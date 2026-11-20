@@ -1,0 +1,31 @@
+# --- Material de referencia local (no forma parte del repo; se borra al terminar) ---
+SDD/
+Context/
+
+# --- Secretos y credenciales: nunca al repo ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Configuración local del agente (por persona) ---
+.claude/settings.local.json
+
+# --- Dependencias y builds ---
+node_modules/
+dist/
+build/
+coverage/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# --- Sistema operativo / editores ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

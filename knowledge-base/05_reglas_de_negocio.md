@@ -1,0 +1,100 @@
+# Reglas de Negocio
+
+Los códigos **RN-01 a RN-08** vienen de `docs/discovery/discovery.md` §7 y se conservan sin cambios de numeración ni de sentido. Los códigos **RN-09 en adelante** son nuevos, derivados del Discovery y de las decisiones técnicas del equipo. Se agrupan por dominio, pero el código es único y global (`RN-NN`). Cada regla es verificable; cuando ayuda se escribe como dado/cuando/entonces (DCE).
+
+Convenciones: todo intervalo es **semiabierto `[inicio, fin)`**. Hora local = `America/Argentina/Buenos_Aires`; persistencia en UTC.
+
+## Dominio: Agenda y prevención de solapamientos
+
+- **RN-01 — Sin sobreturnos.** Un profesional no puede tener dos turnos superpuestos, y un sillón o box tampoco. Se evalúan **ambos ejes** de forma independiente.
+  - DCE: *dado* un turno de Ana en el Sillón 1 de 10:00 a 10:30, *cuando* se intenta dar a Ana otro turno de 10:15 a 10:45 en el Sillón 2, *entonces* se rechaza (mismo profesional). *Cuando* se intenta dar a Bruno un turno de 10:15 a 10:45 en el Sillón 1, *entonces* se rechaza (mismo sillón). *Cuando* se da a Bruno un turno de 10:15 a 10:45 en el Sillón 2, *entonces* se acepta.
+- **RN-02 — Borde no solapado.** Un turno que empieza exactamente cuando termina otro **no** se considera solapado (`[inicio, fin)`).
+  - DCE: *dado* un turno de 10:00 a 10:30, *cuando* se da otro del mismo profesional (o sillón) de 10:30 a 11:00, *entonces* se acepta. *Cuando* se da uno de 10:29 a 11:00, *entonces* se rechaza. Un turno de 09:30 a 10:00 también se acepta.
+  - Casos de test obligatorios: contiguo antes, contiguo después, contenido dentro, que contiene al otro, solapado por un minuto en cada extremo, mismo intervalo exacto.
+- **RN-09 — Fin calculado y granularidad.** `fin = inicio + duración efectiva`. La duración es un entero de minutos, múltiplo de 5, entre 5 y 480. El inicio cae en minutos múltiplos de 5. **Suposición:** granularidad de 5 minutos.
+- **RN-10 — Los turnos cancelados no ocupan lugar.** Solo los turnos en estado distinto de `CANCELADO` participan de RN-01. Los estados `ATENDIDO` y `AUSENTE` **sí** ocupan su intervalo (el horario ya transcurrió y no se debe duplicar).
+- **RN-11 — Recursos obligatorios y activos.** Todo turno tiene exactamente un profesional, un sillón, una prestación y un paciente. Profesional, sillón y prestación deben estar activos. El profesional debe realizar la prestación (`ProfesionalPrestacion`). **Suposición:** relación profesional-prestación obligatoria. **Una prestación no requiere un tipo de sillón específico: sirve cualquier sillón activo y libre** (decisión del líder 2026-11-20, resuelve PA-04); no existen tipos de sillón.
+- **RN-12 — Estados y transiciones del turno.** Estados: `PROGRAMADO` (inicial), `CONFIRMADO`, `ATENDIDO`, `AUSENTE`, `CANCELADO`. Transiciones permitidas: `PROGRAMADO → CONFIRMADO`, `PROGRAMADO|CONFIRMADO → CANCELADO`, `PROGRAMADO|CONFIRMADO → ATENDIDO`, `PROGRAMADO|CONFIRMADO → AUSENTE`. `CANCELADO`, `ATENDIDO` y `AUSENTE` son finales. **Suposición:** el estado `CONFIRMADO` se alcanza cuando el paciente confirma con el token o el personal lo marca.
+- **RN-13 — No se dan turnos en el pasado.** El `inicio` debe ser posterior al momento actual al crear o reprogramar. **Suposición:** sin excepción para el administrador.
+- **RN-14 — Zona horaria única.** Todo cálculo de horario de atención, plazo y recordatorio usa `America/Argentina/Buenos_Aires`; se persiste en UTC con `timestamptz`. Argentina no usa horario de verano, pero el código no debe asumir un desfase fijo: usa `ZoneId`.
+  - DCE: un turno el 2026-12-01 a las 09:00 locales se guarda como 12:00 UTC y se muestra como 09:00 en cualquier cliente.
+- **RN-15 — Garantía ante concurrencia.** La validación de dominio no alcanza: la base de datos tiene restricciones `EXCLUDE USING gist` sobre `tstzrange(inicio, fin, '[)')`, una por profesional y otra por sillón, para turnos no cancelados. Si dos operaciones simultáneas (recepción y reserva online) apuntan al mismo hueco, **una gana y la otra recibe `409 Conflict`** con un mensaje claro y la sugerencia de elegir otro horario. La capa de aplicación traduce la violación de la restricción a un error de dominio.
+
+## Dominio: Prestaciones y duración
+
+- **RN-03 — Duración por prestación.** Cada prestación tiene una duración por defecto. Al dar el turno, la duración se puede ajustar (dentro de RN-09); el turno guarda la duración efectiva.
+  - DCE: *dado* "Limpieza" con 45 min por defecto, *cuando* recepción da el turno con 60 min, *entonces* `duracion_min = 60` y `fin = inicio + 60`. La reserva online siempre usa la duración por defecto.
+
+## Dominio: Horarios de atención y bloqueos
+
+- **RN-04 — Horario y bloqueos.** No se puede dar un turno fuera del horario de atención del profesional ni dentro de un bloqueo.
+  - DCE: *dado* un profesional con horario lunes 09:00-13:00, *cuando* se da un turno el lunes de 12:45 a 13:15, *entonces* se rechaza; uno de 12:30 a 13:00 se acepta. *Dado* un bloqueo de 10:00 a 11:00, un turno de 10:30 a 11:30 se rechaza y uno de 11:00 a 11:30 se acepta (borde, RN-02).
+- **RN-16 — Horario por tramos.** El horario de atención se define por profesional, día de semana (1 a 7) y uno o más tramos `[hora_inicio, hora_fin)`. Los tramos de un mismo profesional y día no se superponen. Un turno debe quedar **completamente contenido en un único tramo** (no puede cruzar un corte de mediodía ni la medianoche). **Suposición:** sin horario general del consultorio; solo horarios por profesional.
+- **RN-17 — Bloqueos y turnos existentes.** Un bloqueo `[inicio, fin)` de un profesional no se puede crear si se superpone con turnos activos de ese profesional; se informa la lista de turnos en conflicto y deben reprogramarse o cancelarse antes. **Suposición:** el sistema rechaza el bloqueo en lugar de cancelar turnos automáticamente.
+
+## Dominio: Cancelación y reprogramación
+
+- **RN-05 — Plazo de cancelación.** Cancelar o reprogramar no tiene penalidad hasta 24 hs antes del turno. El administrador configura el plazo (`cancelacion.plazo_horas`). Fuera de ese plazo, la cancelación queda registrada como **tardía**.
+  - DCE: *dado* plazo = 24 y un turno el miércoles a las 10:00, *cuando* se cancela el martes a las 10:00 exacto, *entonces* **no** es tardía (límite inclusivo: `inicio - ahora >= plazo`). *Cuando* se cancela el martes a las 10:01, *entonces* es tardía.
+  - Regla de cálculo: `tardía = (inicio - ahora) < plazo`. Un cambio del plazo afecta solo cancelaciones futuras.
+  - Cancelar un turno ya iniciado o pasado no es posible por esta vía (se usa asistencia, RN-20).
+- **RN-06 — Cancelar libera el horario.** Al cancelar, el turno pasa a `CANCELADO`, el intervalo deja de ocupar al profesional y al sillón (RN-10) y el hueco se ofrece a la lista de espera (RN-23). Esto aplica a cancelaciones tardías y no tardías por igual.
+- **RN-18 — Reprogramar conserva la identidad.** Reprogramar modifica `inicio` (y opcionalmente profesional, sillón y duración) del **mismo** turno y revalida RN-01, RN-02, RN-04, RN-11 y RN-13 **excluyendo al propio turno** de la comparación (un turno puede moverse 15 minutos dentro de su propio intervalo anterior). El token existente sigue siendo válido y su expiración se recalcula (RN-25). Al reprogramar se libera el hueco anterior, que se ofrece a la lista de espera.
+  - Si la reprogramación se hace dentro de las `plazo_horas` previas al turno original, el turno queda marcado `reprogramado_tarde = true`. **Suposición:** la reprogramación tardía se permite al personal y se registra, sin bloquearla (ver IN-02 en `10_preguntas_abiertas.md`).
+  - **Reprogramar lo hace solo recepción (o ADMIN).** El paciente **no** reprograma por token (RN-07 solo da ver, confirmar y cancelar): puede cancelar (RN-19) y volver a reservar. Decisión del líder 2026-11-20 (parte de PA-06).
+- **RN-19 — Registro de la cancelación.** Toda cancelación guarda quién la hizo (`cancelado_por`: usuario o `PACIENTE_TOKEN`), cuándo (`cancelado_en`), el motivo opcional y si fue tardía. El paciente puede cancelar por token también fuera de plazo; queda marcada tardía. **Suposición:** no se impide la cancelación tardía del paciente, solo se registra.
+- **RN-20 — Asistencia.** **Recepción (o administrador)** marca `ATENDIDO` o `AUSENTE` solo a partir del `inicio` del turno y sobre turnos `PROGRAMADO` o `CONFIRMADO`. El odontólogo **no** marca asistencia (es solo lectura, RN-33): se lo comunica a recepción fuera del sistema. Una marca incorrecta puede corregirla el administrador. **Suposición:** corrección solo por ADMIN.
+
+## Dominio: Lista de espera (diferenciador)
+
+- **RN-21 — Alta en lista de espera.** Recepción registra a un paciente con: prestación (obligatoria), profesional preferido (opcional), rango de fechas `[fecha_desde, fecha_hasta]`, franja horaria preferida (opcional) y estado `ACTIVA`. Un paciente no puede tener dos entradas `ACTIVA` para la misma prestación. Las entradas con `fecha_hasta` pasada pasan a `VENCIDA`. **Suposición:** el paciente de la entrada debe tener email, porque el aviso del hueco es por email (RN-23); sin email no se puede anotar (ver PA-16).
+- **RN-22 — Compatibilidad.** Un hueco `[h_inicio, h_fin)` de un profesional P es **compatible** con una entrada si se cumplen todas (el sillón es indistinto: cualquier sillón activo y libre sirve, RN-11):
+  1. el profesional P realiza la prestación de la entrada;
+  2. si la entrada tiene profesional preferido, es P;
+  3. la duración de la prestación (la de por defecto) cabe en el hueco: `duracion_default <= h_fin - h_inicio`, y el turno resultante respeta RN-01, RN-02 y RN-04;
+  4. la fecha del hueco está dentro de `[fecha_desde, fecha_hasta]` y, si hay franja, el turno resultante cae dentro de ella.
+  - DCE: *dado* un hueco de 30 min de un profesional, *cuando* se busca compatibles, *entonces* una entrada de "Tratamiento de conducto" (90 min) **no** recibe aviso y una de "Consulta" (30 min) sí.
+  - La lógica es una función pura del dominio, sin acceso a base de datos.
+- **RN-23 — Aviso automático a todos los compatibles.** Al liberarse un hueco (RN-06, RN-18), el sistema **avisa solo, por email,** a todos los pacientes con entradas `ACTIVA` compatibles (RN-22), cada uno con un enlace con token para tomar el turno (RN-38). Decisión del líder 2026-11-20 (resuelve PA-02). No hay turno de espera ni prioridad: el orden solo sirve para el tope de avisos.
+  - **Suposición (SU-14):** se avisa a lo sumo a `lista_espera.max_avisos_por_hueco` entradas (default 10), elegidas por antigüedad (`creado_en` ascendente); un paciente con varias entradas compatibles recibe un solo aviso (la más antigua); se avisa una sola vez por hueco (sin segunda tanda); no se avisa si el hueco ya empezó (RN-13).
+  - Recepción **ve las entradas compatibles** (sugerencias) y **puede asignar manualmente** un hueco (p. ej. tras un llamado); esa asignación es otra forma de "ser el primero en confirmar" y compite bajo RN-15 (**Suposición** SU-15: se conserva ese camino).
+- **RN-24 — El primero que confirma se queda con el turno.** Al confirmar una oferta (o al asignar recepción), se crea un turno normal con todas las reglas RN-01 a RN-04, RN-08, RN-09, RN-11 y RN-13: el turno empieza al inicio del hueco, con la duración por defecto de la prestación de la entrada y un sillón activo libre (el del turno liberado si sigue libre; si no, el primero activo libre; **Suposición** SU-14). La entrada pasa a `ASIGNADA` y guarda `turno_asignado_id`. Si dos confirman a la vez, rige RN-15: gana uno; **a los demás el enlace les informa que el hueco ya fue tomado.** Si nadie confirma antes del inicio del hueco, **el hueco queda libre** (reserva online y recepción pueden usarlo) y las ofertas vencen. Recepción puede cancelar una entrada (`CANCELADA`).
+- **RN-38 — Oferta de hueco: token y vigencia.** Cada aviso (RN-23) genera una **oferta** (`OfertaHueco`) con su propio token, **distinto del token de turno** (aún no hay turno). Misma generación y almacenamiento que RN-25: `SecureRandom` de 256 bits, base64url, **solo se guarda el hash SHA-256**, comparación en tiempo constante, nunca en logs, 404 uniforme ante token inexistente. Solo permite ver la oferta y tomarla; no da acceso a otros datos (como RN-07). Vigente hasta el **inicio del hueco**. Pasa a `TOMADA` (cuando otro la tomó o es la que ganó) o `VENCIDA`. Al tomarla, el paciente no carga datos: ya está identificado por su entrada, y recibe el email de confirmación con el token de su nuevo turno (RN-25, RN-31). Los reintentos de un aviso fallido (RN-30) cesan al empezar el hueco. La anticipación mínima de RN-27 **no** se aplica a las ofertas (solo RN-13). **Suposición** (SU-14).
+
+## Dominio: Reserva online y token
+
+- **RN-07 — Alcance del token.** El token del paciente solo da acceso al turno al que pertenece: verlo, confirmarlo o cancelarlo. No da acceso a otros turnos, a la ficha del paciente, a datos de otros pacientes ni a la agenda.
+  - DCE: *dado* el token del turno A, *cuando* se consulta cualquier otro recurso con ese token, *entonces* responde 404.
+- **RN-08 — Reserva online solo en libres.** Un paciente solo puede reservar un horario que realmente esté libre; se aplican las mismas reglas RN-01 a RN-04 (y RN-09, RN-11, RN-13). La disponibilidad que se muestra es una ayuda; la validación definitiva ocurre al confirmar la reserva (RN-15). Si el horario se ocupó entre la consulta y la reserva, responde 409 y se ofrecen alternativas.
+- **RN-25 — Token: generación, almacenamiento y vigencia.**
+  - Se genera con `SecureRandom`, **256 bits** (32 bytes), codificado en base64url (43 caracteres).
+  - Se persiste **solo su hash SHA-256**; el token en claro se envía una única vez por email y se muestra en la pantalla de confirmación de la reserva.
+  - **Vigencia (decisión del líder 2026-11-20, resuelve PA-01):** válido desde la reserva hasta el **inicio del turno**, o hasta que el turno se cancele (por el paciente o por el personal), lo que ocurra primero; después ya no hay nada que gestionar. Es de **un solo turno** (RN-07): al cancelarse se revoca (`revocado_en`). Si el turno se reprograma, conserva su token y la expiración se recalcula al nuevo `inicio` (RN-18). Ante un token vencido o revocado se responde igual que ante uno inexistente (404).
+  - La comparación del hash es en tiempo constante. Nunca se registra el token en logs.
+- **RN-26 — Datos mínimos de la reserva online.** Obligatorios: **nombre completo** (nombre y apellido), **email, teléfono y obra social** (texto libre, es solo un dato; **Suposición:** se admite "Particular" o "Sin obra social") y aceptación del tratamiento de datos (Ley 25.326; **Suposición:** se mantiene por la ley). **No se pide DNI.** Decisión del líder 2026-11-20 (resuelve PA-01).
+- **RN-27 — Límites de la reserva online.** Solo se reserva dentro del horizonte (`reserva_online.horizonte_dias`, 60 por defecto) y con una anticipación mínima (`reserva_online.anticipacion_minima_horas`, 2 por defecto). Un mismo email no puede tener más de `reserva_online.max_turnos_activos_por_email` (3) turnos futuros activos. Los endpoints públicos tienen rate limit por IP. **Suposición:** valores por defecto a validar.
+- **RN-28 — Identidad del paciente en reserva online.** Sin DNI, la deduplicación es **por email** (comparación exacta, sin distinguir mayúsculas) y por **teléfono si coincide**: se reutiliza la ficha activa con ese email **sin modificar sus datos existentes** (para evitar que un tercero altere datos de un paciente real); si hay varias con el mismo email, se elige la que también coincide en teléfono; si ninguna coincide, se crea una ficha nueva. **Suposición** (SU-04): mecanismo mínimo, sin fusión de fichas duplicadas (p. ej. una cargada por recepción con otro email).
+
+## Dominio: Notificaciones por email
+
+- **RN-29 — Recordatorio.** Se envía un email de recordatorio a los turnos `PROGRAMADO` o `CONFIRMADO` cuyo paciente tiene email, `recordatorio.anticipacion_horas` (24 por defecto, configurable) antes del `inicio`. No se envía recordatorio a turnos cancelados, ya atendidos o con `inicio` en el pasado. Si el turno se crea con menos anticipación que la configurada, se envía en el siguiente ciclo del planificador (mejor esfuerzo). **Suposición:** 24 hs por defecto (ver PA-05).
+- **RN-30 — Idempotencia y registro.** Cada envío se registra en `NotificacionEnviada`. Existe a lo sumo un registro por `(turno, tipo, inicio_referencia)`: el planificador puede ejecutarse varias veces sin duplicar el recordatorio, y si el turno se reprograma (cambia `inicio`) corresponde un nuevo recordatorio. Un fallo de SMTP deja el registro en `FALLIDA` con el error, y se reintenta hasta 3 veces con espera creciente. **Suposición:** 3 intentos.
+- **RN-31 — Emails transaccionales.** Se envía email al crear una reserva online (con el enlace de token), al cancelar o reprogramar un turno (si el paciente tiene email) y al avisar un hueco desde la lista de espera (RN-23, RN-38). Un turno de un paciente sin email no genera error: no se notifica.
+
+## Dominio: Pacientes, usuarios y roles
+
+- **RN-32 — Ficha de paciente.** Datos mínimos: nombre, apellido y al menos un medio de contacto (email o teléfono). DNI opcional pero único cuando existe. La obra social es un dato de texto, sin validación ni cálculo de cobertura. No se elimina físicamente un paciente con turnos: se da de baja lógicamente (`activo = false`).
+- **RN-33 — Permisos por rol.** Se aplica la matriz de `03_actores_y_roles.md`. **El odontólogo es solo lectura**: ve su agenda y la ficha básica de sus pacientes y no modifica nada (ni turnos, ni asistencia, ni horarios, ni bloqueos); los cambios se piden a recepción fuera del sistema. Recepción gestiona turnos, asistencia, horarios y bloqueos, pero no accede a configuración ni a usuarios.
+- **RN-34 — Autenticación del personal.** Contraseñas con BCrypt. Tras 5 intentos fallidos consecutivos la cuenta se bloquea 15 minutos (**Suposición:** valores a validar). El mensaje de error de login no distingue entre usuario inexistente y contraseña incorrecta. Un usuario inactivo no puede iniciar sesión.
+- **RN-35 — Datos personales y de salud.** Aplican la Ley 25.326 (datos personales) y la Ley 26.529 (derechos del paciente). El MVP solo guarda una ficha básica; no se registran datos clínicos. Solo datos ficticios en desarrollo y tests. Los emails y respuestas de error no exponen datos de otros pacientes.
+- **RN-36 — Configuración validada.** `cancelacion.plazo_horas` entero entre 0 y 168; `recordatorio.anticipacion_horas` entero entre 1 y 168; los demás límites, enteros positivos. Solo ADMIN modifica la configuración.
+- **RN-37 — Bajas lógicas del catálogo.** Profesionales, sillones y prestaciones con turnos históricos no se eliminan: se desactivan. Desactivar uno con turnos futuros activos requiere reprogramarlos o cancelarlos antes (se informa la lista). Un recurso inactivo no aparece en la reserva online ni en la creación de turnos.
+
+## Dominio: Excepciones globales
+
+- **Error de solapamiento (RN-01, RN-15):** siempre `409 Conflict`, con indicación de si el conflicto es por profesional o por sillón.
+- **Fuera de horario, bloqueo, plazo o pasado (RN-04, RN-13):** `422 Unprocessable Entity` con el código de la regla incumplida.
+- **Token inválido, vencido o revocado (RN-07, RN-25):** siempre `404`, sin diferenciar el motivo. Un token de oferta existente cuyo hueco ya fue tomado o venció responde con su estado y, al intentar tomarla, `409` con el mensaje "hueco ya tomado" (RN-24, RN-38).
+- **Escritura de un odontólogo (RN-33):** siempre `403`.
+- **Reloj:** toda regla temporal usa un `Clock` inyectable, nunca `Instant.now()` directo, para poder testear plazos y bordes.
+- **Trazabilidad:** todo turno registra `canal` (`INTERNO` u `ONLINE`), `creado_por_usuario_id` (si corresponde) y marcas de tiempo.

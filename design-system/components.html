@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Componentes - Turnos Odontología (provisional)</title>
+<link rel="stylesheet" href="tokens.css">
+<script>/* Vista previa: components.html?theme=light|dark fuerza el tema */
+try { var t = new URLSearchParams(location.search).get('theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
+<script src="brand.js" defer></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-sans);
+         font-size: var(--text-base); line-height: var(--leading-normal); -webkit-text-size-adjust: 100%; }
+  h1, h2, h3, p { margin: 0; }
+  h1 { font-size: var(--text-2xl); line-height: var(--leading-tight); font-weight: var(--weight-bold); }
+  h2 { font-size: var(--text-xl); line-height: var(--leading-tight); font-weight: var(--weight-semibold); }
+  h3 { font-size: var(--text-base); font-weight: var(--weight-semibold); }
+  .icon { width: 1.125em; height: 1.125em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75;
+          stroke-linecap: round; stroke-linejoin: round; }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .muted { color: var(--color-text-muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* Foco visible global */
+  :focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-offset); border-radius: var(--radius-sm); }
+
+  /* Layout de la pagina de referencia */
+  .page { max-width: 1280px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-8); }
+  .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4);
+          padding-bottom: var(--space-5); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-6); }
+  .head img { height: 48px; width: auto; max-width: 100%; display: block; }
+  .head__meta { display: grid; gap: var(--space-1); }
+  .tag { display: inline-block; font-size: var(--text-xs); font-weight: var(--weight-semibold); padding: 2px var(--space-2);
+         border-radius: var(--radius-pill); background: var(--color-warning-soft); color: var(--color-warning-text); }
+  section { margin-bottom: var(--space-7); }
+  section > h2 { margin-bottom: var(--space-1); }
+  section > .lead { color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .split { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .split { grid-template-columns: 1fr 1fr; } .split--wide { grid-template-columns: 2fr 1fr; } }
+  .panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); }
+  .panel > h3 { margin-bottom: var(--space-3); }
+
+  /* Botones */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--target-min);
+         padding: 0 var(--space-4); border: 1px solid transparent; border-radius: var(--radius-md); font: inherit;
+         font-weight: var(--weight-semibold); cursor: pointer; text-decoration: none;
+         transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-base) ease, border-color var(--dur-base) ease; }
+  .btn:active:not(:disabled) { transform: scale(0.97); }
+  .btn--primary { background: var(--color-primary); color: var(--color-on-primary); }
+  .btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .btn--secondary { background: var(--color-surface); color: var(--color-primary); border-color: var(--color-border-strong); }
+  .btn--secondary:hover:not(:disabled) { background: var(--color-primary-soft); }
+  .btn--danger { background: var(--color-danger); color: #fff; }
+  .btn--danger:hover:not(:disabled) { background: var(--color-danger-hover); }
+  .btn--danger-ghost { background: transparent; color: var(--color-danger-text); border-color: var(--color-danger); }
+  .btn--danger-ghost:hover:not(:disabled) { background: var(--color-danger-soft); }
+  .btn:disabled { background: var(--color-surface-muted); color: var(--color-text-disabled); border-color: var(--color-border); cursor: not-allowed; }
+  .btn--block { width: 100%; }
+  .btn--sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+  .btn.is-focus { outline: var(--focus-outline); outline-offset: var(--focus-offset); } /* demostracion de foco */
+
+  /* Campos */
+  .field { display: grid; gap: var(--space-2); }
+  .field label, .field .label { font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+  .field .hint { font-size: var(--text-sm); color: var(--color-text-muted); }
+  .field .error { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--text-sm); color: var(--color-danger-text); font-weight: var(--weight-medium); }
+  .input, .select { width: 100%; min-height: var(--target-min); padding: 0 var(--space-3); font: inherit; color: var(--color-text);
+         background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md);
+         transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease; }
+  .select { appearance: none; padding-right: var(--space-6);
+         background-image: linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%), linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+         background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%; background-size: 6px 6px; background-repeat: no-repeat; }
+  .input:focus-visible, .select:focus-visible { outline: none; border-color: var(--focus-color); box-shadow: var(--focus-ring); }
+  .input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--color-danger); border-width: 2px; }
+  .input:disabled { background: var(--color-surface-muted); color: var(--color-text-disabled); }
+  .form { display: grid; gap: var(--space-4); }
+
+  /* Badges de estado: icono + texto + color */
+  .badge { display: inline-flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); border-radius: var(--radius-pill);
+           font-size: var(--text-xs); font-weight: var(--weight-semibold); line-height: 1.4; border: 1px solid; white-space: nowrap; }
+  .badge .icon { width: 14px; height: 14px; }
+  .st-reservado { background: var(--turno-reservado-bg); color: var(--turno-reservado-fg); border-color: var(--turno-reservado-border); }
+  .st-confirmado { background: var(--turno-confirmado-bg); color: var(--turno-confirmado-fg); border-color: var(--turno-confirmado-border); }
+  .st-atendido { background: var(--turno-atendido-bg); color: var(--turno-atendido-fg); border-color: var(--turno-atendido-border); }
+  .st-ausente { background: var(--turno-ausente-bg); color: var(--turno-ausente-fg); border-color: var(--turno-ausente-border); }
+  .st-cancelado { background: var(--turno-cancelado-bg); color: var(--turno-cancelado-fg); border-color: var(--turno-cancelado-border); }
+  .st-cancelado .badge__txt { text-decoration: line-through; }
+  .st-tardia { background: var(--turno-tardia-bg); color: var(--turno-tardia-fg); border-color: var(--turno-tardia-border); }
+  .st-bloqueo { background: var(--agenda-bloqueo-bg); color: var(--agenda-bloqueo-fg); border-color: var(--agenda-bloqueo-border); }
+
+  /* Tarjeta de turno */
+  .turno { display: grid; gap: var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border);
+           border-left: 6px solid var(--turno-confirmado-border); border-radius: var(--radius-md); padding: var(--space-4); box-shadow: var(--shadow-sm); }
+  .turno__top { display: flex; justify-content: space-between; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; }
+  .turno__hora { font-size: var(--text-lg); font-weight: var(--weight-bold); }
+  .turno__paciente { font-weight: var(--weight-semibold); }
+  .turno dl { display: grid; grid-template-columns: auto 1fr; gap: var(--space-1) var(--space-4); margin: 0; font-size: var(--text-sm); }
+  .turno dt { color: var(--color-text-muted); } .turno dd { margin: 0; }
+
+  /* Agenda diaria */
+  .agenda-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+  .agenda { position: relative; display: grid; min-width: 620px;
+            grid-template-columns: 56px repeat(3, minmax(160px, 1fr));
+            grid-template-rows: 44px repeat(8, var(--agenda-row-h)); }
+  .agenda__lines { grid-area: 2 / 1 / -1 / -1;
+            background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--agenda-row-h) - 1px), var(--agenda-linea) calc(var(--agenda-row-h) - 1px), var(--agenda-linea) var(--agenda-row-h)); }
+  .agenda__col-head { grid-row: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 var(--space-3);
+            font-weight: var(--weight-semibold); font-size: var(--text-sm); background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border-strong); border-left: 1px solid var(--color-border); }
+  .agenda__col-head small { font-weight: var(--weight-regular); color: var(--color-text-muted); font-size: var(--text-xs); }
+  .agenda__corner { grid-row: 1; grid-column: 1; background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border-strong); }
+  .agenda__time { grid-column: 1; font-size: var(--text-xs); color: var(--color-text-muted); padding: 2px var(--space-2) 0 0; text-align: right; }
+  .agenda__time--hour { font-weight: var(--weight-semibold); color: var(--color-text); }
+  .slot { position: relative; z-index: 1; margin: 1px 3px; padding: 3px var(--space-2); border-radius: var(--radius-sm); border: 1px solid;
+          font-size: var(--text-xs); line-height: 1.25; overflow: hidden; display: flex; flex-direction: column; gap: 1px; }
+  .slot strong { font-size: var(--text-sm); font-weight: var(--weight-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .slot .slot__meta { display: flex; gap: var(--space-1); align-items: center; font-weight: var(--weight-medium); }
+  .slot .icon { width: 13px; height: 13px; }
+  .slot--bloqueo { background: repeating-linear-gradient(135deg, var(--agenda-bloqueo-bg) 0 8px, transparent 8px 16px), var(--agenda-bloqueo-bg);
+          color: var(--agenda-bloqueo-fg); border-color: var(--agenda-bloqueo-border); border-style: solid; }
+  .slot--libre { background: transparent; border: 1.5px dashed var(--agenda-libre-border); color: var(--agenda-libre-fg); font: inherit;
+          font-size: var(--text-xs); font-weight: var(--weight-medium); cursor: pointer; align-items: center; justify-content: center; flex-direction: row; gap: var(--space-1);
+          transition: background-color var(--dur-base) ease, transform var(--dur-fast) var(--ease-out); }
+  .slot--libre:hover { background: var(--agenda-libre-hover); color: var(--color-primary); border-color: var(--color-primary); }
+  .slot--libre:active { transform: scale(0.98); }
+  .slot--cancelado strong { text-decoration: line-through; }
+  .slot--conflicto { outline: 2px solid var(--color-danger); outline-offset: 0; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+
+  /* Alertas */
+  .alert { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid; }
+  .alert .icon { margin-top: 2px; width: 20px; height: 20px; }
+  .alert strong { display: block; }
+  .alert--danger { background: var(--color-danger-soft); color: var(--color-danger-text); border-color: var(--color-danger); }
+  .alert--info { background: var(--color-info-soft); color: var(--color-info-text); border-color: var(--turno-reservado-border); }
+
+  /* Reserva publica (mobile) */
+  .phone { width: 100%; max-width: 390px; margin: 0 auto; background: var(--color-bg); border: 1px solid var(--color-border-strong);
+           border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+  .phone__bar { background: var(--color-surface); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-2); font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+  .phone__body { padding: var(--space-4); display: grid; gap: var(--space-4); }
+  .steps { display: flex; gap: var(--space-1); }
+  .steps span { flex: 1; height: 4px; border-radius: 2px; background: var(--color-border); }
+  .steps span.on { background: var(--color-primary); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chip { min-height: var(--target-min); min-width: 72px; padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-border-strong);
+          background: var(--color-surface); color: var(--color-text); font: inherit; font-weight: var(--weight-semibold); cursor: pointer;
+          transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-base) ease; }
+  .chip:active { transform: scale(0.97); }
+  .chip[aria-pressed="true"] { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); }
+
+  /* Toast */
+  .toast { display: inline-flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+           background: #1B2733; color: #F4F6F8; box-shadow: var(--shadow-lg); max-width: 100%;
+           animation: toast-in var(--dur-slow) var(--ease-out) both; }
+  .toast .icon { color: #8FD6A4; width: 20px; height: 20px; }
+  .toast button { margin-left: var(--space-2); background: none; border: 0; color: #CFE6F3; font: inherit; font-weight: var(--weight-semibold); cursor: pointer; min-height: 32px; padding: 0 var(--space-2); text-decoration: underline; }
+  .toast button:focus-visible { outline-color: #CFE6F3; }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* Tabla de configuracion */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; font-size: var(--text-sm); }
+  caption { text-align: left; padding: var(--space-3) var(--space-4); font-weight: var(--weight-semibold); font-size: var(--text-base); }
+  th, td { text-align: left; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); vertical-align: middle; }
+  th { background: var(--color-surface-muted); font-weight: var(--weight-semibold); color: var(--color-text-muted); }
+  td.num, th.num { text-align: right; }
+  tbody tr:hover { background: var(--color-primary-soft); }
+</style>
+</head>
+<body>
+
+<!-- Sprite de iconos (trazo 1.75, sin dependencias) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></symbol>
+  <symbol id="i-done" viewBox="0 0 24 24"><path d="m3 12.5 4 4 7-9"/><path d="m11 16.5 1 1 9-10.5"/></symbol>
+  <symbol id="i-userx" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 20c0-3.5 3-6 7-6 1.3 0 2.5.3 3.5.8"/><path d="m17 14 4 4m0-4-4 4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4m0 3v.01"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8v.01"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+</svg>
+
+<div class="page">
+  <header class="head">
+    <div class="head__meta">
+      <img src="assets/logo.svg" alt="Logo provisional" data-brand-logo>
+      <h1 data-brand-name>Turnos Odontología (provisional)</h1>
+      <p class="muted">Referencia de componentes · Design system revisión 1 · <span class="tag">Pendiente de aprobación</span></p>
+    </div>
+    <div class="row"><span class="tag">Nombre y logo (TBD)</span><span class="tag">Datos ficticios</span></div>
+  </header>
+
+  <!-- Botones -->
+  <section aria-labelledby="s-botones">
+    <h2 id="s-botones">Botones</h2>
+    <p class="lead">Objetivo táctil mínimo 44 px. Feedback de presión con escala 0.97. El foco se ve con anillo de 3 px.</p>
+    <div class="row">
+      <button class="btn btn-primary btn--primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Nuevo turno</button>
+      <button class="btn btn--secondary" type="button">Reprogramar</button>
+      <button class="btn btn--danger" type="button">Cancelar turno</button>
+      <button class="btn btn--danger-ghost" type="button">Eliminar bloqueo</button>
+      <button class="btn btn--primary" type="button" disabled>Guardar (deshabilitado)</button>
+      <button class="btn btn--primary is-focus" type="button">Foco visible</button>
+    </div>
+  </section>
+
+  <!-- Estados de turno -->
+  <section aria-labelledby="s-estados">
+    <h2 id="s-estados">Estados de turno</h2>
+    <p class="lead">Cada estado combina color, icono y texto: nunca depende solo del color.</p>
+    <div class="row">
+      <span class="badge st-reservado"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span class="badge__txt">Reservado</span></span>
+      <span class="badge st-confirmado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span class="badge__txt">Confirmado</span></span>
+      <span class="badge st-atendido"><svg class="icon" aria-hidden="true"><use href="#i-done"/></svg><span class="badge__txt">Atendido</span></span>
+      <span class="badge st-ausente"><svg class="icon" aria-hidden="true"><use href="#i-userx"/></svg><span class="badge__txt">Ausente</span></span>
+      <span class="badge st-cancelado"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg><span class="badge__txt">Cancelado</span></span>
+      <span class="badge st-tardia"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span class="badge__txt">Cancelación tardía</span></span>
+      <span class="badge st-bloqueo"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span class="badge__txt">Bloqueo</span></span>
+    </div>
+  </section>
+
+  <!-- Formularios y tarjeta -->
+  <section aria-labelledby="s-form">
+    <h2 id="s-form">Campos y tarjeta de turno</h2>
+    <p class="lead">Etiqueta arriba, ayuda opcional, error debajo con icono y texto.</p>
+    <div class="split">
+      <div class="panel">
+        <h3>Campos</h3>
+        <form class="form" onsubmit="return false" novalidate>
+          <div class="field">
+            <label for="f-pac">Paciente</label>
+            <input id="f-pac" class="input" type="text" value="Lucía Benavídez" autocomplete="off">
+            <span class="hint">Buscá por nombre, apellido o email.</span>
+          </div>
+          <div class="field">
+            <label for="f-sillon">Sillón</label>
+            <select id="f-sillon" class="select" aria-invalid="true" aria-describedby="f-sillon-err">
+              <option>Sillón 2</option><option>Sillón 1</option><option>Sillón 3</option>
+            </select>
+            <span class="error" id="f-sillon-err"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>El sillón 2 ya tiene un turno de 10:00 a 10:30.</span>
+          </div>
+          <div class="field">
+            <label for="f-hora">Hora de inicio</label>
+            <input id="f-hora" class="input mono" type="text" value="10:15" aria-invalid="true" aria-describedby="f-hora-err">
+            <span class="error" id="f-hora-err"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Elegí un horario dentro de la jornada del profesional.</span>
+          </div>
+          <div class="field">
+            <label for="f-dis">Campo deshabilitado</label>
+            <input id="f-dis" class="input" type="text" value="Calculado por la prestación" disabled>
+          </div>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Tarjeta de turno</h3>
+        <article class="turno" aria-label="Turno de Lucía Benavídez">
+          <div class="turno__top">
+            <div>
+              <div class="turno__hora mono">10:00 – 10:30</div>
+              <div class="turno__paciente">Lucía Benavídez</div>
+            </div>
+            <span class="badge st-confirmado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span class="badge__txt">Confirmado</span></span>
+          </div>
+          <dl>
+            <dt>Prestación</dt><dd>Control y limpieza</dd>
+            <dt>Profesional</dt><dd>Dra. Cecilia Ferreyra</dd>
+            <dt>Sillón</dt><dd>Sillón 2</dd>
+            <dt>Obra social</dt><dd>OSDE (ficticia)</dd>
+          </dl>
+          <div class="row">
+            <button class="btn btn--secondary btn--sm" type="button">Reprogramar</button>
+            <button class="btn btn--danger-ghost btn--sm" type="button">Cancelar</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agenda -->
+  <section aria-labelledby="s-agenda">
+    <h2 id="s-agenda">Agenda diaria por sillón</h2>
+    <p class="lead">Fragmento 09:00 a 11:00, filas de 15 minutos. Los huecos libres son botones para crear un turno.</p>
+    <div class="alert alert--danger" role="alert" style="margin-bottom: var(--space-4)">
+      <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+      <div><strong>Solapamiento</strong>El sillón 2 ya tiene un turno de 10:00 a 10:30. Elegí otro sillón u otro horario.</div>
+    </div>
+    <div class="agenda-wrap" role="region" aria-label="Agenda del día, desplazable horizontalmente" tabindex="0">
+      <div class="agenda" role="group" aria-label="Agenda del jueves, sillones 1 a 3">
+        <div class="agenda__lines" aria-hidden="true"></div>
+        <div class="agenda__corner"></div>
+        <div class="agenda__col-head" style="grid-column:2"><span>Sillón 1</span><small>Dra. Ferreyra</small></div>
+        <div class="agenda__col-head" style="grid-column:3"><span>Sillón 2</span><small>Dr. Matías Orellana</small></div>
+        <div class="agenda__col-head" style="grid-column:4"><span>Sillón 3</span><small>Dra. Ferreyra</small></div>
+
+        <div class="agenda__time agenda__time--hour mono" style="grid-row:2">09:00</div>
+        <div class="agenda__time mono" style="grid-row:3">09:15</div>
+        <div class="agenda__time mono" style="grid-row:4">09:30</div>
+        <div class="agenda__time mono" style="grid-row:5">09:45</div>
+        <div class="agenda__time agenda__time--hour mono" style="grid-row:6">10:00</div>
+        <div class="agenda__time mono" style="grid-row:7">10:15</div>
+        <div class="agenda__time mono" style="grid-row:8">10:30</div>
+        <div class="agenda__time mono" style="grid-row:9">10:45</div>
+
+        <!-- Sillon 1 -->
+        <div class="slot st-confirmado" style="grid-column:2; grid-row:2 / 4">
+          <strong>Mariana Quiroga</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmado · Limpieza</span>
+        </div>
+        <button class="slot slot--libre" type="button" style="grid-column:2; grid-row:4 / 6" aria-label="Hueco libre en sillón 1, de 09:30 a 10:00. Crear turno"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Libre 09:30</button>
+        <div class="slot st-reservado" style="grid-column:2; grid-row:6 / 9">
+          <strong>Tomás Ibarra</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Reservado · Endodoncia</span>
+        </div>
+
+        <!-- Sillon 2 -->
+        <button class="slot slot--libre" type="button" style="grid-column:3; grid-row:2 / 3" aria-label="Hueco libre en sillón 2, de 09:00 a 09:15. Crear turno"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Libre</button>
+        <div class="slot st-atendido" style="grid-column:3; grid-row:3 / 6">
+          <strong>Raúl Domínguez</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-done"/></svg>Atendido · Extracción</span>
+        </div>
+        <div class="slot st-confirmado slot--conflicto" style="grid-column:3; grid-row:6 / 8">
+          <strong>Lucía Benavídez</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmado · Control</span>
+        </div>
+        <div class="slot st-tardia" style="grid-column:3; grid-row:8 / 10">
+          <strong>Nicolás Paz</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Cancelación tardía</span>
+        </div>
+
+        <!-- Sillon 3 -->
+        <div class="slot slot--bloqueo" style="grid-column:4; grid-row:2 / 4">
+          <strong>Bloqueo</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Esterilización</span>
+        </div>
+        <div class="slot st-ausente" style="grid-column:4; grid-row:4 / 6">
+          <strong>Valeria Sosa</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-userx"/></svg>Ausente · Control</span>
+        </div>
+        <div class="slot st-cancelado slot--cancelado" style="grid-column:4; grid-row:6 / 8">
+          <strong>Hernán Acosta</strong>
+          <span class="slot__meta"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>Cancelado</span>
+        </div>
+        <button class="slot slot--libre" type="button" style="grid-column:4; grid-row:8 / 10" aria-label="Hueco libre en sillón 3, de 10:30 a 11:00. Crear turno"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Libre 10:30</button>
+      </div>
+    </div>
+    <div class="leyenda" aria-label="Leyenda">
+      <span class="badge st-reservado"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Reservado</span>
+      <span class="badge st-confirmado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmado</span>
+      <span class="badge st-atendido"><svg class="icon" aria-hidden="true"><use href="#i-done"/></svg>Atendido</span>
+      <span class="badge st-ausente"><svg class="icon" aria-hidden="true"><use href="#i-userx"/></svg>Ausente</span>
+      <span class="badge st-cancelado"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>Cancelado</span>
+      <span class="badge st-tardia"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Cancelación tardía</span>
+      <span class="badge st-bloqueo"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Bloqueo (rayado)</span>
+      <span class="badge" style="border-style:dashed;border-color:var(--agenda-libre-border);color:var(--agenda-libre-fg)"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Hueco libre (punteado)</span>
+    </div>
+  </section>
+
+  <!-- Reserva publica + toast -->
+  <section aria-labelledby="s-reserva">
+    <h2 id="s-reserva">Reserva pública (mobile) y toast</h2>
+    <p class="lead">Una columna, objetivos de 44 px, campos con autocompletado. Sin login.</p>
+    <div class="split">
+      <div class="phone">
+        <div class="phone__bar"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg><span data-brand-name>Turnos Odontología (provisional)</span></div>
+        <form class="phone__body" onsubmit="return false" novalidate aria-label="Reservar turno">
+          <div class="steps" aria-hidden="true"><span class="on"></span><span class="on"></span><span></span></div>
+          <h3 style="font-size: var(--text-xl)">Tus datos</h3>
+          <div class="field">
+            <label for="p-nom">Nombre y apellido</label>
+            <input id="p-nom" class="input" type="text" autocomplete="name" value="Camila Rinaldi">
+          </div>
+          <div class="field">
+            <label for="p-mail">Email</label>
+            <input id="p-mail" class="input" type="email" autocomplete="email" inputmode="email" value="camila@ejemplo.test" aria-invalid="true" aria-describedby="p-mail-err">
+            <span class="error" id="p-mail-err"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Revisá el email: falta el dominio completo.</span>
+          </div>
+          <div class="field">
+            <label for="p-tel">Teléfono</label>
+            <input id="p-tel" class="input" type="tel" autocomplete="tel" inputmode="tel" placeholder="Ej.: 11 5555-0142">
+            <span class="hint">Lo usamos solo para avisarte de cambios.</span>
+          </div>
+          <div class="field">
+            <label for="p-os">Obra social</label>
+            <select id="p-os" class="select"><option>Particular (sin obra social)</option><option>Obra social ficticia A</option><option>Obra social ficticia B</option></select>
+          </div>
+          <div class="field">
+            <span class="label" id="p-hor">Horarios disponibles, jueves 20</span>
+            <div class="chips" role="group" aria-labelledby="p-hor">
+              <button class="chip mono" type="button" aria-pressed="false">09:30</button>
+              <button class="chip mono" type="button" aria-pressed="true">10:45</button>
+              <button class="chip mono" type="button" aria-pressed="false">11:30</button>
+              <button class="chip mono" type="button" aria-pressed="false">15:00</button>
+            </div>
+          </div>
+          <button class="btn btn--primary btn--block" type="submit">Reservar turno</button>
+        </form>
+      </div>
+      <div class="panel" style="align-self:start">
+        <h3>Toast</h3>
+        <div class="toast" role="status">
+          <svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>
+          <span>Turno reprogramado para las 10:45.</span>
+          <button type="button">Deshacer</button>
+        </div>
+        <p class="muted" style="margin-top:var(--space-4); font-size: var(--text-sm)">Aparece con opacidad y 8 px de desplazamiento (180 a 240 ms, ease-out). Con movimiento reducido solo cambia la opacidad.</p>
+        <div class="alert alert--info" style="margin-top:var(--space-4)">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <div><strong>Plazo de cancelación</strong>Podés cancelar sin cargo hasta 24 h antes (valor ficticio).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabla de configuracion -->
+  <section aria-labelledby="s-config">
+    <h2 id="s-config">Tabla de configuración</h2>
+    <p class="lead">Administración: prestaciones y duraciones. Números en tipografía monoespaciada y alineados a la derecha.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Prestaciones</caption>
+        <thead><tr><th scope="col">Prestación</th><th scope="col" class="num">Duración</th><th scope="col">Profesionales</th><th scope="col">Estado</th><th scope="col"><span class="sr-only">Acciones</span></th></tr></thead>
+        <tbody>
+          <tr><th scope="row" style="background:none;color:inherit">Control y limpieza</th><td class="num mono">30 min</td><td>Todos</td><td><span class="badge st-confirmado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Activa</span></td><td><button class="btn btn--secondary btn--sm" type="button">Editar</button></td></tr>
+          <tr><th scope="row" style="background:none;color:inherit">Endodoncia</th><td class="num mono">45 min</td><td>Dra. Ferreyra</td><td><span class="badge st-confirmado"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Activa</span></td><td><button class="btn btn--secondary btn--sm" type="button">Editar</button></td></tr>
+          <tr><th scope="row" style="background:none;color:inherit">Blanqueamiento</th><td class="num mono">60 min</td><td>Dr. Orellana</td><td><span class="badge st-cancelado"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg><span class="badge__txt">Inactiva</span></span></td><td><button class="btn btn--secondary btn--sm" type="button">Editar</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</body>
+</html>
