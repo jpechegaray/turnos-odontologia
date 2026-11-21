@@ -1,10 +1,12 @@
 package ar.edu.utn.turnos.seguridad.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.seguridad.domain.Rol;
+import ar.edu.utn.turnos.shared.tiempo.ZonaHoraria;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.concurrent.Callable;
@@ -17,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.convention.TestBean;
 
 class AutenticacionPersonalIT extends PruebaIntegracionBase {
 
@@ -29,7 +31,15 @@ class AutenticacionPersonalIT extends PruebaIntegracionBase {
     @Autowired private UsuarioJpaRepository usuarios;
     @Autowired private AutenticacionPersonal autenticacion;
     @Autowired private JdbcTemplate jdbc;
-    @MockitoBean private Clock reloj;
+    @TestBean(methodName = "crearReloj") private Clock reloj;
+
+    static Clock crearReloj() {
+        // El inicializador de configuración consulta el reloj antes de @BeforeEach.
+        Clock reloj = mock(Clock.class);
+        when(reloj.instant()).thenReturn(INICIO);
+        when(reloj.getZone()).thenReturn(ZonaHoraria.BUENOS_AIRES);
+        return reloj;
+    }
 
     @BeforeEach
     void fijaReloj() {
