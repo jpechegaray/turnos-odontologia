@@ -1,0 +1,67 @@
+package ar.edu.utn.turnos.shared.web;
+
+import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+/** Formato uniforme de error de la API: Problem Details (RFC 7807) con el código de la regla. */
+@RestControllerAdvice
+public class ManejadorErrores extends ResponseEntityExceptionHandler {
+
+    static final String PROPIEDAD_CODIGO = "codigo";
+    static final String PROPIEDAD_ERRORES = "errores";
+    static final String DETALLE_GENERICO = "Ocurrió un error inesperado";
+
+    private static final Logger LOG = LoggerFactory.getLogger(ManejadorErrores.class);
+
+    @ExceptionHandler(ReglaNegocioException.class)
+    public ProblemDetail manejarRegla(ReglaNegocioException ex) {
+        HttpStatus estado = HttpStatus.valueOf(ex.estado().codigoHttp());
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(estado, ex.getMessage());
+        problema.setTitle(estado.getReasonPhrase());
+        problema.setProperty(PROPIEDAD_CODIGO, ex.codigo());
+        ex.propiedades().forEach(problema::setProperty);
+        return problema;
+    }
+
+    /** Agrega la lista de campos inválidos (sin el valor recibido) al 400 de Bean Validation. */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<Map<String, String>> errores = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> Map.of("campo", error.getField(), "mensaje", String.valueOf(error.getDefaultMessage())))
+                .toList();
+        ProblemDetail problema = ex.getBody();
+        problema.setProperty(PROPIEDAD_ERRORES, errores);
+        return handleExceptionInternal(ex, problema, headers, status, request);
+    }
+
+    /**
+     * Último recurso: 500 genérico. La excepción se registra en el log del servidor y nunca viaja
+     * en la respuesta. Las de seguridad se relanzan para que las traduzca Spring Security (401/403).
+     */
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail manejarInesperado(Exception ex) throws Exception {
+        if (ex instanceof AccessDeniedException || ex instanceof AuthenticationException) {
+            throw ex;
+        }
+        LOG.error("Error inesperado", ex);
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, DETALLE_GENERICO);
+        problema.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        return problema;
+    }
+}
