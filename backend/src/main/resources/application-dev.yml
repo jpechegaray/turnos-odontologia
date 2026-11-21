@@ -1,0 +1,20 @@
+# Perfil de desarrollo local. Las credenciales NO se escriben acá: salen de .env o del entorno.
+# .env se busca en el directorio actual (backend/ con ./mvnw) y en el padre (raíz, desde el IDE).
+# Formato del .env: CLAVE=valor sin comillas (se importa como .properties).
+spring:
+  config:
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      # Conserva el esquema y agrega tablas/columnas nuevas; no borra ni renombra (PA-10).
+      ddl-auto: update
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

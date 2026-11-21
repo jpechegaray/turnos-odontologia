@@ -12,6 +12,7 @@ Las decisiones **DD-01 a DD-08** fueron tomadas por el equipo (no se reabren sin
 - **Node/TypeScript full stack (por ejemplo NestJS o Express + un ORM):** descartada. Permitiría un solo lenguaje en front y back, pero el equipo no cursó un ORM equivalente a JPA en Node ni el ecosistema de testing con Testcontainers en ese stack; se priorizó el conocimiento común del equipo sobre la unificación de lenguaje.
 **Justificación**: se eligió Spring Boot para aprovechar JPA/JPQL, con tipado fuerte para un dominio con reglas sensibles, y Testcontainers permite probar contra PostgreSQL real, necesario para validar las restricciones `EXCLUDE`.
 **Trade-offs aceptados**: mayor verbosidad que Python o Node; dos lenguajes en el proyecto (Java y TypeScript); arranque y consumo de memoria de la JVM.
+**Precisión de versión (2026-11-21, C-01)**: se usa la última **Spring Boot 3.5.x**. A esta fecha su soporte OSS ya terminó (no recibe parches gratuitos); se acepta para no apartarse de esta decisión. La migración a Spring Boot 4.x queda fuera del alcance del MVP.
 
 ### DD-02 — Monolito modular, single-tenant, un consultorio por instalación
 **Decisión**: una sola aplicación backend con módulos por feature (agenda/turnos, pacientes, profesionales y sillones, prestaciones, reserva pública, lista de espera, notificaciones y configuración, más seguridad). Un consultorio por instalación; multi-tenant y multisede quedan para etapas posteriores.

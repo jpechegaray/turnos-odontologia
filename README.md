@@ -42,13 +42,31 @@ Después, según lo que vayas a hacer:
 |---|---|---|
 | Git | cualquiera reciente | Repo |
 | Java (JDK) | 21 | Backend Spring Boot |
-| Maven | 3.9 (o el `mvnw` del repo, cuando exista) | Build del backend |
+| Maven | 3.9 (o el `mvnw` del repo, en `backend/`) | Build del backend |
 | Docker Desktop | reciente | PostgreSQL 16 y Testcontainers |
 | Node.js | 22.20 o más | Front (Vite) y CLIs |
 | OpenSpec CLI | 2.x | Ciclo de changes: `npm install -g @fission-ai/openspec` |
 | Claude Code | reciente | Agente: lee `CLAUDE.md` y las skills del repo solo |
 
-> El código todavía no existe: lo crea **C-01** (esqueleto backend y entorno). Hasta que se mergee, no hay `pom.xml` ni `docker-compose.yml`.
+### Levantar el backend
+
+Hace falta JDK 21 y Docker Desktop encendido. Desde la raíz del repo:
+
+```bash
+cp .env.example .env              # y reemplazar los valores "cambiar-en-env-local"
+docker compose up -d              # PostgreSQL 16 en 127.0.0.1:5432
+cd backend
+./mvnw spring-boot:run            # perfil dev por defecto
+./mvnw verify                     # tests unitarios (*Test) y de integración (*IT) con Testcontainers
+```
+
+Notas:
+
+- **Puerto 5432 ocupado** (por ejemplo, un PostgreSQL instalado en tu máquina): cambiá el puerto publicado en `docker-compose.yml` (`"127.0.0.1:<otro>:5432"`) y el puerto de `SPRING_DATASOURCE_URL` en tu `.env`.
+- **Recrear la base** desde cero: `docker compose down -v` borra el volumen `turnos-pgdata`. En dev Hibernate usa `ddl-auto: update`, que agrega tablas y columnas pero no borra ni renombra (PA-10), así que si cambiaste el modelo de forma incompatible recreá la base.
+- **Formato del `.env`**: `CLAVE=valor`, sin comillas y sin `${}`. Spring lo importa como `.properties`, que conserva las comillas.
+- **`SPRING_PROFILES_ACTIVE`** solo vale si lo exportás en la shell o en el IDE: un `.env` importado no puede activar el perfil que lo importa. Con `./mvnw spring-boot:run` el perfil `dev` ya viene por defecto.
+- `./mvnw verify` necesita Docker encendido (Testcontainers levanta su propio PostgreSQL) y **no** usa tu `.env` ni la base de `docker compose`.
 
 ### Clonar y pasarte a tu rama
 

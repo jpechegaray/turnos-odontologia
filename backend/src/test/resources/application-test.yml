@@ -1,0 +1,5 @@
+# Perfil de pruebas: esquema limpio en cada ejecución. El datasource lo aporta @ServiceConnection (Testcontainers).
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

@@ -1,0 +1,38 @@
+# Configuración común. Cada módulo completa SOLO su bloque comentado (RM-02).
+# Las credenciales no se escriben acá: viven en .env (ver application-dev.yml).
+spring:
+  application:
+    name: turnos
+  jpa:
+    open-in-view: false
+    # El script schema-constraints.sql corre DESPUÉS de que Hibernate genera el esquema (DD-08).
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        # Los instantes se persisten en UTC (timestamptz); la zona de negocio la da el Clock (DD-05).
+        jdbc:
+          time_zone: UTC
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:schema-constraints.sql
+      # Separador propio para que C-19 pueda agregar bloques DO $$ ... $$ sin cortarlos.
+      separator: "^^^"
+      continue-on-error: false
+
+# Springdoc apagado por defecto; application-dev.yml lo enciende.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# --- Bloques por módulo (descomentar y completar solo el propio) ---
+# app:
+#   seguridad:        # dueño: C-03
+#   configuracion:    # dueño: C-08
+#   notificaciones:   # dueño: C-15 (mail)
+#   ratelimit:        # dueño: C-17
+#   reservapublica:   # dueños: C-14 y C-36
+#   listaespera:      # dueño: por asignar (lista de espera)
+#   agenda:           # dueño: por asignar (agenda)
