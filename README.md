@@ -68,6 +68,16 @@ Notas:
 - **`SPRING_PROFILES_ACTIVE`** solo vale si lo exportás en la shell o en el IDE: un `.env` importado no puede activar el perfil que lo importa. Con `./mvnw spring-boot:run` el perfil `dev` ya viene por defecto.
 - `./mvnw verify` necesita Docker encendido (Testcontainers levanta su propio PostgreSQL) y **no** usa tu `.env` ni la base de `docker compose`.
 
+### Contrato de sesión del personal (C-03 / C-16)
+
+1. Pedí `GET /api/auth/csrf` (`204`). Leé la cookie `XSRF-TOKEN` y enviá su valor en `X-XSRF-TOKEN` con cada escritura protegida, incluido el login.
+2. Enviá `POST /api/auth/login` con JSON `{ "email": "...", "password": "..." }`. El éxito devuelve `200` con `{id, email, rol}` y el navegador conserva `JSESSIONID` (`HttpOnly`). Un rechazo de credenciales devuelve `401` Problem Details con un mensaje genérico.
+3. Volvé a pedir CSRF tras el login. `GET /api/auth/me` devuelve el mismo DTO o `401` sin sesión. `POST /api/auth/logout` usa la cabecera CSRF, devuelve `204` e invalida la sesión. Pedí un token nuevo antes de volver a iniciar sesión.
+
+Usá el proxy `/api` de Vite para mantener el mismo origen. El backend decide los permisos; los guards de la interfaz no sustituyen esa validación.
+
+Para probar el login local, definí `SEED_ADMIN_PASSWORD` en tu `.env` antes de arrancar el backend con el perfil `dev`. El usuario ficticio es `admin@consultorio.test`; si ya existe, el arranque no cambia su contraseña. Mantené `APP_COOKIE_SECURE=false` solo para HTTP local y `APP_CORS_ORIGIN` en el origen exacto del frontend cuando uses CORS.
+
 ### Levantar el frontend
 
 Hace falta Node 22.20 o más. Desde la raíz del repo:

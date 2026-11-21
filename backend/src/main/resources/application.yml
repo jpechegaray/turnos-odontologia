@@ -27,6 +27,14 @@ springdoc:
   swagger-ui:
     enabled: false
 
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${APP_COOKIE_SECURE:true}
+
 # --- Bloques por módulo (descomentar y completar solo el propio) ---
 # app:
 #   seguridad:        # dueño: C-03
