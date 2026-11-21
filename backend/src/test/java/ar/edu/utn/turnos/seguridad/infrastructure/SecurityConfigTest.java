@@ -9,8 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ar.edu.utn.turnos.shared.web.ManejadorErrores;
 import ar.edu.utn.turnos.seguridad.web.CsrfController;
+import ar.edu.utn.turnos.seguridad.web.SesionPersonalController;
+import ar.edu.utn.turnos.shared.web.ManejadorErrores;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@WebMvcTest(properties = "APP_CORS_ORIGIN=http://localhost:5173")
-@Import({SecurityConfig.class, CsrfController.class, ManejadorErrores.class,
-        SecurityConfigTest.ControladorPrueba.class})
+@WebMvcTest(controllers = {CsrfController.class, SesionPersonalController.class},
+        properties = "APP_CORS_ORIGIN=http://localhost:5173")
+@Import({SecurityConfig.class, ManejadorErrores.class, SecurityConfigTest.ControladorPrueba.class})
 class SecurityConfigTest {
 
     @MockitoBean
