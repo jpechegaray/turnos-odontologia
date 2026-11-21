@@ -1,8 +1,12 @@
+import { BrowserRouter } from "react-router-dom";
+import { AppRutas } from "./app/AppRutas";
+import { registroDeFeatures } from "./app/rutas/modulos";
+
 function App() {
   return (
-    <main className="app">
-      <h1>{window.BRAND.name}</h1>
-    </main>
+    <BrowserRouter>
+      <AppRutas registro={registroDeFeatures} />
+    </BrowserRouter>
   );
 }
 
