@@ -537,7 +537,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > Una sola persona (Santino) deja el esqueleto para que nadie choque en los archivos base. Nada en paralelo hasta el GATE 1.
 
 ### [C-01] `C-01-esqueleto-backend-y-entorno`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho (PR #53, 2026-11-21)
 - **Responsable**: Santino — **Ola**: 0 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `backend/` Maven + Java 21 + Spring Boot 3, paquete base `ar.edu.utn.turnos`, `TurnosApplication`; dependencias YA declaradas para todo el proyecto (web, data-jpa, validation, security, mail, postgresql, springdoc-openapi, spring-security-test, Testcontainers, ArchUnit) para que ningún change posterior edite `pom.xml`
