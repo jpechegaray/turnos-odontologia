@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.app {
+  padding: var(--space-5) var(--space-4);
+}

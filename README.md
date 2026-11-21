@@ -68,6 +68,24 @@ Notas:
 - **`SPRING_PROFILES_ACTIVE`** solo vale si lo exportás en la shell o en el IDE: un `.env` importado no puede activar el perfil que lo importa. Con `./mvnw spring-boot:run` el perfil `dev` ya viene por defecto.
 - `./mvnw verify` necesita Docker encendido (Testcontainers levanta su propio PostgreSQL) y **no** usa tu `.env` ni la base de `docker compose`.
 
+### Levantar el frontend
+
+Hace falta Node 22.20 o más. Desde la raíz del repo:
+
+```bash
+cd frontend
+npm ci                            # instala desde package-lock.json
+npm run dev                       # SPA en http://localhost:5173, con /api reenviado al backend en :8080
+npm test                          # Vitest, una sola corrida (sin watch)
+npm run build                     # tsc -b + vite build, genera dist/
+npm run lint                      # ESLint
+```
+
+Notas:
+
+- El `.env` de la raíz es **opcional** para el frontend: `VITE_API_BASE_URL` vale `/api` por defecto.
+- Para que `/api` responda desde el navegador, el backend tiene que estar corriendo en `:8080` (ver "Levantar el backend").
+
 ### Clonar y pasarte a tu rama
 
 ```bash
