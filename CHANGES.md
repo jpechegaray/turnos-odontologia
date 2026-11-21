@@ -559,7 +559,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-10 (Flyway): el esquema depende de `ddl-auto: update`, que no borra ni renombra columnas; ante un cambio incompatible se recrea la base ficticia (`docker compose down -v`).
 
 ### [C-02] `C-02-esqueleto-frontend`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho (PR #54, 2026-11-21)
 - **Responsable**: Santino — **Ola**: 0 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `frontend/` Vite + React 18 + TypeScript 5 + React Router + Vitest + Testing Library; `package.json` con TODAS las dependencias previstas (para no volver a editarlo)
