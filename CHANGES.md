@@ -869,7 +869,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: Login real contra el backend de C-03 en desarrollo; un ODONTOLOGO no ve las acciones de escritura; tests Vitest en verde.
 
 ### [C-17] `C-17-limite-de-tasa-endpoints-publicos`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho (PR #66, 2026-11-21)
 - **Responsable**: Lionel — **Ola**: 2 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `shared.ratelimit`: filtro en memoria por IP sobre `/api/public/**` (implementación propia, sin dependencia nueva), umbrales por `@ConfigurationProperties`, `Clock` inyectable y limpieza de contadores
