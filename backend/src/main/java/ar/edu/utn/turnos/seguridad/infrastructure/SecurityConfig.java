@@ -101,6 +101,13 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "RECEPCION")
                         .requestMatchers(HttpMethod.DELETE, "/api/profesionales/{id}/bloqueos/{bloqueoId}")
                             .hasAnyRole("ADMIN", "RECEPCION")
+                        // Ídem para los horarios de atención (C-11).
+                        .requestMatchers(HttpMethod.POST, "/api/profesionales/{id}/horarios")
+                            .hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.PUT, "/api/profesionales/{id}/horarios/{horarioId}")
+                            .hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/profesionales/{id}/horarios/{horarioId}")
+                            .hasAnyRole("ADMIN", "RECEPCION")
                         // Gestión de usuarios (C-13): solo ADMIN, también para leer; 403 antes de validar el cuerpo.
                         .requestMatchers("/api/usuarios", "/api/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
