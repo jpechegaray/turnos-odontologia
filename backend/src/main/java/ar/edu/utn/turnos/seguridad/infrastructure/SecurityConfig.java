@@ -94,6 +94,11 @@ public class SecurityConfig {
                         .requestMatchers(RUTAS_PUBLICAS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
                         .requestMatchers(login).permitAll()
+                        // Denegar escrituras de bloqueos antes de que MVC valide el cuerpo o los IDs.
+                        .requestMatchers(HttpMethod.POST, "/api/profesionales/{id}/bloqueos")
+                            .hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/profesionales/{id}/bloqueos/{bloqueoId}")
+                            .hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configuracionCors(origen)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/public/**")
