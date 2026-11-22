@@ -36,11 +36,15 @@ server:
         secure: ${APP_COOKIE_SECURE:true}
 
 # --- Bloques por módulo (descomentar y completar solo el propio) ---
-# app:
+app:
 #   seguridad:        # dueño: C-03
 #   configuracion:    # dueño: C-08
 #   notificaciones:   # dueño: C-15 (mail)
-#   ratelimit:        # dueño: C-17
+  ratelimit:        # dueño: C-17
+    max-solicitudes-por-ip: 60
+    ventana-ip: 1m
+    max-solicitudes-por-clave: 10
+    ventana-clave: 1m
 #   reservapublica:   # dueños: C-14 y C-36
 #   listaespera:      # dueño: por asignar (lista de espera)
 #   agenda:           # dueño: por asignar (agenda)
