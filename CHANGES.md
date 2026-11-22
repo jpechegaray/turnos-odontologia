@@ -12,63 +12,65 @@
 
 ## Asignación rápida
 
+> **Avance al 2026-11-22:** 14 de 51 changes hechos (Ola 0 y Ola 1 completas salvo C-07; Ola 2: C-10, C-11, C-12, C-13, C-16 y C-17). En revisión: C-07 (PR #75, en pausa). Falta archivar en OpenSpec: C-04, C-09, C-11. Ya se pueden empezar: C-14 (Santino), C-20, C-21, C-22 y C-24 (Cualquiera). Bloqueados solo por C-07: C-15 (Julián), C-18, C-19 (Juan Pablo, camino crítico) y C-23.
+
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
 "Depende de" = changes que tienen que estar **mergeados en `master` antes** de empezar ese change. "—" = no depende de nada (se puede hacer apenas abre su ola).
 
-| Change | Responsable | Ola | Tam. | Nombre | Depende de (hacer antes) | Marca |
-|---|---|---|---|---|---|---|
-| C-01 | **Santino** | 0 | M | esqueleto-backend-y-entorno | — | camino crítico |
-| C-02 | **Santino** | 0 | S | esqueleto-frontend | — |  |
-| C-03 | **Nico** | 1 | L | seguridad-login-sesion-csrf | C-01 | CRITICAL |
-| C-04 | **Valentino** | 1 | S | catalogo-prestaciones | C-01 | camino crítico |
-| C-05 | Cualquiera | 1 | S | catalogo-sillones | C-01 |  |
-| C-06 | Cualquiera | 1 | S | catalogo-profesionales | C-01 |  |
-| C-07 | Cualquiera | 1 | M | pacientes-ficha-basica | C-01 |  |
-| C-08 | Cualquiera | 1 | S | configuracion-parametros | C-01 |  |
-| C-09 | Cualquiera | 1 | M | frontend-base-ui-y-cliente-api | C-02 |  |
-| C-10 | **Lionel** | 2 | S | profesional-prestaciones | C-04, C-06 | camino crítico |
-| C-11 | Cualquiera | 2 | M | horarios-de-atencion | C-06 |  |
-| C-12 | Cualquiera | 2 | S | bloqueos-de-agenda | C-06 |  |
-| C-13 | **Valentino** | 2 | M | administrar-usuarios | C-03, C-06 | CRITICAL |
-| C-14 | **Santino** | 2 | S | servicio-token-seguro | C-01 | CRITICAL |
-| C-15 | **Julián** | 2 | M | notificaciones-email-infraestructura | C-01, C-07, C-08 | HIGH |
-| C-16 | **Nico** | 2 | S | frontend-login-y-guards | C-03, C-09 | HIGH |
-| C-17 | **Lionel** | 2 | S | limite-de-tasa-endpoints-publicos | C-01 | HIGH |
-| C-18 | Cualquiera | 2 | M | lista-espera-alta-y-gestion | C-04, C-06, C-07 |  |
-| C-19 | **Juan Pablo** | 3 | L | crear-turno-sin-solapamientos | C-03, C-04, C-05, C-07, C-10, C-11, C-12 | OPSX evaluado, camino crítico, HIGH |
-| C-20 | Cualquiera | 3 | S | front-prestaciones-y-configuracion | C-04, C-08, C-16 |  |
-| C-21 | Cualquiera | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
-| C-22 | Cualquiera | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
-| C-23 | Cualquiera | 3 | S | front-pacientes | C-07, C-16 |  |
-| C-24 | Cualquiera | 3 | S | front-usuarios-admin | C-13, C-16 |  |
-| C-25 | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
-| C-26 | Cualquiera | 4 | M | horarios-libres-disponibilidad | C-19 |  |
-| C-27 | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
-| C-28 | Cualquiera | 4 | M | consultar-agenda-dia-semana | C-19 |  |
-| C-29 | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
-| C-30 | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
-| C-31 | Cualquiera | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
-| C-32 | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
-| C-33 | Cualquiera | 4 | M | datos-ficticios-seed | C-03, C-05, C-07, C-10, C-11, C-19 |  |
-| C-34 | Cualquiera | 4 | S | front-registro-notificaciones | C-16, C-25 |  |
-| C-35 | Cualquiera | 5 | M | reprogramar-turno | C-19, C-27 |  |
-| C-36 | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
-| C-37 | Cualquiera | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
-| C-38 | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
-| C-39 | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
-| C-40 | Cualquiera | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
-| C-41 | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
-| C-42 | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
-| C-43 | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
-| C-44 | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
-| C-45 | Cualquiera | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
-| C-46 | Cualquiera | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
-| C-47 | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
-| C-48 | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
-| C-49 | **Julián** | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
-| C-50 | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
-| C-51 | **Juan Pablo** | 8 | M | verificacion-e2e-y-cierre-mvp | C-33, C-37, C-44, C-46, C-47, C-48, C-49 |  |
+| Change | Estado | Responsable | Ola | Tam. | Nombre | Depende de (hacer antes) | Marca |
+|---|---|---|---|---|---|---|---|
+| C-01 | ✅ hecho | **Santino** | 0 | M | esqueleto-backend-y-entorno | — | camino crítico |
+| C-02 | ✅ hecho | **Santino** | 0 | S | esqueleto-frontend | — |  |
+| C-03 | ✅ hecho | **Nico** | 1 | L | seguridad-login-sesion-csrf | C-01 | CRITICAL |
+| C-04 | ✅ hecho | **Valentino** | 1 | S | catalogo-prestaciones | C-01 | camino crítico |
+| C-05 | ✅ hecho | Nico (Cualquiera) | 1 | S | catalogo-sillones | C-01 |  |
+| C-06 | ✅ hecho | Nico (Cualquiera) | 1 | S | catalogo-profesionales | C-01 |  |
+| C-07 | 🔍 en revisión | Julián (Cualquiera) | 1 | M | pacientes-ficha-basica | C-01 |  |
+| C-08 | ✅ hecho | Nico (Cualquiera) | 1 | S | configuracion-parametros | C-01 |  |
+| C-09 | ✅ hecho | Valentino (Cualquiera) | 1 | M | frontend-base-ui-y-cliente-api | C-02 |  |
+| C-10 | ✅ hecho | **Lionel** | 2 | S | profesional-prestaciones | C-04, C-06 | camino crítico |
+| C-11 | ✅ hecho | Valentino (Cualquiera) | 2 | M | horarios-de-atencion | C-06 |  |
+| C-12 | ✅ hecho | Nico (Cualquiera) | 2 | S | bloqueos-de-agenda | C-06 |  |
+| C-13 | ✅ hecho | **Valentino** | 2 | M | administrar-usuarios | C-03, C-06 | CRITICAL |
+| C-14 | ⬜ pendiente | **Santino** | 2 | S | servicio-token-seguro | C-01 | CRITICAL |
+| C-15 | ⬜ pendiente | **Julián** | 2 | M | notificaciones-email-infraestructura | C-01, C-07, C-08 | HIGH |
+| C-16 | ✅ hecho | **Nico** | 2 | S | frontend-login-y-guards | C-03, C-09 | HIGH |
+| C-17 | ✅ hecho | **Lionel** | 2 | S | limite-de-tasa-endpoints-publicos | C-01 | HIGH |
+| C-18 | ⬜ pendiente | Cualquiera | 2 | M | lista-espera-alta-y-gestion | C-04, C-06, C-07 |  |
+| C-19 | ⬜ pendiente | **Juan Pablo** | 3 | L | crear-turno-sin-solapamientos | C-03, C-04, C-05, C-07, C-10, C-11, C-12 | OPSX evaluado, camino crítico, HIGH |
+| C-20 | ⬜ pendiente | Cualquiera | 3 | S | front-prestaciones-y-configuracion | C-04, C-08, C-16 |  |
+| C-21 | ⬜ pendiente | Cualquiera | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
+| C-22 | ⬜ pendiente | Cualquiera | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
+| C-23 | ⬜ pendiente | Cualquiera | 3 | S | front-pacientes | C-07, C-16 |  |
+| C-24 | ⬜ pendiente | Cualquiera | 3 | S | front-usuarios-admin | C-13, C-16 |  |
+| C-25 | ⬜ pendiente | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
+| C-26 | ⬜ pendiente | Cualquiera | 4 | M | horarios-libres-disponibilidad | C-19 |  |
+| C-27 | ⬜ pendiente | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
+| C-28 | ⬜ pendiente | Cualquiera | 4 | M | consultar-agenda-dia-semana | C-19 |  |
+| C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
+| C-30 | ⬜ pendiente | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
+| C-31 | ⬜ pendiente | Cualquiera | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
+| C-32 | ⬜ pendiente | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
+| C-33 | ⬜ pendiente | Cualquiera | 4 | M | datos-ficticios-seed | C-03, C-05, C-07, C-10, C-11, C-19 |  |
+| C-34 | ⬜ pendiente | Cualquiera | 4 | S | front-registro-notificaciones | C-16, C-25 |  |
+| C-35 | ⬜ pendiente | Cualquiera | 5 | M | reprogramar-turno | C-19, C-27 |  |
+| C-36 | ⬜ pendiente | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
+| C-37 | ⬜ pendiente | Cualquiera | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
+| C-38 | ⬜ pendiente | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
+| C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
+| C-40 | ⬜ pendiente | Cualquiera | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
+| C-41 | ⬜ pendiente | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
+| C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
+| C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
+| C-44 | ⬜ pendiente | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
+| C-45 | ⬜ pendiente | Cualquiera | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
+| C-46 | ⬜ pendiente | Cualquiera | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
+| C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
+| C-48 | ⬜ pendiente | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
+| C-49 | ⬜ pendiente | **Julián** | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
+| C-50 | ⬜ pendiente | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
+| C-51 | ⬜ pendiente | **Juan Pablo** | 8 | M | verificacion-e2e-y-cierre-mvp | C-33, C-37, C-44, C-46, C-47, C-48, C-49 |  |
 
 ---
 
@@ -537,7 +539,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > Una sola persona (Santino) deja el esqueleto para que nadie choque en los archivos base. Nada en paralelo hasta el GATE 1.
 
 ### [C-01] `C-01-esqueleto-backend-y-entorno`
-- **Estado**: `[x]` hecho (PR #53, 2026-11-21)
+- **Estado**: `[x]` hecho por Santino (PR #53, 2026-11-21)
 - **Responsable**: Santino — **Ola**: 0 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `backend/` Maven + Java 21 + Spring Boot 3, paquete base `ar.edu.utn.turnos`, `TurnosApplication`; dependencias YA declaradas para todo el proyecto (web, data-jpa, validation, security, mail, postgresql, springdoc-openapi, spring-security-test, Testcontainers, ArchUnit) para que ningún change posterior edite `pom.xml`
@@ -559,7 +561,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-10 (Flyway): el esquema depende de `ddl-auto: update`, que no borra ni renombra columnas; ante un cambio incompatible se recrea la base ficticia (`docker compose down -v`).
 
 ### [C-02] `C-02-esqueleto-frontend`
-- **Estado**: `[x]` hecho (PR #54, 2026-11-21)
+- **Estado**: `[x]` hecho por Santino (PR #54, 2026-11-21)
 - **Responsable**: Santino — **Ola**: 0 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `frontend/` Vite + React 18 + TypeScript 5 + React Router + Vitest + Testing Library; `package.json` con TODAS las dependencias previstas (para no volver a editarlo)
@@ -582,7 +584,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 ## FASE 1 — Ola 1: Fundaciones paralelas: seguridad, catálogos, pacientes, configuración y base de UI
 
 ### [C-03] `C-03-seguridad-login-sesion-csrf`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Nico (PR #55, 2026-11-21)
 - **Responsable**: Nico — **Ola**: 1 — **Tamaño**: L (8-10 h)
 - **Scope**:
   - Entidad `Usuario` (email único, hash BCrypt, rol `ODONTOLOGO|RECEPCION|ADMIN`, activo, intentos fallidos, `bloqueado_hasta`) en `seguridad`
@@ -605,7 +607,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: CRITICAL: se entrega primero análisis y propuesta (OPSX propose); no se escribe código sin aprobación de Juan Pablo. Valores de bloqueo (5 intentos, 15 min) son supuesto a validar.
 
 ### [C-04] `C-04-catalogo-prestaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Valentino (PR #63, 2026-11-21) — falta archivar en OpenSpec
 - **Responsable**: Valentino — **Ola**: 1 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `Prestacion` (nombre, duración por defecto, activa) en `prestaciones`; `/api/prestaciones` CRUD con baja lógica
@@ -625,8 +627,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: La baja con turnos futuros (RN-37) se completa en C-30.
 
 ### [C-05] `C-05-catalogo-sillones`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 1 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Nico (PR #56, 2026-11-21)
+- **Responsable**: Nico (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `Sillon` (nombre único, activo) en `profesionales.sillon`; `/api/sillones` CRUD con baja lógica; ADMIN escribe, RECEPCION y ODONTOLOGO leen
   - Puerto de consulta `SillonConsulta` (activos, por id) para agenda
@@ -644,8 +646,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-12 abierta (bloquear un sillón por intervalo): no se incluye; solo se desactiva. No desactivar con turnos futuros llega en C-30.
 
 ### [C-06] `C-06-catalogo-profesionales`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 1 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Nico (PR #57, 2026-11-21)
+- **Responsable**: Nico (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `Profesional` (nombre, apellido, matrícula, activo) en `profesionales.profesional`; `/api/profesionales` CRUD con baja lógica; ADMIN escribe, RECEPCION lee, ODONTOLOGO lee el propio
   - Puerto `ProfesionalConsulta` para agenda, horarios y bloqueos (por id y activos)
@@ -663,8 +665,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: C-05 y C-06 comparten el paquete `profesionales` en la misma ola; mismo responsable y subpaquetes distintos (ver Riesgo RM-01).
 
 ### [C-07] `C-07-pacientes-ficha-basica`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 1 — **Tamaño**: M (4-6 h)
+- **Estado**: `[~]` en revisión (PR #75, en pausa)
+- **Responsable**: Julián (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Entidad `Paciente` (nombre, apellido, DNI único opcional, email, teléfono, obra social como texto, notas, activo) en `pacientes`
   - `/api/pacientes` crear, editar, buscar (apellido, nombre, DNI o email), baja lógica; RECEPCION y ADMIN; al menos un medio de contacto (RN-32)
@@ -683,8 +685,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-16 (pacientes sin email): se permite email o teléfono, pero sin email no hay recordatorio ni lista de espera. La lectura del odontólogo (solo pacientes de sus turnos) se implementa en C-28.
 
 ### [C-08] `C-08-configuracion-parametros`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 1 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Nico (PR #61, 2026-11-21)
+- **Responsable**: Nico (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `Configuracion` (clave, valor, descripción, actualizado_en) en `configuracion` con las 7 claves de 04 §Configuracion y sus valores por defecto (inicializador idempotente)
   - `GET /api/configuracion` (RECEPCION, ADMIN) y `PUT` (solo ADMIN); validación RN-36 (plazo 0 a 168, recordatorio 1 a 168, demás enteros positivos)
@@ -703,8 +705,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-05 (anticipación del recordatorio) abierta: se entrega 24 hs configurable, como indica el supuesto SU-06.
 
 ### [C-09] `C-09-frontend-base-ui-y-cliente-api`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 1 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Valentino (PR #64, 2026-11-21) — falta archivar en OpenSpec
+- **Responsable**: Valentino (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `shared/api`: cliente `fetch` con cookie de sesión, token CSRF y mapeo de Problem Details (409, 422, 404, 403) a errores tipados
   - `shared/fecha`: formateo y parseo en zona `America/Argentina/Buenos_Aires` e intervalos semiabiertos `[inicio, fin)`
@@ -729,7 +731,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > Los tres changes de `profesionales` (C-10, C-11, C-12) van en subpaquetes distintos y son la condición de apertura de C-19.
 
 ### [C-10] `C-10-profesional-prestaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #68, 2026-11-22)
 - **Responsable**: Lionel — **Ola**: 2 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `ProfesionalPrestacion` (`@ManyToOne` a `Profesional` y `Prestacion`, pareja única) en `profesionales.prestacion`, sin editar `Profesional`
@@ -749,8 +751,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-01 (paquete `profesionales` compartido con C-11 y C-12 en la misma ola).
 
 ### [C-11] `C-11-horarios-de-atencion`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 2 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Valentino (PR #72, 2026-11-22) — falta archivar en OpenSpec
+- **Responsable**: Valentino (tomado como Cualquiera) — **Ola**: 2 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Entidad `HorarioAtencion` (profesional, día 1 a 7, tramo `[hora_inicio, hora_fin)` en hora local) en `profesionales.horario`
   - `/api/profesionales/{id}/horarios` CRUD para RECEPCION y ADMIN; ODONTOLOGO solo consulta los propios y recibe 403 al modificar
@@ -770,8 +772,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-01. SU-02: si se decide que recepción no toque horarios, solo cambia la matriz de permisos.
 
 ### [C-12] `C-12-bloqueos-de-agenda`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 2 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Nico (PR #67, 2026-11-22)
+- **Responsable**: Nico (tomado como Cualquiera) — **Ola**: 2 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `Bloqueo` (profesional, `[inicio, fin)`, motivo) en `profesionales.bloqueo`; `POST`, `GET` y `DELETE /api/profesionales/{id}/bloqueos` para RECEPCION y ADMIN; ODONTOLOGO solo ve y recibe 403 al escribir
   - Puerto `BloqueoConsulta.solapa(profesionalId, Intervalo)` con intervalo semiabierto: un turno que empieza justo cuando termina el bloqueo se acepta (RN-02)
@@ -790,7 +792,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-01. PA-12 abierta: solo hay bloqueos por profesional, no por sillón.
 
 ### [C-13] `C-13-administrar-usuarios`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Valentino (PR #71, 2026-11-22)
 - **Responsable**: Valentino — **Ola**: 2 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `/api/usuarios` CRUD solo ADMIN: alta con rol, modificación, desactivación; email único; contraseña con BCrypt
@@ -850,7 +852,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-02 (`application.yml`: bloque de mail).
 
 ### [C-16] `C-16-frontend-login-y-guards`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Nico (PR #70, 2026-11-22)
 - **Responsable**: Nico — **Ola**: 2 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `features/auth`: pantalla de login, contexto de sesión (`/api/auth/me`), logout y redirección ante 401
@@ -869,7 +871,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: Login real contra el backend de C-03 en desarrollo; un ODONTOLOGO no ve las acciones de escritura; tests Vitest en verde.
 
 ### [C-17] `C-17-limite-de-tasa-endpoints-publicos`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #66, 2026-11-21)
 - **Responsable**: Lionel — **Ola**: 2 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `shared.ratelimit`: filtro en memoria por IP sobre `/api/public/**` (implementación propia, sin dependencia nueva), umbrales por `@ConfigurationProperties`, `Clock` inyectable y limpieza de contadores

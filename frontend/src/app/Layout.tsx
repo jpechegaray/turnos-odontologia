@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { CerrarSesion } from "../features/auth/CerrarSesion";
 import type { EntradaMenuResuelta } from "./rutas/tipos";
 import "./layout.css";
 
@@ -22,6 +23,7 @@ export function Layout({ menu }: { menu: readonly EntradaMenuResuelta[] }) {
             ))}
           </ul>
         </nav>
+        <CerrarSesion />
       </header>
       <main className="layout__contenido">
         <Outlet />
