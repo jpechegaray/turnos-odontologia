@@ -1,0 +1,162 @@
+/*
+ * Kit UI tomado de design-system/components.html (Revision 1). Solo variables de tokens.css (regla 13).
+ * Diferencias con la referencia: el texto del botón de peligro usa --color-on-primary y el toast va
+ * invertido (--color-text / --color-surface) porque la referencia usa colores fijos.
+ */
+
+.icon {
+  width: 1.125em;
+  height: 1.125em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--color-text-muted); }
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-base) ease, border-color var(--dur-base) ease;
+}
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-offset); }
+.btn--primary { background: var(--color-primary); color: var(--color-on-primary); }
+.btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn--secondary { background: var(--color-surface); color: var(--color-primary); border-color: var(--color-border-strong); }
+.btn--secondary:hover:not(:disabled) { background: var(--color-primary-soft); }
+.btn--danger { background: var(--color-danger); color: var(--color-on-primary); }
+.btn--danger:hover:not(:disabled) { background: var(--color-danger-hover); }
+.btn--danger-ghost { background: transparent; color: var(--color-danger-text); border-color: var(--color-danger); }
+.btn--danger-ghost:hover:not(:disabled) { background: var(--color-danger-soft); }
+.btn:disabled { background: var(--color-surface-muted); color: var(--color-text-disabled); border-color: var(--color-border); cursor: not-allowed; }
+.btn--block { width: 100%; }
+.btn--sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+
+/* Campos */
+.field { display: grid; gap: var(--space-2); }
+.field label { font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+.field .hint { font-size: var(--text-sm); color: var(--color-text-muted); }
+.field .error {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  font-size: var(--text-sm);
+  color: var(--color-danger-text);
+  font-weight: var(--weight-medium);
+}
+.input {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
+}
+.input:focus-visible { outline: none; border-color: var(--focus-color); box-shadow: var(--focus-ring); }
+.input[aria-invalid="true"] { border-color: var(--color-danger); border-width: 2px; }
+.input:disabled { background: var(--color-surface-muted); color: var(--color-text-disabled); }
+
+/* Badges de estado: icono + texto + color */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.badge .icon { width: 14px; height: 14px; }
+.st-reservado { background: var(--turno-reservado-bg); color: var(--turno-reservado-fg); border-color: var(--turno-reservado-border); }
+.st-confirmado { background: var(--turno-confirmado-bg); color: var(--turno-confirmado-fg); border-color: var(--turno-confirmado-border); }
+.st-atendido { background: var(--turno-atendido-bg); color: var(--turno-atendido-fg); border-color: var(--turno-atendido-border); }
+.st-ausente { background: var(--turno-ausente-bg); color: var(--turno-ausente-fg); border-color: var(--turno-ausente-border); }
+.st-cancelado { background: var(--turno-cancelado-bg); color: var(--turno-cancelado-fg); border-color: var(--turno-cancelado-border); }
+.st-cancelado .badge__txt { text-decoration: line-through; }
+.st-tardia { background: var(--turno-tardia-bg); color: var(--turno-tardia-fg); border-color: var(--turno-tardia-border); }
+.st-bloqueo { background: var(--agenda-bloqueo-bg); color: var(--agenda-bloqueo-fg); border-color: var(--agenda-bloqueo-border); }
+
+/* Tarjeta */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+.panel__titulo { margin: 0 0 var(--space-3); font-size: var(--text-base); font-weight: var(--weight-semibold); }
+
+/* Alertas */
+.alert {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+}
+.alert .icon { margin-top: 2px; width: 20px; height: 20px; }
+.alert strong { display: block; }
+.alert--danger { background: var(--color-danger-soft); color: var(--color-danger-text); border-color: var(--color-danger); }
+.alert--info { background: var(--color-info-soft); color: var(--color-info-text); border-color: var(--turno-reservado-border); }
+
+/* Toast (invertido con tokens existentes) */
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-text);
+  color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  max-width: 100%;
+  animation: toast-in var(--dur-slow) var(--ease-out) both;
+}
+.toast .icon { width: 20px; height: 20px; }
+.toast button {
+  margin-left: var(--space-2);
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  text-decoration: underline;
+}
+.toast button:focus-visible { outline: var(--focus-outline); outline-color: currentColor; outline-offset: var(--focus-offset); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Tabla */
+.table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+.tabla { width: 100%; border-collapse: collapse; min-width: 560px; font-size: var(--text-sm); }
+.tabla caption { text-align: left; padding: var(--space-3) var(--space-4); font-weight: var(--weight-semibold); font-size: var(--text-base); }
+.tabla th, .tabla td { text-align: left; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); vertical-align: middle; }
+.tabla th { background: var(--color-surface-muted); font-weight: var(--weight-semibold); color: var(--color-text-muted); }
+.tabla .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tabla tbody tr:hover { background: var(--color-primary-soft); }
+.tabla__vacio { color: var(--color-text-muted); text-align: center; }

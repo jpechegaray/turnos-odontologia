@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@WebMvcTest
+@WebMvcTest(ManejadorErroresTest.ControladorPrueba.class)
 @Import({ManejadorErrores.class, ManejadorErroresTest.ControladorPrueba.class})
 @WithMockUser
 class ManejadorErroresTest {

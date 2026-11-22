@@ -56,7 +56,7 @@ El detalle completo está en [knowledge-base/02_descripcion_general.md](knowledg
 | **Ciclo OPSX** | Explorar, proponer, implementar, verificar y archivar changes | `openspec-explore`, `openspec-propose`, `openspec-apply-change`, `openspec-verify`, `openspec-archive-change`, `openspec-sync-specs`, `openspec-update-change` |
 | **UI (apoyo)** | Pulido visual siguiendo el sistema aprobado | `design-system`, `emil-design-eng` (si están instaladas) |
 
-Cargá la skill que corresponda al contexto ANTES de escribir código. Las skills de proyecto están en `.claude/skills/` (versionadas en `skills-lock.json`).
+Cargá la skill que corresponda al contexto ANTES de escribir código. Las skills de proyecto están en `.claude/skills/` (Claude Code) y en una copia idéntica en `.agents/skills/` (Codex, OpenCode y otros agentes), versionadas en `skills-lock.json`. Si actualizás una skill, actualizá las dos carpetas (`diff -r .claude/skills .agents/skills`).
 
 > Las reglas compactas de cada skill están en [.atl/skill-registry.md](.atl/skill-registry.md), que genera `skill-registry` y se versiona en el repo. Ahí también figuran los choques con decisiones del proyecto: jpa-patterns recomienda Flyway, pero rige DD-08 (Hibernate); springboot-security sugiere JWT, pero rige DD-03 (sesión). Esta tabla solo asigna skills a roles.
 
