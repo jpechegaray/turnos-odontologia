@@ -729,7 +729,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > Los tres changes de `profesionales` (C-10, C-11, C-12) van en subpaquetes distintos y son la condición de apertura de C-19.
 
 ### [C-10] `C-10-profesional-prestaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho (PR #68, 2026-11-22)
 - **Responsable**: Lionel — **Ola**: 2 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `ProfesionalPrestacion` (`@ManyToOne` a `Profesional` y `Prestacion`, pareja única) en `profesionales.prestacion`, sin editar `Profesional`
