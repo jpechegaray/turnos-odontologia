@@ -18,7 +18,9 @@ export type RutaFeature = Readonly<{
   componente: ComponentType;
   /** Sin entrada de menú la ruta existe pero no aparece en la navegación. */
   menu?: EntradaMenu;
-  /** Reservado para los guards de C-16; hoy no restringe nada (el backend es la barrera, RN-33). */
+  /** Por defecto es una pantalla interna del personal. */
+  ambito?: "publico" | "ingreso";
+  /** Roles permitidos en la pantalla interna. La API conserva la autorización efectiva. */
   roles?: readonly Rol[];
 }>;
 

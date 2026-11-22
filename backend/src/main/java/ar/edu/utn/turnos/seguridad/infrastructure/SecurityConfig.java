@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.function.Supplier;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
@@ -70,7 +72,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain cadenaDeFiltros(HttpSecurity http, RespuestasSeguridadProblemDetail respuestas,
             CookieCsrfTokenRepository csrfCookie, SecurityContextRepository contextos,
-            @Value("${APP_CORS_ORIGIN:}") String origen)
+            @Value("${APP_CORS_ORIGIN:}") String origen, ObjectProvider<EstadoSesionPersonal> estadoSesion)
             throws Exception {
         var login = new AntPathRequestMatcher(LOGIN, "POST");
         var logout = new AntPathRequestMatcher(LOGOUT, "POST");
@@ -106,6 +108,8 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "RECEPCION")
                         .requestMatchers(HttpMethod.DELETE, "/api/profesionales/{id}/horarios/{horarioId}")
                             .hasAnyRole("ADMIN", "RECEPCION")
+                        // Gestión de usuarios (C-13): solo ADMIN, también para leer; 403 antes de validar el cuerpo.
+                        .requestMatchers("/api/usuarios", "/api/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configuracionCors(origen)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/public/**")
@@ -128,6 +132,10 @@ public class SecurityConfig {
                                 respuestas.handle(request, response, error);
                             }
                         }));
+        // C-13: una sesión de un usuario desactivado o con otro rol o email pasa a anónima (401). En los
+        // slices @WebMvcTest no hay JPA y el verificador no existe, así que el filtro no se agrega.
+        estadoSesion.ifAvailable(estado ->
+                http.addFilterBefore(new VerificacionSesionVigente(estado), AuthorizationFilter.class));
         return http.build();
     }
 
