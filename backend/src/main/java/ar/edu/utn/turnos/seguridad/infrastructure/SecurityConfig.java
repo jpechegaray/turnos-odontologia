@@ -99,6 +99,13 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "RECEPCION")
                         .requestMatchers(HttpMethod.DELETE, "/api/profesionales/{id}/bloqueos/{bloqueoId}")
                             .hasAnyRole("ADMIN", "RECEPCION")
+                        // Ídem para los horarios de atención (C-11).
+                        .requestMatchers(HttpMethod.POST, "/api/profesionales/{id}/horarios")
+                            .hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.PUT, "/api/profesionales/{id}/horarios/{horarioId}")
+                            .hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/profesionales/{id}/horarios/{horarioId}")
+                            .hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configuracionCors(origen)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/public/**")

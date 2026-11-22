@@ -12,3 +12,15 @@ BEGIN
 END
 $$
 ^^^
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_horario_atencion_profesional' AND conrelid = 'horario_atencion'::regclass
+    ) THEN
+        ALTER TABLE horario_atencion ADD CONSTRAINT fk_horario_atencion_profesional
+            FOREIGN KEY (profesional_id) REFERENCES profesional (id);
+    END IF;
+END
+$$
+^^^
