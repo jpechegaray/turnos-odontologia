@@ -6,7 +6,9 @@ import { simularSesionActiva } from "./app/sesion.fixture";
 describe("App", () => {
   const marcaOriginal = window.BRAND;
 
-  beforeEach(simularSesionActiva);
+  beforeEach(() => {
+    simularSesionActiva();
+  });
   afterEach(() => {
     vi.unstubAllGlobals();
     window.BRAND = marcaOriginal;
