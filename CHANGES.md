@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-22:** 14 de 51 changes hechos (Ola 0 y Ola 1 completas salvo C-07; Ola 2: C-10, C-11, C-12, C-13, C-16 y C-17). En revisión: C-07 (PR #75, en pausa). Falta archivar en OpenSpec: C-04, C-09, C-11. Ya se pueden empezar: C-14 (Santino), C-20, C-21, C-22 y C-24 (Cualquiera). Bloqueados solo por C-07: C-15 (Julián), C-18, C-19 (Juan Pablo, camino crítico) y C-23.
+> **Avance al 2026-11-23:** 15 de 51 changes hechos (Ola 0 y Ola 1 completas salvo C-07; Ola 2: C-10, C-11, C-12, C-13, C-16 y C-17; Ola 3: C-20). En revisión: C-07 (PR #75, en pausa). Falta archivar en OpenSpec: C-20. Ya se pueden empezar: C-14 (Santino), C-21, C-22 y C-24 (Cualquiera). Bloqueados solo por C-07: C-15 (Julián), C-18, C-19 (Juan Pablo, camino crítico) y C-23.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -39,7 +39,7 @@
 | C-17 | ✅ hecho | **Lionel** | 2 | S | limite-de-tasa-endpoints-publicos | C-01 | HIGH |
 | C-18 | ⬜ pendiente | Cualquiera | 2 | M | lista-espera-alta-y-gestion | C-04, C-06, C-07 |  |
 | C-19 | ⬜ pendiente | **Juan Pablo** | 3 | L | crear-turno-sin-solapamientos | C-03, C-04, C-05, C-07, C-10, C-11, C-12 | OPSX evaluado, camino crítico, HIGH |
-| C-20 | ⬜ pendiente | Cualquiera | 3 | S | front-prestaciones-y-configuracion | C-04, C-08, C-16 |  |
+| C-20 | ✅ hecho | Julián (Cualquiera) | 3 | S | front-prestaciones-y-configuracion | C-04, C-08, C-16 |  |
 | C-21 | ⬜ pendiente | Cualquiera | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
 | C-22 | ⬜ pendiente | Cualquiera | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
 | C-23 | ⬜ pendiente | Cualquiera | 3 | S | front-pacientes | C-07, C-16 |  |
@@ -607,7 +607,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: CRITICAL: se entrega primero análisis y propuesta (OPSX propose); no se escribe código sin aprobación de Juan Pablo. Valores de bloqueo (5 intentos, 15 min) son supuesto a validar.
 
 ### [C-04] `C-04-catalogo-prestaciones`
-- **Estado**: `[x]` hecho por Valentino (PR #63, 2026-11-21) — falta archivar en OpenSpec
+- **Estado**: `[x]` hecho por Valentino (PR #63, 2026-11-21)
 - **Responsable**: Valentino — **Ola**: 1 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Entidad `Prestacion` (nombre, duración por defecto, activa) en `prestaciones`; `/api/prestaciones` CRUD con baja lógica
@@ -705,7 +705,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-05 (anticipación del recordatorio) abierta: se entrega 24 hs configurable, como indica el supuesto SU-06.
 
 ### [C-09] `C-09-frontend-base-ui-y-cliente-api`
-- **Estado**: `[x]` hecho por Valentino (PR #64, 2026-11-21) — falta archivar en OpenSpec
+- **Estado**: `[x]` hecho por Valentino (PR #64, 2026-11-21)
 - **Responsable**: Valentino (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `shared/api`: cliente `fetch` con cookie de sesión, token CSRF y mapeo de Problem Details (409, 422, 404, 403) a errores tipados
@@ -751,7 +751,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-01 (paquete `profesionales` compartido con C-11 y C-12 en la misma ola).
 
 ### [C-11] `C-11-horarios-de-atencion`
-- **Estado**: `[x]` hecho por Valentino (PR #72, 2026-11-22) — falta archivar en OpenSpec
+- **Estado**: `[x]` hecho por Valentino (PR #72, 2026-11-22)
 - **Responsable**: Valentino (tomado como Cualquiera) — **Ola**: 2 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Entidad `HorarioAtencion` (profesional, día 1 a 7, tramo `[hora_inicio, hora_fin)` en hora local) en `profesionales.horario`
@@ -942,8 +942,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: Change OPSX evaluado y camino crítico: bloquea 25 changes, por eso Juan Pablo solo toma C-17 (pequeño) en la Ola 2 y ninguna otra tarea larga hasta mergear C-19. PA-14 (turnos con más de un profesional o sillón): se asume uno de cada. PA-10 (sin Flyway): el script de constraints debe ser idempotente. Sin sugerencia de horarios libres (C-26) para mantenerlo chico. Estrategia TDD: primero los tests de borde de RN-02.
 
 ### [C-20] `C-20-front-prestaciones-y-configuracion`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 3 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Julián (PR #80, 2026-11-23) — falta archivar en OpenSpec
+- **Responsable**: Julián (tomado como Cualquiera) — **Ola**: 3 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `features/prestaciones`: lista, alta, edición y baja lógica con validación de duración (múltiplo de 5, 5 a 480)
   - `features/configuracion`: formulario de parámetros con validación RN-36; edita solo ADMIN, RECEPCION consulta
