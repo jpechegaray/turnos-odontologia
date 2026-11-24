@@ -1,0 +1,59 @@
+/* Panel de prestaciones por profesional: solo variables de design-system/tokens.css. */
+.panel-prestaciones {
+  margin-top: var(--space-5);
+}
+
+.panel-prestaciones__lista {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+
+.panel-prestaciones__lista li {
+  padding: var(--space-1) 0;
+}
+
+.panel-prestaciones__inactiva {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.panel-prestaciones__opciones {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: thin solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.panel-prestaciones__opciones legend {
+  padding: 0 var(--space-1);
+  font-weight: var(--weight-semibold);
+}
+
+/* Toda la etiqueta es el objetivo táctil: alto mínimo `--target-min`. */
+.panel-prestaciones__opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  cursor: pointer;
+}
+
+.panel-prestaciones__opcion input {
+  width: var(--space-5);
+  height: var(--space-5);
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.panel-prestaciones__opcion input:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+.panel-prestaciones__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
