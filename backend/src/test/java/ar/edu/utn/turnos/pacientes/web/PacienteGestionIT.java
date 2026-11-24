@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import jakarta.servlet.http.Cookie;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,20 +29,6 @@ class PacienteGestionIT extends PruebaIntegracionBase {
     @BeforeEach
     void limpiar() {
         repositorio.deleteAll();
-    }
-
-    /**
-     * CSRF como lo hace la SPA: cookie XSRF-TOKEN más cabecera X-XSRF-TOKEN. No se usa
-     * {@code SecurityMockMvcRequestPostProcessors.csrf()}: reemplaza de forma permanente el
-     * repositorio de tokens del filtro CSRF del contexto compartido y rompe a las demás clases de pruebas.
-     */
-    private RequestPostProcessor csrfValido() throws Exception {
-        Cookie token = mockMvc.perform(get("/api/auth/csrf")).andReturn().getResponse().getCookie("XSRF-TOKEN");
-        return peticion -> {
-            peticion.setCookies(token);
-            peticion.addHeader("X-XSRF-TOKEN", token.getValue());
-            return peticion;
-        };
     }
 
     private String json(Object obj) throws Exception {
