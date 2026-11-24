@@ -13,7 +13,7 @@ public interface PacienteRepositorioJpa extends JpaRepository<PacienteJpa, Long>
 
     Optional<PacienteJpa> findByEmailIgnoreCase(String email);
 
-    boolean existsByDni(String dni);
+    boolean existsByDniAndActivoTrue(String dni);
 
     @Query("""
         SELECT p FROM PacienteJpa p

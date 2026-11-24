@@ -11,9 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Servicio de pacientes. El DNI es único solo entre fichas activas (índice parcial uk_paciente_dni_activo);
+ * la traducción de {@link DataIntegrityViolationException} a 409 asume que ese índice es la única
+ * restricción única de la tabla. Si otro change agrega una, hay que revisar esa traducción.
+ */
 @Service
 public class PacienteServicioImpl implements PacienteServicio {
 
@@ -35,7 +41,7 @@ public class PacienteServicioImpl implements PacienteServicio {
                     "El DNI ya está registrado");
         }
         Paciente conCreacion = (paciente.creadoEn() == null)
-                ? paciente.conCreacion(Instant.now(clock))
+                ? paciente.conCreacion(Instant.now(clock).truncatedTo(ChronoUnit.MICROS))
                 : paciente;
         try {
             return repositorio.guardar(conCreacion);

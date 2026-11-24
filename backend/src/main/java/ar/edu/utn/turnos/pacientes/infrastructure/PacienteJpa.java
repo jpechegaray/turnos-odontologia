@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 
 /**
@@ -15,8 +14,7 @@ import java.time.Instant;
  * The table name and constraints follow the data model (KB 04).
  */
 @Entity
-@Table(name = "pacientes",
-    uniqueConstraints = @UniqueConstraint(name = "uk_paciente_dni", columnNames = "dni"))
+@Table(name = "pacientes")
 public class PacienteJpa {
 
     @Id
@@ -29,8 +27,8 @@ public class PacienteJpa {
     @Column(nullable = false)
     private String apellido;
 
-    // DNI is nullable but must be unique when present
-    @Column(nullable = true, unique = true)
+    // DNI nullable; unique among ACTIVE rows via partial index uk_paciente_dni_activo (schema-constraints.sql)
+    @Column(nullable = true, length = 20)
     private String dni;
 
     @Column(nullable = true)

@@ -65,18 +65,19 @@ backend/src/main/java/ar/edu/utn/turnos/pacientes/
 
 ### D3. Persistencia: entidad JPA, unique del DNI e índices
 
-- `PacienteJpa` mapea la tabla `pacientes`. `@Table` declara `uniqueConstraints = @UniqueConstraint(name = "uk_paciente_dni", columnNames = "dni")` e índices `(apellido, nombre)` y `(email)`, como pide KB 04.
-- `dni` es nullable y único: PostgreSQL permite muchos `NULL`, que es exactamente lo que necesita el DNI opcional.
+- `PacienteJpa` mapea la tabla `pacientes` con `@Table(name = "pacientes")`, sin unique sobre el DNI en el mapeo (Hibernate no genera índices parciales).
+- `dni` es nullable. La unicidad es un índice único parcial `uk_paciente_dni_activo ON pacientes (dni) WHERE activo = true AND dni IS NOT NULL`: el DNI es único solo entre fichas activas y solo cuando se informa.
 - `notas` usa `columnDefinition = "text"`. `creado_en` y `consentimiento_datos_en` son `Instant` (Hibernate 6 los mapea a `timestamp with time zone`).
 - `creado_en` es `nullable = false` y `updatable = false`; lo setea el servicio con el `Clock`.
 - `consentimiento_datos_en` queda nullable y C-07 no lo escribe: lo completa C-41.
-- **No se toca `schema-constraints.sql`.** La unicidad del DNI la genera Hibernate con la entidad. La regla "al menos un contacto" queda en el dominio y el servicio: la regla dura 5 solo exige garantía en la base para los solapamientos, y un `CHECK` obligaría a editar un archivo compartido por un caso que el dominio ya cubre.
-- **Riesgo asumido:** `ddl-auto: update` no siempre agrega constraints a una tabla ya existente. Si una base de dev ya tuviera `pacientes` sin `uk_paciente_dni`, el chequeo previo del servicio igual devuelve 409; la constraint es la red de seguridad ante carreras. Se documenta `docker compose down -v` para recrear.
+- **Se agrega un bloque idempotente a `schema-constraints.sql`** (DD-08, corre después de Hibernate): `ALTER TABLE IF EXISTS pacientes DROP CONSTRAINT IF EXISTS uk_paciente_dni`, lo mismo para `pacientes_dni_key`, y `CREATE UNIQUE INDEX IF NOT EXISTS uk_paciente_dni_activo ... WHERE activo = true AND dni IS NOT NULL`. Los `DROP` hacen que las bases de dev que ya tenían la unique completa converjan sin `docker compose down -v`. Correrlo dos veces no falla. La regla "al menos un contacto" queda en el dominio y el servicio: un `CHECK` obligaría a editar un archivo compartido por un caso que el dominio ya cubre.
+- **Decisión del líder (2026-11-23):** una ficha dada de baja (`activo = false`) NO reserva su DNI. Reemplaza la decisión previa de que el DNI de una ficha inactiva siguiera ocupado.
+- **Riesgo asumido:** si el script no corriera, la base no tendría la garantía; el pre-chequeo del servicio igual devuelve 409 entre fichas activas. El índice es la red de seguridad ante carreras.
 
 ### D4. Servicio y puerto de lectura; la seguridad va en el controlador
 
 - `PacienteServicio` implementa los casos de uso y `PacienteConsulta`:
-  - `crear(Paciente)`: si hay DNI, verifica `existePorDni`; setea `creadoEn` con `Instant.now(reloj)`; guarda. Si la base rechaza por unicidad, traduce a 409 RN-32.
+  - `crear(Paciente)`: si hay DNI, verifica `existePorDni` (solo cuenta fichas ACTIVAS: `existsByDniAndActivoTrue`); setea `creadoEn` con `Instant.now(reloj)`; guarda. Si la base rechaza por unicidad, traduce a 409 RN-32.
   - `actualizar(Long, Paciente)`: carga la ficha (404 si no existe), verifica el DNI si cambió, aplica `conDatos` y guarda. Si la base rechaza, 409.
   - `obtener(Long)`: 404 si no existe; devuelve activas e inactivas.
   - `buscar(...)`: delega en el repositorio con los filtros normalizados.
@@ -84,7 +85,7 @@ backend/src/main/java/ar/edu/utn/turnos/pacientes/
   - `porId(Long)` y `porEmail(String)` (el puerto): solo lectura, devuelven activas e inactivas.
 - **La autorización va en `PacienteController` con `@PreAuthorize`, no en el servicio.** El puerto `PacienteConsulta` lo va a invocar C-41 desde una petición anónima (`/api/public/reservas`); si el servicio tuviera `@PreAuthorize`, la reserva pública fallaría. La seguridad en el borde HTTP es suficiente porque ningún otro camino llega al servicio con datos de un usuario no confiable.
   - **Desvío respecto de KB 03** ("por método de servicio y reglas por ruta"): se documenta acá. La alternativa era un segundo servicio de lectura sin seguridad, que duplica el mapeo; se prefiere una sola implementación y la anotación en el controlador.
-- `PacienteServicio` captura `DataIntegrityViolationException` de `saveAndFlush`. En la tabla solo hay una constraint única (DNI), así que cualquier violación de integridad en el alta/edición es un DNI repetido. Se documenta esa suposición.
+- `PacienteServicio` captura `DataIntegrityViolationException` de `saveAndFlush`. En la tabla solo hay una restricción única (el índice parcial del DNI entre fichas activas), así que cualquier violación de integridad en el alta/edición es un DNI repetido. Se documenta esa suposición.
 
 ### D5. Contrato HTTP
 
@@ -99,7 +100,7 @@ backend/src/main/java/ar/edu/utn/turnos/pacientes/
 - `PacienteRequest` lleva `@NotBlank` en nombre y apellido y `@Size` con los largos de las columnas. No lleva `@Email` (ver Non-Goals).
 - `PUT` es reemplazo completo: un campo omitido o vacío se guarda como `null`, salvo nombre y apellido. Eso permite borrar el email e informar un teléfono en la misma edición.
 - `POST` siempre crea con `activo = true`; no se acepta `activo` en el request. La baja solo se hace con `DELETE`.
-- La respuesta no expone `consentimientoDatosEn` ni `creadoEn`: no los necesita el front y no son parte de US-009.
+- `PacienteRequest` y `PacienteResponse` incluyen `nroAfiliado` (opcional, máx. 50) y `notas` (opcional, texto limitado a 1000 caracteres). La respuesta incluye además `creadoEn` (`Instant` UTC, lo setea el servicio al crear y no cambia al editar). **`consentimientoDatosEn` no está en el request ni en la respuesta**: es una columna `timestamptz` nullable solo de la entidad, que completará la reserva pública (C-41) cuando el paciente acepte el tratamiento de datos; C-07 la deja en `null` e ignora cualquier valor que llegue en el cuerpo. `PacienteResponse` es un `record` con `desde(Paciente)`; no hay `actualizadoEn` porque la KB no lo define.
 - `DELETE` es una baja lógica aunque use el verbo `DELETE`: no hay borrado físico. Se documenta en el javadoc del controlador para que no se confunda con un borrado real.
 - **Alternativa descartada:** `PUT /api/pacientes/{id}/baja`. Se descarta porque la matriz de KB 03 habla de "D" y `DELETE` es el verbo natural; el comportamiento lógico queda documentado.
 
@@ -124,31 +125,31 @@ backend/src/main/java/ar/edu/utn/turnos/pacientes/
 ### D8. Baja lógica y consecuencias
 
 - La baja marca `activo = false`; la fila y todos sus datos quedan. La búsqueda la excluye; `GET /{id}` la sigue mostrando con `activo = false`.
-- El DNI de una ficha inactiva sigue ocupado por la constraint única. Es la lectura literal de RN-32 ("DNI único cuando existe") y evita reutilizar la identidad de un paciente dado de baja. La reactivación no está en el plan; si el equipo la quiere, va en un change posterior.
+- El DNI de una ficha inactiva queda libre: la unicidad rige solo entre fichas activas (decisión del líder, 2026-11-23). La reactivación no está en el plan; si un change posterior la agrega, deberá rechazar la reactivación cuando otra ficha activa ya use ese DNI (el índice parcial lo impediría con 409).
 - La protección "no borrar un paciente con turnos" se cumple trivialmente porque C-07 no borra nunca; C-19 agrega la validación cuando exista `Turno`.
 
 ### D9. Tests
 
 - **Integración (`*IT`)** con `PruebaIntegracionBase` (contexto completo, perfil `test`, PostgreSQL de Testcontainers, `MockMvc`). Cada `@Test` lleva `@DisplayName` con el nombre exacto del escenario de la spec.
-- Se autentica con `SecurityMockMvcRequestPostProcessors.user(...).roles(...)`, que permite cambiar de rol dentro del mismo test (recepción, admin, odontólogo y anónimo). En toda escritura se agrega `.with(csrf())`: sin él, un 403 de CSRF taparía un 403 de rol y el test pasaría por el motivo equivocado.
+- Se autentica con `@WithMockUser(roles = ...)` por test (recepción, admin, odontólogo) y sin usuario para el caso anónimo. En toda escritura se envía el CSRF como la SPA (cookie `XSRF-TOKEN` obtenida de `GET /api/auth/csrf` más cabecera `X-XSRF-TOKEN`), igual que `CatalogoPrestacionesIT`. **No se usa `SecurityMockMvcRequestPostProcessors.csrf()`**: reemplaza de forma permanente el repositorio de tokens del filtro CSRF del contexto compartido y deja sin cookie a las demás clases que corren después. Un 403 de CSRF taparía un 403 de rol, por eso el token es siempre válido.
 - La limpieza es `@BeforeEach` con `PacienteRepositorioJpa.deleteAll()`, no `@Transactional` en la clase: una violación de unicidad deja la transacción marcada para rollback y contaminaría los tests siguientes.
 - **Unitario (`*Test`)** de `Paciente` para la normalización (DNI en blanco, contactos en blanco, RN-32), sin Spring.
-- **Integración de persistencia (`*IT`)** que guarda dos fichas con el mismo DNI a través del adaptador (salteando el pre-chequeo del servicio) y verifica que la constraint de la base lanza `DataIntegrityViolationException`. Es la red de seguridad de la carrera.
+- **Integración de persistencia (`*IT`)** que guarda dos fichas ACTIVAS con el mismo DNI a través del adaptador (salteando el pre-chequeo del servicio) y verifica que la constraint de la base lanza `DataIntegrityViolationException`. Es la red de seguridad de la carrera.
 - **Integración del puerto** `PacienteConsultaIT` para los cuatro escenarios de consulta (por id, por email sin distinguir mayúsculas, inactiva por id, inexistente vacío).
 - Solo datos ficticios: `Paciente Ficticio Uno`, DNI `00000001`, `paciente1@example.test`, teléfono `0000-000001`, obra social `Obra Social Ficticia`.
 
 ### D10. Relación con C-03
 
-C-07 solo depende de C-01, que ya está mergeado. Los endpoints quedan protegidos por la política denegar por defecto y por `@PreAuthorize`; los tests simulan la sesión. El login real, los roles persistidos y el CSRF con cookie llegan en C-03. Hasta entonces no hay forma de usar la API desde el navegador, pero el módulo y sus tests son independientes. No se edita `SecurityConfig` ni el `pom.xml`.
+C-07 solo depende de C-01. Los endpoints quedan protegidos por la política denegar por defecto y por `@PreAuthorize`. El login real, los roles persistidos y el CSRF con cookie ya existen (C-03, C-13), y los tests usan ese CSRF. No se edita `SecurityConfig` ni el `pom.xml`.
 
 ## Risks / Trade-offs
 
 - **[El JPQL con parámetros nulos puede fallar en PostgreSQL]** → El test de búsqueda cubre los cuatro filtros y las combinaciones; si Hibernate no infiere el tipo, se pasa a `Specification` o a queries por combinación sin cambiar la spec.
-- **[El DNI de una ficha inactiva no se puede reutilizar]** → Es la lectura literal de RN-32. Se documenta y se avisa en el PR; la reactivación queda como mejora posterior.
-- **[`ddl-auto: update` no agrega la constraint a una tabla existente]** → El pre-chequeo del servicio devuelve 409 igual; la constraint protege la carrera en bases nuevas. Se documenta `docker compose down -v` para dev.
-- **[Cualquier `DataIntegrityViolationException` se traduce a DNI duplicado]** → Hoy la tabla solo tiene la constraint del DNI. Si C-41 o C-19 agregan otra, deben revisar esta traducción; queda anotado en el javadoc del servicio.
+- **[Dos fichas con el mismo DNI en el historial (una inactiva y una activa)]** → Es la decisión del líder (2026-11-23): la baja libera el DNI. Los módulos que cruzan por DNI deben considerar solo la ficha activa; la reactivación futura deberá validar el DNI.
+- **[Una base de dev con la unique completa `uk_paciente_dni`]** → El script idempotente la descarta (`DROP CONSTRAINT IF EXISTS`) y crea el índice parcial; no hace falta `docker compose down -v`.
+- **[Cualquier `DataIntegrityViolationException` se traduce a DNI duplicado]** → Hoy la tabla solo tiene el índice parcial del DNI. Si C-41 o C-19 agregan otra, deben revisar esta traducción; queda anotado en el javadoc del servicio.
 - **[La seguridad en el controlador deja el servicio accesible desde código interno]** → Es intencional: el puerto lo usa la reserva pública anónima de C-41. No hay endpoint HTTP que llegue al servicio sin `@PreAuthorize`.
-- **[C-03 todavía no está mergeado]** → No hay login real ni CSRF con cookie. Los tests usan `@WithMockUser`; la prueba de punta a punta se hace cuando C-03 esté en `master`.
+- **[La sesión real se prueba en otras clases]** → C-03 y C-13 ya están en `master` (login por cookie, CSRF con cookie y verificación de sesión vigente). Estos tests usan `@WithMockUser` más el CSRF por cookie y cabecera, como el resto de los ITs de API; la verificación de sesión vigente solo actúa sobre `IdentidadPersonal` y la cubren `SesionVigenteIT` y compañía.
 - **[Datos personales en logs]** → No se loguean fichas ni mensajes con datos. El manejador genérico loguea la excepción, no el cuerpo. Los mensajes de error son genéricos.
 
 ## Migration Plan
@@ -157,7 +158,7 @@ No hay datos ni versiones previas del módulo. La tabla `pacientes` la crea Hibe
 
 ## Open Questions
 
-Ninguna bloquea apply. Queda como decisión para el PR (no cambia specs ni tasks): si el equipo prefiere que una ficha inactiva libere su DNI, se ajusta la constraint y el escenario correspondiente en un change posterior.
+Ninguna. La pregunta sobre si una ficha inactiva libera su DNI quedó resuelta por el líder el 2026-11-23: sí lo libera, y la unicidad rige solo entre fichas activas.
 
 ## UI Mockups
 

@@ -7,7 +7,7 @@ Hoy no existe la ficha de paciente, y sin ella la agenda no puede asignar turnos
 ## What Changes
 
 - Nuevo módulo `pacientes` con la entidad `Paciente` (nombre, apellido, DNI opcional y único, email, teléfono, obra social como texto, número de afiliado, notas, activo, consentimiento de datos y fecha de creación), según KB 04 §Paciente.
-- Regla RN-32: nombre y apellido obligatorios, al menos un medio de contacto (email o teléfono), DNI único cuando se informa, obra social sin validación y baja lógica en lugar de borrado físico.
+- Regla RN-32: nombre y apellido obligatorios, al menos un medio de contacto (email o teléfono), DNI único entre fichas activas cuando se informa (una ficha dada de baja libera su DNI), obra social sin validación y baja lógica en lugar de borrado físico.
 - API `/api/pacientes`: alta, edición, consulta por id, búsqueda por apellido, nombre, DNI o email, y baja lógica. La escritura queda reservada a `RECEPCION` y `ADMIN`; la baja lógica, solo a `ADMIN`, según la matriz de KB 03. `ODONTOLOGO` no accede a estos endpoints en este change (la lectura limitada a sus turnos es C-28).
 - Puerto `PacienteConsulta` (por id y por email) para que agenda, lista de espera y reserva pública lean la ficha sin acoplarse al repositorio.
 - Errores con el formato existente: DNI duplicado devuelve 409, falta de medio de contacto devuelve 422, paciente inexistente devuelve 404 y falta de rol devuelve 403 (Problem Details con `codigo`).
@@ -25,7 +25,7 @@ Hoy no existe la ficha de paciente, y sin ella la agenda no puede asignar turnos
 
 - **Código nuevo:** `backend/src/main/java/ar/edu/utn/turnos/pacientes/{domain,application,infrastructure,web}` y sus tests espejo en `backend/src/test/java/.../pacientes/`.
 - **Archivos existentes:** no se editan. Se reutilizan `shared/error` (`ReglaNegocioException`, `EstadoError`), `shared/web/ManejadorErrores`, `shared/tiempo` y `SecurityConfig` con `@PreAuthorize` y `@WithMockUser`. El `pom.xml` ya trae todas las dependencias (RM-08).
-- **Esquema:** la tabla `pacientes` la genera Hibernate (`ddl-auto`). No hace falta tocar `schema-constraints.sql`: la unicidad del DNI y el "al menos un contacto" se resuelven en la entidad y en el dominio, sin `EXCLUDE`.
+- **Esquema:** la tabla `pacientes` la genera Hibernate (`ddl-auto`). La unicidad del DNI es un índice único parcial (`WHERE activo = true AND dni IS NOT NULL`) que Hibernate no puede generar; va en `schema-constraints.sql` (DD-08), que además descarta la unique completa de versiones previas. El "al menos un contacto" se resuelve en el dominio, sin `EXCLUDE`.
 - **API:** se agregan rutas bajo `/api/pacientes`; no se modifica ninguna ruta existente.
 - **Dependencias entre changes:** C-07 solo depende de C-01, que ya está mergeado. El login real y los roles persistidos llegan con C-03; mientras tanto los endpoints declaran sus roles y los tests los simulan con `@WithMockUser`, igual que la base que dejó C-01.
 - **Gobernanza:** MEDIUM. Se implementa por pasos y se muestran las decisiones no obvias.

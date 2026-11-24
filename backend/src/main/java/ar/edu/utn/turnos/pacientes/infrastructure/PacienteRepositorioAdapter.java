@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * Adapter that implements the domain {@link PacienteRepositorio} using JPA.
- * All persistence rules (unique DNI, case‑insensitive searches, active filter) are applied here.
+ * All persistence rules (unique DNI among active rows, case‑insensitive searches, active filter) are applied here.
  */
 @Component
 public class PacienteRepositorioAdapter implements PacienteRepositorio {
@@ -38,7 +38,7 @@ public class PacienteRepositorioAdapter implements PacienteRepositorio {
     @Override
     public boolean existePorDni(String dni) {
         if (dni == null) return false;
-        return jpaRepository.existsByDni(dni);
+        return jpaRepository.existsByDniAndActivoTrue(dni);
     }
 
     @Override

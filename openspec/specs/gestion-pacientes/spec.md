@@ -1,10 +1,10 @@
-# Spec Delta
+# gestion-pacientes Specification
 
 ## Purpose
 
 Define la ficha básica de paciente que usa el consultorio: qué datos guarda, cómo se busca, cómo se da de baja y quién puede operarla. Es la base que consumen la agenda, la lista de espera y la reserva pública para asignar turnos sin duplicar pacientes.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Ficha de paciente con datos mínimos
 
@@ -65,7 +65,7 @@ Toda ficha SHALL tener al menos un medio de contacto: email o teléfono. Una pet
 
 ### Requirement: DNI opcional y único
 
-El DNI SHALL ser opcional. Cuando se informa, MUST ser único entre todas las fichas, incluidas las inactivas, y un DNI repetido MUST rechazarse con estado 409, formato Problem Details y `codigo` igual a `RN-32`. Un DNI vacío o con solo espacios MUST tratarse como no informado.
+El DNI SHALL ser opcional y, cuando se informa, MUST ser único entre las fichas activas; una ficha dada de baja no reserva su DNI (decisión del líder, 2026-11-23). La base MUST garantizarlo con un índice único parcial. Un DNI repetido entre activas MUST rechazarse con 409, Problem Details y `codigo` `RN-32`. Un DNI en blanco MUST tratarse como no informado.
 
 #### Scenario: Un DNI repetido devuelve 409
 
@@ -80,17 +80,84 @@ El DNI SHALL ser opcional. Cuando se informa, MUST ser único entre todas las fi
 - **WHEN** una recepcionista crea un tercer paciente sin DNI
 - **THEN** la respuesta tiene estado 201
 
-#### Scenario: El DNI de una ficha inactiva sigue ocupado
+#### Scenario: El DNI de una ficha inactiva queda libre para una ficha nueva
 
 - **GIVEN** un paciente dado de baja lógicamente con DNI ficticio `00000002`
-- **WHEN** una recepcionista intenta crear otro paciente con ese DNI
-- **THEN** la respuesta tiene estado 409 y formato Problem Details
+- **WHEN** una recepcionista crea otro paciente con ese DNI
+- **THEN** la respuesta tiene estado 201
+
+#### Scenario: La base acepta una ficha inactiva y una activa con el mismo DNI
+
+- **GIVEN** una ficha inactiva con DNI ficticio `00000005` guardada en la base
+- **WHEN** se guarda una ficha activa con el mismo DNI
+- **THEN** la base la acepta
+
+#### Scenario: La base rechaza dos fichas activas con el mismo DNI aunque exista una inactiva
+
+- **GIVEN** una ficha inactiva y una ficha activa con DNI ficticio `00000007`
+- **WHEN** se guarda otra ficha activa con el mismo DNI saltando la validación de la aplicación
+- **THEN** la base rechaza la operación con una violación de integridad
 
 #### Scenario: Un DNI en blanco se trata como no informado
 
 - **GIVEN** un paciente existente sin DNI
 - **WHEN** una recepcionista crea otro paciente con DNI vacío
 - **THEN** la respuesta tiene estado 201
+
+### Requirement: Datos complementarios de la ficha
+
+La ficha SHALL guardar de forma opcional el número de afiliado (hasta 50 caracteres) y notas de texto libre (hasta 1000 caracteres), y MUST registrar la fecha de creación (`creadoEn`, instante UTC) al crearla, sin modificarla en las ediciones. La respuesta MUST incluir `nroAfiliado`, `notas` y `creadoEn`.
+
+#### Scenario: Alta con número de afiliado y notas
+
+- **GIVEN** una recepcionista autenticada
+- **WHEN** crea un paciente con número de afiliado `AF-000008` y notas ficticias
+- **THEN** la respuesta tiene estado 201
+- **AND** el cuerpo devuelve el número de afiliado y las notas informados
+
+#### Scenario: Las notas demasiado largas se rechazan
+
+- **GIVEN** una recepcionista autenticada
+- **WHEN** crea un paciente con notas de más de 1000 caracteres
+- **THEN** la respuesta tiene estado 400 y formato Problem Details
+- **AND** el cuerpo lista el campo `notas` como inválido
+
+#### Scenario: La edición actualiza el número de afiliado y las notas
+
+- **GIVEN** un paciente activo con número de afiliado y notas
+- **WHEN** una recepcionista edita la ficha con otro número de afiliado y otras notas
+- **THEN** la respuesta tiene estado 200
+- **AND** el cuerpo devuelve los valores nuevos
+
+#### Scenario: El alta registra la fecha de creación y la edición no la cambia
+
+- **GIVEN** una recepcionista autenticada
+- **WHEN** crea un paciente y luego edita su apellido
+- **THEN** la respuesta del alta informa `creadoEn`
+- **AND** la respuesta de la edición devuelve el mismo `creadoEn`
+
+### Requirement: Consentimiento de datos reservado a la reserva pública
+
+La ficha SHALL tener la columna `consentimiento_datos_en` como instante opcional, que no aparece en el request ni en la respuesta de esta API: la completará la reserva pública (C-41). La API MUST ignorar cualquier valor que se le envíe para ese campo.
+
+#### Scenario: La respuesta no expone el consentimiento de datos ni acepta informarlo
+
+- **GIVEN** una recepcionista autenticada
+- **WHEN** crea un paciente enviando además un valor para `consentimientoDatosEn`
+- **THEN** la respuesta tiene estado 201 y no incluye `consentimientoDatosEn`
+- **AND** la ficha guardada tiene el consentimiento sin informar
+
+#### Scenario: La ficha conserva número de afiliado, notas, creación y consentimiento nulo
+
+- **GIVEN** una ficha guardada con número de afiliado, notas y fecha de creación, sin consentimiento
+- **WHEN** se lee desde la base
+- **THEN** conserva esos valores y el consentimiento queda sin informar
+
+#### Scenario: El consentimiento de datos se persiste cuando se informa
+
+- **GIVEN** una ficha con un instante de consentimiento informado por el código de dominio
+- **WHEN** se guarda y se lee desde la base
+- **THEN** el consentimiento conserva el mismo instante
 
 ### Requirement: Búsqueda de pacientes
 

@@ -63,10 +63,23 @@ class PacienteServicioIT extends PruebaIntegracionBase {
     }
 
     @Test
+    @DisplayName("WHEN editar un paciente con el DNI de una ficha inactiva THEN se permite")
+    void actualizarConDniDeFichaInactiva() {
+        Paciente inactiva = servicio.crear(Paciente.nuevo("E", "F", "55550001", "e@x.com", "555", null, null, null));
+        servicio.darDeBaja(inactiva.id());
+        Paciente p = servicio.crear(Paciente.nuevo("G", "H", "55550002", "g@x.com", "555", null, null, null));
+
+        Paciente actualizado = servicio.actualizar(p.id(),
+                Paciente.nuevo("G", "H", "55550001", "g@x.com", "555", null, null, null));
+
+        assertThat(actualizado.dni()).isEqualTo("55550001");
+    }
+
+    @Test
     @DisplayName("WHEN dar de baja una ficha ya inactiva THEN es idempotente (no lanza excepción)")
     void bajaIdempotente() {
         // GIVEN
-        Paciente p = servicio.crear(Paciente.nuevo("E", "F", "55555555", "e@x.com", "555", null, null, null));
+        Paciente p = servicio.crear(Paciente.nuevo("E", "F", "55550003", "e@x.com", "555", null, null, null));
         Long id = p.id();
         // first baja
         servicio.darDeBaja(id);

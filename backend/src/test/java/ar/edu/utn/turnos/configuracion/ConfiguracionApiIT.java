@@ -1,7 +1,6 @@
 package ar.edu.utn.turnos.configuracion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -10,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
-import jakarta.servlet.http.Cookie;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Set;
@@ -25,8 +23,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,9 +46,6 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
 
     @Autowired
     private JdbcTemplate jdbc;
-
-    @Autowired(required = false)
-    private CookieCsrfTokenRepository csrfDeSesion;
 
     @ParameterizedTest
     @ValueSource(strings = {"ADMIN", "RECEPCION"})
@@ -136,11 +129,7 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
         var antes = jdbc.queryForList(FILAS);
         var peticion = escritura("ADMIN", DEFAULTS.replace(PLAZO, "\"cancelacion.plazo_horas\": 72"));
         if (tokenIncorrecto) {
-            if (csrfDeSesion == null) {
-                peticion.with(csrf().asHeader().useInvalidToken());
-            } else {
-                peticion.cookie(new Cookie("XSRF-TOKEN", "valor-ficticio")).header("X-XSRF-TOKEN", "incorrecto");
-            }
+            peticion.with(csrfConCabeceraIncorrecta());
         }
         mockMvc.perform(peticion)
                 .andExpect(status().isForbidden())
@@ -197,12 +186,7 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
         return put(RUTA).with(user("personal").roles(rol)).contentType(MediaType.APPLICATION_JSON).content(cuerpo);
     }
 
-    private MockHttpServletRequestBuilder conCsrfValido(MockHttpServletRequestBuilder peticion) {
-        if (csrfDeSesion == null) {
-            return peticion.with(csrf().asHeader());
-        }
-        var token = csrfDeSesion.generateToken(new MockHttpServletRequest());
-        return peticion.cookie(new Cookie("XSRF-TOKEN", token.getToken()))
-                .header(token.getHeaderName(), token.getToken());
+    private MockHttpServletRequestBuilder conCsrfValido(MockHttpServletRequestBuilder peticion) throws Exception {
+        return peticion.with(csrfValido());
     }
 }

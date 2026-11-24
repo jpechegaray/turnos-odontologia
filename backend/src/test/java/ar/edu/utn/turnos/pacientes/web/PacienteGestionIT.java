@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.hamcrest.Matchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -50,7 +49,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("paciente1@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isCreated())
@@ -70,7 +69,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setTelefono("0000-000002");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isCreated())
@@ -91,7 +90,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setObraSocial("Obra Social Ficticia Nivel A");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isCreated())
@@ -108,7 +107,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("paciente4@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isBadRequest())
@@ -130,7 +129,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setApellido("Cinco");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isUnprocessableEntity())
@@ -153,7 +152,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setTelefono(null);
 
         mockMvc.perform(put("/api/pacientes/{id}", guardado.id())
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isUnprocessableEntity())
@@ -178,7 +177,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setTelefono("0000-000007");
 
         mockMvc.perform(put("/api/pacientes/{id}", guardado.id())
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isOk())
@@ -204,7 +203,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("otro@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isConflict())
@@ -225,16 +224,16 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("p3@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    @DisplayName("El DNI de una ficha inactiva sigue ocupado")
+    @DisplayName("El DNI de una ficha inactiva queda libre para una ficha nueva")
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void elDniDeUnaFichaInactivaSigueOcupado() throws Exception {
+    void elDniDeUnaFichaInactivaQuedaLibre() throws Exception {
         Paciente p = servicio.crear(Paciente.nuevo("Inactivo", "Paciente", "00000002", "inactivo@example.test", null, null, null, null));
         servicio.darDeBaja(p.id());
 
@@ -245,12 +244,10 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("nuevo@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
-                .andExpect(status().isConflict())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.codigo").value("RN-32"));
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -266,7 +263,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("nuevo_sin_dni@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isCreated())
@@ -388,7 +385,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
     void laBajaDejaLaFichaInactivaYConsultable() throws Exception {
         Paciente p = servicio.crear(Paciente.nuevo("Baja", "Test", null, "baja_test@example.test", null, null, null, null));
 
-        mockMvc.perform(delete("/api/pacientes/{id}", p.id()).with(csrf()))
+        mockMvc.perform(delete("/api/pacientes/{id}", p.id()).with(csrfValido()))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/pacientes/{id}", p.id()))
@@ -412,7 +409,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
     @DisplayName("Dar de baja una ficha inexistente devuelve 404")
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void darDeBajaUnaFichaInexistenteDevuelve404() throws Exception {
-        mockMvc.perform(delete("/api/pacientes/{id}", 999999L).with(csrf()))
+        mockMvc.perform(delete("/api/pacientes/{id}", 999999L).with(csrfValido()))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
     }
@@ -431,7 +428,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         altaReq.setEmail("rec_test@example.test");
 
         String res = mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(altaReq)))
                 .andExpect(status().is2xxSuccessful())
@@ -445,7 +442,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         editReq.setEmail("rec_mod@example.test");
 
         mockMvc.perform(put("/api/pacientes/{id}", id)
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(editReq)))
                 .andExpect(status().is2xxSuccessful());
@@ -461,7 +458,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
     void recepcionNoPuedeDarDeBajaUnaFicha() throws Exception {
         Paciente p = servicio.crear(Paciente.nuevo("NoBaja", "Recep", null, "nobaja@example.test", null, null, null, null));
 
-        mockMvc.perform(delete("/api/pacientes/{id}", p.id()).with(csrf()))
+        mockMvc.perform(delete("/api/pacientes/{id}", p.id()).with(csrfValido()))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 
@@ -475,7 +472,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
     void administradorDaDeBajaUnaFicha() throws Exception {
         Paciente p = servicio.crear(Paciente.nuevo("BajaAdmin", "Test", null, "baja_admin@example.test", null, null, null, null));
 
-        mockMvc.perform(delete("/api/pacientes/{id}", p.id()).with(csrf()))
+        mockMvc.perform(delete("/api/pacientes/{id}", p.id()).with(csrfValido()))
                 .andExpect(status().isNoContent());
 
         Paciente despues = servicio.obtener(p.id());
@@ -502,7 +499,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isForbidden())
@@ -534,7 +531,7 @@ class PacienteGestionIT extends PruebaIntegracionBase {
         req.setEmail("nuevo@example.test");
 
         mockMvc.perform(post("/api/pacientes")
-                .with(csrf())
+                .with(csrfValido())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(req)))
                 .andExpect(status().isConflict())
@@ -544,5 +541,119 @@ class PacienteGestionIT extends PruebaIntegracionBase {
                 .andExpect(content().string(not(containsString("ApellidoSecreto"))))
                 .andExpect(content().string(not(containsString("secreto@example.test"))))
                 .andExpect(content().string(not(containsString("0000-000001"))));
+    }
+
+    // ------------------------------------------------------------------------
+    // Datos complementarios de la ficha (número de afiliado, notas, creación)
+    // ------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Alta con número de afiliado y notas")
+    @WithMockUser(username = "recept", roles = {"RECEPCION"})
+    void altaConNumeroDeAfiliadoYNotas() throws Exception {
+        PacienteRequest req = new PacienteRequest();
+        req.setNombre("Paciente");
+        req.setApellido("Ocho");
+        req.setEmail("paciente8b@example.test");
+        req.setNroAfiliado("AF-000008");
+        req.setNotas("Alergia ficticia a la penicilina");
+
+        mockMvc.perform(post("/api/pacientes")
+                .with(csrfValido())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(req)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nroAfiliado").value("AF-000008"))
+                .andExpect(jsonPath("$.notas").value("Alergia ficticia a la penicilina"));
+    }
+
+    @Test
+    @DisplayName("Las notas demasiado largas se rechazan")
+    @WithMockUser(username = "recept", roles = {"RECEPCION"})
+    void lasNotasDemasiadoLargasSeRechazan() throws Exception {
+        PacienteRequest req = new PacienteRequest();
+        req.setNombre("Paciente");
+        req.setApellido("Nueve");
+        req.setEmail("paciente9@example.test");
+        req.setNotas("x".repeat(1001));
+
+        mockMvc.perform(post("/api/pacientes")
+                .with(csrfValido())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.errores[*].campo").value(hasItem("notas")));
+    }
+
+    @Test
+    @DisplayName("La edición actualiza el número de afiliado y las notas")
+    @WithMockUser(username = "recept", roles = {"RECEPCION"})
+    void laEdicionActualizaNumeroDeAfiliadoYNotas() throws Exception {
+        Paciente p = servicio.crear(Paciente.nuevo("Paciente", "Diez", null, "paciente10@example.test", null, null, "AF-1", "Nota inicial"));
+
+        PacienteRequest req = new PacienteRequest();
+        req.setNombre("Paciente");
+        req.setApellido("Diez");
+        req.setEmail("paciente10@example.test");
+        req.setNroAfiliado("AF-2");
+        req.setNotas("Nota corregida");
+
+        mockMvc.perform(put("/api/pacientes/{id}", p.id())
+                .with(csrfValido())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nroAfiliado").value("AF-2"))
+                .andExpect(jsonPath("$.notas").value("Nota corregida"));
+    }
+
+    @Test
+    @DisplayName("El alta registra la fecha de creación y la edición no la cambia")
+    @WithMockUser(username = "recept", roles = {"RECEPCION"})
+    void elAltaRegistraLaFechaDeCreacionYLaEdicionNoLaCambia() throws Exception {
+        PacienteRequest req = new PacienteRequest();
+        req.setNombre("Paciente");
+        req.setApellido("Once");
+        req.setEmail("paciente11@example.test");
+
+        String creada = mockMvc.perform(post("/api/pacientes")
+                .with(csrfValido())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(req)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.creadoEn").isString())
+                .andReturn().getResponse().getContentAsString();
+        long id = mapper.readTree(creada).get("id").asLong();
+        String creadoEn = mapper.readTree(creada).get("creadoEn").asText();
+
+        req.setApellido("OnceEditado");
+        mockMvc.perform(put("/api/pacientes/{id}", id)
+                .with(csrfValido())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.creadoEn").value(creadoEn));
+    }
+
+    @Test
+    @DisplayName("La respuesta no expone el consentimiento de datos ni acepta informarlo")
+    @WithMockUser(username = "recept", roles = {"RECEPCION"})
+    void laRespuestaNoExponeElConsentimientoDeDatos() throws Exception {
+        String cuerpo = """
+                {"nombre":"Paciente","apellido":"Doce","email":"paciente12@example.test",
+                 "consentimientoDatosEn":"2020-01-01T00:00:00Z"}
+                """;
+
+        String creada = mockMvc.perform(post("/api/pacientes")
+                .with(csrfValido())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(cuerpo))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.consentimientoDatosEn").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        long id = mapper.readTree(creada).get("id").asLong();
+
+        org.assertj.core.api.Assertions.assertThat(servicio.obtener(id).consentimientoDatosEn()).isNull();
     }
 }

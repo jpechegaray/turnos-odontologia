@@ -21,21 +21,6 @@ public class PacienteController {
         this.servicio = servicio;
     }
 
-    private PacienteResponse toResponse(Paciente p) {
-        PacienteResponse r = new PacienteResponse();
-        r.setId(p.id());
-        r.setNombre(p.nombre());
-        r.setApellido(p.apellido());
-        r.setDni(p.dni());
-        r.setEmail(p.email());
-        r.setTelefono(p.telefono());
-        r.setObraSocial(p.obraSocial());
-        r.setActivo(p.activo());
-        r.setCreadoEn(p.creadoEn());
-        r.setActualizadoEn(null);
-        return r;
-    }
-
     @PostMapping
     @PreAuthorize("hasAnyRole('RECEPCION','ADMIN')")
     public ResponseEntity<PacienteResponse> crear(@Valid @RequestBody PacienteRequest request) {
@@ -46,10 +31,10 @@ public class PacienteController {
                 request.getEmail(),
                 request.getTelefono(),
                 request.getObraSocial(),
-                null,
-                null);
+                request.getNroAfiliado(),
+                request.getNotas());
         Paciente creado = servicio.crear(dominio);
-        return ResponseEntity.status(201).body(toResponse(creado));
+        return ResponseEntity.status(201).body(PacienteResponse.desde(creado));
     }
 
     @PutMapping("/{id}")
@@ -63,17 +48,17 @@ public class PacienteController {
                 request.getEmail(),
                 request.getTelefono(),
                 request.getObraSocial(),
-                null,
-                null);
+                request.getNroAfiliado(),
+                request.getNotas());
         Paciente actualizado = servicio.actualizar(id, nuevosDatos);
-        return ResponseEntity.ok(toResponse(actualizado));
+        return ResponseEntity.ok(PacienteResponse.desde(actualizado));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('RECEPCION','ADMIN')")
     public ResponseEntity<PacienteResponse> obtener(@PathVariable Long id) {
         Paciente p = servicio.obtener(id);
-        return ResponseEntity.ok(toResponse(p));
+        return ResponseEntity.ok(PacienteResponse.desde(p));
     }
 
     @GetMapping
@@ -84,7 +69,7 @@ public class PacienteController {
             @RequestParam(required = false) String dni,
             @RequestParam(required = false) String email) {
         List<Paciente> lista = servicio.buscar(apellido, nombre, dni, email);
-        List<PacienteResponse> resp = lista.stream().map(this::toResponse).collect(Collectors.toList());
+        List<PacienteResponse> resp = lista.stream().map(PacienteResponse::desde).collect(Collectors.toList());
         return ResponseEntity.ok(resp);
     }
 

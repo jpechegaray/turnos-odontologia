@@ -18,14 +18,12 @@ import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Escenarios de la spec {@code catalogo-prestaciones}: cada {@code @DisplayName} es el nombre exacto del escenario. */
@@ -269,16 +267,6 @@ class CatalogoPrestacionesIT extends PruebaIntegracionBase {
     }
 
     // --- Ayudas ---
-
-    /** Token CSRF real, como lo obtiene la SPA: cookie {@code XSRF-TOKEN} más cabecera {@code X-XSRF-TOKEN} (C-03). */
-    private RequestPostProcessor csrfValido() throws Exception {
-        Cookie token = mockMvc.perform(get("/api/auth/csrf")).andReturn().getResponse().getCookie("XSRF-TOKEN");
-        return peticion -> {
-            peticion.setCookies(token);
-            peticion.addHeader("X-XSRF-TOKEN", token.getValue());
-            return peticion;
-        };
-    }
 
     private ResultActions alta(String nombre, int duracion) throws Exception {
         return mockMvc.perform(post(URL).with(csrfValido()).contentType(MediaType.APPLICATION_JSON)
