@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-23:** 15 de 51 changes hechos (Ola 0 y Ola 1 completas salvo C-07; Ola 2: C-10, C-11, C-12, C-13, C-16 y C-17; Ola 3: C-20). En revisión: C-07 (PR #75, en pausa). Falta archivar en OpenSpec: C-20. Ya se pueden empezar: C-14 (Santino), C-21, C-22 y C-24 (Cualquiera). Bloqueados solo por C-07: C-15 (Julián), C-18, C-19 (Juan Pablo, camino crítico) y C-23.
+> **Avance al 2026-11-23:** 16 de 51 changes hechos (Ola 0 y Ola 1 completas; Ola 2: C-10, C-11, C-12, C-13, C-16 y C-17; Ola 3: C-20). Falta archivar en OpenSpec: C-20. Ya se pueden empezar: C-14 (Santino), C-15 (Julián), C-19 (Juan Pablo, camino crítico) y C-18, C-21, C-22, C-23 y C-24 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -26,7 +26,7 @@
 | C-04 | ✅ hecho | **Valentino** | 1 | S | catalogo-prestaciones | C-01 | camino crítico |
 | C-05 | ✅ hecho | Nico (Cualquiera) | 1 | S | catalogo-sillones | C-01 |  |
 | C-06 | ✅ hecho | Nico (Cualquiera) | 1 | S | catalogo-profesionales | C-01 |  |
-| C-07 | 🔍 en revisión | Julián (Cualquiera) | 1 | M | pacientes-ficha-basica | C-01 |  |
+| C-07 | ✅ hecho | Juan Pablo y Julián (Cualquiera) | 1 | M | pacientes-ficha-basica | C-01 |  |
 | C-08 | ✅ hecho | Nico (Cualquiera) | 1 | S | configuracion-parametros | C-01 |  |
 | C-09 | ✅ hecho | Valentino (Cualquiera) | 1 | M | frontend-base-ui-y-cliente-api | C-02 |  |
 | C-10 | ✅ hecho | **Lionel** | 2 | S | profesional-prestaciones | C-04, C-06 | camino crítico |
@@ -665,8 +665,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: C-05 y C-06 comparten el paquete `profesionales` en la misma ola; mismo responsable y subpaquetes distintos (ver Riesgo RM-01).
 
 ### [C-07] `C-07-pacientes-ficha-basica`
-- **Estado**: `[~]` en revisión (PR #75, en pausa)
-- **Responsable**: Julián (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Juan Pablo a partir del trabajo de Julián (PR #83, 2026-11-23)
+- **Responsable**: Juan Pablo y Julián (tomado como Cualquiera) — **Ola**: 1 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Entidad `Paciente` (nombre, apellido, DNI único opcional, email, teléfono, obra social como texto, notas, activo) en `pacientes`
   - `/api/pacientes` crear, editar, buscar (apellido, nombre, DNI o email), baja lógica; RECEPCION y ADMIN; al menos un medio de contacto (RN-32)
