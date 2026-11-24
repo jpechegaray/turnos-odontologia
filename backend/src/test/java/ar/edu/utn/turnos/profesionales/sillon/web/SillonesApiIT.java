@@ -3,7 +3,6 @@ package ar.edu.utn.turnos.profesionales.sillon.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.profesionales.sillon.application.SillonConsulta;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -48,7 +44,6 @@ class SillonesApiIT extends PruebaIntegracionBase {
     @Autowired private ObjectMapper json;
     @Autowired private TransactionTemplate transacciones;
     @Autowired private SillonConsulta consulta;
-    @Autowired(required = false) private CookieCsrfTokenRepository csrfDeSesion;
 
     @Test
     @DisplayName("El administrador da de alta un sillón activo")
@@ -266,11 +261,7 @@ class SillonesApiIT extends PruebaIntegracionBase {
         String nombreNuevo = "Box rechazado por CSRF";
         var solicitud = operacion.solicitud(id, nombreNuevo).with(user("admin-ficticio").roles("ADMIN"));
         if (invalido) {
-            if (csrfDeSesion == null) {
-                solicitud.with(csrf().asHeader().useInvalidToken());
-            } else {
-                solicitud.cookie(new Cookie("XSRF-TOKEN", "valor-ficticio")).header("X-XSRF-TOKEN", "incorrecto");
-            }
+            solicitud.with(csrfConCabeceraIncorrecta());
         }
 
         problema(mockMvc.perform(solicitud), 403);
@@ -313,18 +304,14 @@ class SillonesApiIT extends PruebaIntegracionBase {
         }
     }
 
-    private MockHttpServletRequestBuilder comoAdmin(MockHttpServletRequestBuilder peticion, String cuerpo) {
+    private MockHttpServletRequestBuilder comoAdmin(MockHttpServletRequestBuilder peticion, String cuerpo)
+            throws Exception {
         return conCsrfValido(peticion).with(user("admin-ficticio").roles("ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON).content(cuerpo);
     }
 
-    private MockHttpServletRequestBuilder conCsrfValido(MockHttpServletRequestBuilder peticion) {
-        if (csrfDeSesion == null) {
-            return peticion.with(csrf().asHeader());
-        }
-        var token = csrfDeSesion.generateToken(new MockHttpServletRequest());
-        return peticion.cookie(new Cookie("XSRF-TOKEN", token.getToken()))
-                .header(token.getHeaderName(), token.getToken());
+    private MockHttpServletRequestBuilder conCsrfValido(MockHttpServletRequestBuilder peticion) throws Exception {
+        return peticion.with(csrfValido());
     }
 
     private Long guardar(String nombre, boolean activo) {

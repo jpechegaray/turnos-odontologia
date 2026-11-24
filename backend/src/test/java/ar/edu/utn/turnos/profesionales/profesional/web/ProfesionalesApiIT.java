@@ -3,7 +3,6 @@ package ar.edu.utn.turnos.profesionales.profesional.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -264,12 +263,7 @@ class ProfesionalesApiIT extends PruebaIntegracionBase {
 
     private MockHttpServletRequestBuilder escritura(MockHttpServletRequestBuilder peticion, String rol, String cuerpo)
             throws Exception {
-        var token = mockMvc.perform(get("/api/auth/csrf")).andReturn().getResponse().getCookie("XSRF-TOKEN");
-        if (token == null) {
-            peticion.with(csrf().asHeader());
-        } else {
-            peticion.cookie(token).header("X-XSRF-TOKEN", token.getValue());
-        }
+        peticion.with(csrfValido());
         return peticion.with(user("personal-ficticio").roles(rol))
                 .contentType(MediaType.APPLICATION_JSON).content(cuerpo);
     }
