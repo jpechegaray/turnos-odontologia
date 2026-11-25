@@ -29,7 +29,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 4. Persistencia y restricciones
 
-- [ ] 4.1 Mapear `TurnoJpa` y la tabla `turno` con las columnas del ERD, `@Version` y los cuatro índices. Agregar al final de `schema-constraints.sql`, en bloques `DO $$` idempotentes:
+- [x] 4.1 Mapear `TurnoJpa` y la tabla `turno` con las columnas del ERD, `@Version` y los cuatro índices. Agregar al final de `schema-constraints.sql`, en bloques `DO $$` idempotentes:
   - las FK a `pacientes`, `profesional`, `sillon`, `prestacion` y `usuario`;
   - los `CHECK`;
   - `turno_sin_solape_profesional` y `turno_sin_solape_sillon`.
@@ -38,7 +38,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
   - el escenario "Las restricciones de exclusión existen en la base", que consulta `pg_constraint`;
   - los tipos `timestamptz`;
   - que correr el script dos veces no falla.
-- [ ] 4.2 Implementar el repositorio y la persistencia con `saveAndFlush` y la traducción de cada restricción a `409 RN-01` con su `recurso`. Se verifica con Testcontainers:
+- [x] 4.2 Implementar el repositorio y la persistencia con `saveAndFlush` y la traducción de cada restricción a `409 RN-01` con su `recurso`. Se verifica con Testcontainers:
   - el escenario "La base rechaza un solapamiento que esquivó la validación", por sillón y por profesional;
   - un turno `CANCELADO` superpuesto se guarda sin error;
   - la consulta de ocupados devuelve solo los no cancelados que solapan.
