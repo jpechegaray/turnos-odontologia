@@ -70,7 +70,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 6. Concurrencia
 
-- [ ] 6.1 Escribir el test de integración "Dos creaciones simultáneas sobre el mismo hueco". Dos hilos con sesiones distintas se sincronizan con un `CountDownLatch` y llaman a `POST /api/turnos` con el mismo profesional y horario. Se verifica:
+- [x] 6.1 Escribir el test de integración "Dos creaciones simultáneas sobre el mismo hueco". Dos hilos con sesiones distintas se sincronizan con un `CountDownLatch` y llaman a `POST /api/turnos` con el mismo profesional y horario. Se verifica:
   - exactamente un `201` y un `409 RN-01`;
   - `count` de turnos igual a 1;
   - el test se corre 5 veces seguidas sin fallar.

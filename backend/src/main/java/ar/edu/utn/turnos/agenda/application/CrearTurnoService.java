@@ -60,6 +60,8 @@ public class CrearTurnoService {
      */
     @Transactional
     public Turno crear(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
+        // RN-15: las altas sobre el mismo profesional o sillón se ordenan; la segunda valida contra la primera.
+        turnos.bloquearRecursos(solicitud.profesionalId(), solicitud.sillonId());
         var intervalo = validador.validar(solicitud, recursos(solicitud), consultas, null);
         var turno = turnos.guardar(Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(), solicitud.sillonId(),
                 solicitud.prestacionId(), intervalo, notas, creadoPorUsuarioId, Instant.now(reloj)));

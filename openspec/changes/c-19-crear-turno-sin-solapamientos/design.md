@@ -91,6 +91,13 @@ Los mensajes no incluyen datos personales. Si un turno choca por los dos ejes, s
 
 La persistencia guarda con `saveAndFlush`, para que el `INSERT` ocurra dentro del `try`. Ante una `DataIntegrityViolationException`, busca en la cadena de causas el nombre de la restricción y lanza el mismo `409 RN-01` con el `recurso` correspondiente. Cualquier otra violación se relanza.
 
+3. **Lock de recursos (agregado durante el apply, 2026-11-25).** El test de carrera mostró un problema. Con dos restricciones `EXCLUDE`, dos `INSERT` simultáneos se bloquean en cruz: uno espera al otro en el índice de profesional y el otro en el de sillón. PostgreSQL aborta a uno con `deadlock detected`, que no es una `DataIntegrityViolationException`, y el perdedor recibía un **500** (no había sobreturno, pero la respuesta era incorrecta).
+
+   La solución es que `CrearTurnoService`, al empezar la transacción y antes de validar, tome `pg_advisory_xact_lock` del profesional y del sillón, **siempre en ese orden**. Con un orden fijo no hay ciclo posible, y el segundo pedido espera al primero y valida contra el turno ya confirmado: recibe el `409` normal con el `recurso` correcto. Los locks se liberan solos al terminar la transacción. Solo serializan las altas del mismo profesional o sillón.
+
+   - *Alternativa descartada:* reintentar ante un deadlock. Obliga a sacar la transacción del servicio para repetirla, y el resultado depende de cuántos reintentos alcancen.
+   - *Para los changes que siguen:* reprogramar (C-35) y la reserva pública (C-41) tienen que tomar los mismos locks. C-41 los hereda si reutiliza `CrearTurnoService`.
+
 - *Por qué las dos:* la consulta da el mensaje claro en el caso normal. Solo la restricción cierra la ventana entre consultar y guardar cuando dos pedidos llegan a la vez (RN-15).
 - *Alternativa descartada:* `SELECT ... FOR UPDATE` o aislamiento `SERIALIZABLE`. No bloquean filas que todavía no existen y agregan reintentos. La restricción es declarativa y cubre también la reserva online (C-41).
 
