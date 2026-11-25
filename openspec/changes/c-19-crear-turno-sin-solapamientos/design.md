@@ -46,7 +46,16 @@ Se agregan al record existente:
 
 ### D2. `ValidadorTurno` puro en `agenda.domain`
 
-Recibe la solicitud y los datos ya cargados: recursos con su estado, si el intervalo cae dentro del horario, si toca un bloqueo y los turnos activos que solapan. Recibe también un `turnoExcluidoId` opcional. No consulta la base ni depende de Spring. Usa el `Clock` para RN-13.
+Recibe:
+
+- la solicitud;
+- los recursos ya cargados con su estado (`RecursosTurno`: `INEXISTENTE`, `INACTIVO` o `ACTIVO`, más la duración por defecto y si el profesional realiza la prestación);
+- una interfaz de dominio `ConsultasAgenda`, con `dentroDeHorario`, `enBloqueo` y `turnosQueSolapan`;
+- un `turnoExcluidoId` opcional.
+
+Devuelve el intervalo efectivo. No depende de Spring y usa el `Clock` para RN-13.
+
+`ConsultasAgenda` existe porque el intervalo depende de la duración, que sale de la prestación. Por eso, horario, bloqueos y ocupados solo se pueden consultar después de validar RN-11 y RN-09. El validador los consulta **solo si las reglas anteriores pasaron**, y así no se hacen consultas de más. Esto ajusta la idea inicial de "recibir todo ya cargado" (cambio del 2026-11-25, durante el apply). Además, el validador vuelve a comparar los ocupados con `solapaCon`, sin confiar en el filtro de la consulta.
 
 Aplica las reglas en el orden del Flujo 1 y corta en la primera que falla: RN-11, RN-13, RN-09, RN-16/RN-04 (horario), RN-04 (bloqueo) y RN-01. El orden va de lo más barato y definitivo a lo más caro. Además, garantiza que recepción vea el error más útil: un profesional inactivo no tiene que mostrarse como solapamiento.
 

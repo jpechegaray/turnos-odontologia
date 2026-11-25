@@ -22,10 +22,10 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 3. Validador puro
 
-- [ ] 3.1 Implementar en `ValidadorTurno` la verificación de RN-11: inexistente, inactivo y profesional que no realiza la prestación, con los códigos de D4. Se verifica con JUnit, un test por recurso y por motivo.
-- [ ] 3.2 Agregar RN-13 con un `Clock` fijo (un inicio igual al momento actual se rechaza) y RN-09, reutilizando `DuracionPrestacion` y con un inicio de 10:03 rechazado. Se verifica con JUnit.
-- [ ] 3.3 Agregar RN-04 y RN-16 a partir de los resultados de horario y bloqueo, con la propiedad `motivo`. Se verifica con JUnit.
-- [ ] 3.4 Agregar RN-01 por profesional y por sillón a partir de la lista de ocupados: los cancelados no cuentan, cuando chocan los dos ejes gana `PROFESIONAL` y se ignora el `turnoExcluidoId`. Se verifica con JUnit, incluido el orden: un caso con varias reglas incumplidas devuelve la primera del Flujo 1.
+- [x] 3.1 Implementar en `ValidadorTurno` la verificación de RN-11: inexistente, inactivo y profesional que no realiza la prestación, con los códigos de D4. Se verifica con JUnit, un test por recurso y por motivo.
+- [x] 3.2 Agregar RN-13 con un `Clock` fijo (un inicio igual al momento actual se rechaza) y RN-09, reutilizando `DuracionPrestacion` y con un inicio de 10:03 rechazado. Se verifica con JUnit.
+- [x] 3.3 Agregar RN-04 y RN-16 a partir de los resultados de horario y bloqueo, con la propiedad `motivo`. Se verifica con JUnit.
+- [x] 3.4 Agregar RN-01 por profesional y por sillón a partir de la lista de ocupados: los cancelados no cuentan, cuando chocan los dos ejes gana `PROFESIONAL` y se ignora el `turnoExcluidoId`. Se verifica con JUnit, incluido el orden: un caso con varias reglas incumplidas devuelve la primera del Flujo 1.
 
 ## 4. Persistencia y restricciones
 
