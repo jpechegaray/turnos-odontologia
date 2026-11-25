@@ -20,6 +20,8 @@ export function observarSesion(capturar: () => (() => void) | undefined) {
  */
 export async function peticion<T>(metodo: MetodoHttp, ruta: string, cuerpo?: unknown): Promise<T> {
   const segmento = ruta.split(/[/?#]/u)[1];
+  const publica = ruta.startsWith("/public/")
+    && new URL(ruta, window.location.origin).pathname.startsWith("/public/");
   const avisos = segmento === "auth" || segmento === "public" ? [] : Array.from(observadoresSesion, (capturar) => capturar());
   const cabeceras = new Headers({ Accept: "application/json" });
   if (cuerpo !== undefined) {
@@ -28,7 +30,7 @@ export async function peticion<T>(metodo: MetodoHttp, ruta: string, cuerpo?: unk
 
   let respuesta: Response;
   try {
-    if (requiereCsrf(metodo)) {
+    if (!publica && requiereCsrf(metodo)) {
       const token = await asegurarTokenCsrf();
       if (token) cabeceras.set(CABECERA_CSRF, token);
     }

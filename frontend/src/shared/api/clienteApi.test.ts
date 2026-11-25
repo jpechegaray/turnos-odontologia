@@ -120,6 +120,19 @@ describe("Token CSRF en las escrituras", () => {
     expect(cabeceras(0).has("X-XSRF-TOKEN")).toBe(false);
     expect(fetchSimulado).toHaveBeenCalledTimes(1);
   });
+
+  it("Una reserva pública se envía sin obtener ni adjuntar CSRF", async () => {
+    fetchSimulado.mockImplementation(async () => json({}, 201));
+    await api.post("/public/reservas", {});
+    ponerCookieCsrf("token-de-una-sesion-anterior");
+    await api.post("/public/reservas", {});
+
+    expect(fetchSimulado.mock.calls.map(([url]) => url)).toEqual([
+      "/api/public/reservas", "/api/public/reservas",
+    ]);
+    expect(cabeceras(0).has("X-XSRF-TOKEN")).toBe(false);
+    expect(cabeceras(1).has("X-XSRF-TOKEN")).toBe(false);
+  });
 });
 
 describe("Errores y fallo de red en el cliente", () => {
