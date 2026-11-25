@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 38 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-29, C-31, C-32, C-33 y C-34; Ola 5: C-35, C-36, C-37 y C-40; Ola 6: C-45). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-42 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-30, C-43, C-44 y C-46. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 39 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-29, C-31, C-32, C-33 y C-34; Ola 5: C-35, C-36, C-37 y C-40; Ola 6: C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-42 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-30, C-43 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -65,7 +65,7 @@
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
 | C-44 | ⬜ pendiente | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
-| C-46 | ⬜ pendiente | Cualquiera | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
+| C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
 | C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
 | C-48 | ⬜ pendiente | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
 | C-49 | ⬜ pendiente | **Julián** | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
@@ -1453,8 +1453,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 ## FASE 7 — Ola 7: Pantallas de gestión de turnos, lista de espera y páginas públicas
 
 ### [C-46] `C-46-front-reprogramar-cancelar-asistencia`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 7 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #127, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 7 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Acciones en `features/agenda`: reprogramar (aviso de reprogramación tardía), cancelar (motivo y marca de tardía visible) y marcar asistencia o ausencia
   - ODONTOLOGO sin acciones; manejo de 403 y 409
