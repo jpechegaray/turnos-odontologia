@@ -58,3 +58,33 @@ ALTER TABLE IF EXISTS pacientes DROP CONSTRAINT IF EXISTS pacientes_dni_key
 ^^^
 CREATE UNIQUE INDEX IF NOT EXISTS uk_paciente_dni_activo ON pacientes (dni) WHERE activo = true AND dni IS NOT NULL
 ^^^
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_lista_espera_paciente' AND conrelid = 'lista_espera'::regclass
+    ) THEN
+        ALTER TABLE lista_espera ADD CONSTRAINT fk_lista_espera_paciente
+            FOREIGN KEY (paciente_id) REFERENCES pacientes (id);
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_lista_espera_prestacion' AND conrelid = 'lista_espera'::regclass
+    ) THEN
+        ALTER TABLE lista_espera ADD CONSTRAINT fk_lista_espera_prestacion
+            FOREIGN KEY (prestacion_id) REFERENCES prestacion (id);
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_lista_espera_profesional' AND conrelid = 'lista_espera'::regclass
+    ) THEN
+        ALTER TABLE lista_espera ADD CONSTRAINT fk_lista_espera_profesional
+            FOREIGN KEY (profesional_id) REFERENCES profesional (id);
+    END IF;
+END
+$$
+^^^
+-- RN-21: a lo sumo una entrada ACTIVA por paciente y prestación, también ante altas concurrentes.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_lista_espera_activa
+    ON lista_espera (paciente_id, prestacion_id) WHERE estado = 'ACTIVA'
+^^^

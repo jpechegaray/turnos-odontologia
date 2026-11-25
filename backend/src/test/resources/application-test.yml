@@ -3,3 +3,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+# C-18: el vencimiento de la lista de espera no corre solo en las pruebas; se invoca con un reloj fijo.
+lista-espera:
+  vencimiento:
+    cron: "-"
