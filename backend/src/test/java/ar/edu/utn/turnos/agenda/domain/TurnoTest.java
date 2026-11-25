@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
+import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -95,8 +96,85 @@ class TurnoTest {
                 .isInstanceOf(NullPointerException.class);
         var turno = nuevo();
         assertThatIllegalArgumentException().isThrownBy(() -> new Turno(null, 1L, 2L, 3L, 4L, intervalo, 45,
-                EstadoTurno.PROGRAMADO, CanalTurno.INTERNO, null, false, false, null, null, null, 9L, CREADO, null));
+                EstadoTurno.PROGRAMADO, CanalTurno.INTERNO, null, false, false, null, null, null, null, 9L, CREADO, null));
         assertThat(turno.notas()).isEqualTo("Control ficticio");
+    }
+
+    // ---------- C-27: cancelar ----------
+
+    private static final Duration PLAZO = Duration.ofHours(24);
+
+    private static Turno guardado(EstadoTurno estado) {
+        var turno = new Turno(70L, 1L, 2L, 3L, 4L, Intervalo.desde(INICIO, 30), 30, EstadoTurno.PROGRAMADO,
+                CanalTurno.INTERNO, "Control ficticio", false, false, null, null, null, null, 9L, CREADO, 3L);
+        return estado == EstadoTurno.PROGRAMADO ? turno : turno.pasarA(estado);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO"})
+    @DisplayName("Cancelar un turno vigente lo deja CANCELADO con quién, cuándo, motivo y marca de tardía")
+    void cancelarTurnoVigente(EstadoTurno origen) {
+        var ahora = INICIO.minus(Duration.ofHours(72));
+
+        var cancelado = guardado(origen).cancelar(ActorCancelacion.USUARIO, 15L, "Aviso del paciente", ahora, PLAZO);
+
+        assertThat(cancelado.estado()).isEqualTo(EstadoTurno.CANCELADO);
+        assertThat(cancelado.canceladoEn()).isEqualTo(ahora);
+        assertThat(cancelado.canceladoPor()).isEqualTo(ActorCancelacion.USUARIO);
+        assertThat(cancelado.canceladoPorUsuarioId()).isEqualTo(15L);
+        assertThat(cancelado.motivoCancelacion()).isEqualTo("Aviso del paciente");
+        assertThat(cancelado.cancelacionTardia()).isFalse();
+        assertThat(cancelado.id()).isEqualTo(70L);
+        assertThat(cancelado.version()).isEqualTo(3L);
+        assertThat(cancelado.intervalo()).isEqualTo(guardado(origen).intervalo());
+    }
+
+    @Test
+    @DisplayName("Cancelar dentro del plazo queda marcado como tardía y el paciente por token no lleva usuario")
+    void cancelacionTardiaPorToken() {
+        var ahora = INICIO.minus(Duration.ofHours(2));
+
+        var cancelado = guardado(EstadoTurno.PROGRAMADO).cancelar(ActorCancelacion.PACIENTE_TOKEN, null, null, ahora,
+                PLAZO);
+
+        assertThat(cancelado.cancelacionTardia()).isTrue();
+        assertThat(cancelado.canceladoPor()).isEqualTo(ActorCancelacion.PACIENTE_TOKEN);
+        assertThat(cancelado.canceladoPorUsuarioId()).isNull();
+        assertThat(cancelado.motivoCancelacion()).isNull();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"CANCELADO", "ATENDIDO", "AUSENTE"})
+    @DisplayName("Un turno en estado final no se cancela: 409 TURNO_TRANSICION_INVALIDA")
+    void estadoFinalNoSeCancela(EstadoTurno origen) {
+        var ahora = INICIO.minus(Duration.ofHours(72));
+        var turno = guardado(origen);
+
+        assertThatThrownBy(() -> turno.cancelar(ActorCancelacion.USUARIO, 15L, null, ahora, PLAZO))
+                .satisfies(TurnoTest::esTransicionInvalida);
+    }
+
+    @Test
+    @DisplayName("Un turno que empieza justo ahora o ya empezó no se cancela: 422 RN-05")
+    void turnoIniciadoNoSeCancela() {
+        var turno = guardado(EstadoTurno.PROGRAMADO);
+
+        for (var ahora : new Instant[] {INICIO, INICIO.plusSeconds(60)}) {
+            assertThatThrownBy(() -> turno.cancelar(ActorCancelacion.USUARIO, 15L, null, ahora, PLAZO))
+                    .isInstanceOfSatisfying(ReglaNegocioException.class, error -> {
+                        assertThat(error.codigo()).isEqualTo("RN-05");
+                        assertThat(error.estado()).isEqualTo(EstadoError.NO_PROCESABLE_422);
+                    });
+        }
+    }
+
+    @Test
+    @DisplayName("Un turno atendido en el pasado responde la transición inválida, no RN-05")
+    void atendidoEnElPasadoEsTransicionInvalida() {
+        var turno = guardado(EstadoTurno.ATENDIDO);
+
+        assertThatThrownBy(() -> turno.cancelar(ActorCancelacion.USUARIO, 15L, null, INICIO.plusSeconds(3600), PLAZO))
+                .satisfies(TurnoTest::esTransicionInvalida);
     }
 
     private static void esTransicionInvalida(Throwable error) {

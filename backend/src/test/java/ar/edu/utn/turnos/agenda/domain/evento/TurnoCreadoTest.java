@@ -20,7 +20,7 @@ class TurnoCreadoTest {
     void deUnTurnoGuardado() {
         var intervalo = Intervalo.desde(INICIO, 30);
         var turno = new Turno(50L, 1L, 2L, 3L, 4L, intervalo, 30, EstadoTurno.PROGRAMADO, CanalTurno.INTERNO,
-                null, false, false, null, null, null, 9L, CREADO, 0L);
+                null, false, false, null, null, null, null, 9L, CREADO, 0L);
 
         var evento = TurnoCreado.de(turno);
 

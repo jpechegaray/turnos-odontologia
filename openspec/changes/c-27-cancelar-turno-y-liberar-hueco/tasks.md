@@ -11,13 +11,13 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 2. Dominio del turno
 
-- [ ] 2.1 Crear `ActorCancelacion` y sumar `canceladoPorUsuarioId` al record `Turno` (design D4). Ajustar `Turno.nuevo`, `pasarA` y los tests existentes; la suite de C-19 sigue en verde.
-- [ ] 2.2 Agregar `Turno.cancelar(actor, usuarioId, motivo, ahora, plazo)` (design D2). Se verifica con JUnit:
+- [x] 2.1 Crear `ActorCancelacion` y sumar `canceladoPorUsuarioId` al record `Turno` (design D4). Ajustar `Turno.nuevo`, `pasarA` y los tests existentes; la suite de C-19 sigue en verde.
+- [x] 2.2 Agregar `Turno.cancelar(actor, usuarioId, motivo, ahora, plazo)` (design D2). Se verifica con JUnit:
   - desde `PROGRAMADO` y `CONFIRMADO` queda `CANCELADO` con fecha, actor, usuario, motivo y marca de tardía;
   - desde `CANCELADO`, `ATENDIDO` y `AUSENTE` lanza `409 TURNO_TRANSICION_INVALIDA`;
   - con `ahora` igual al inicio o posterior lanza `422 RN-05`;
   - un `ATENDIDO` en el pasado da `409`, no `422`.
-- [ ] 2.3 Agregar las fábricas `TurnoCancelado.de(turno)` y `HuecoLiberado.de(turno)`. Se verifica con JUnit: copian los datos del turno y exigen un turno cancelado con id.
+- [x] 2.3 Agregar las fábricas `TurnoCancelado.de(turno)` y `HuecoLiberado.de(turno)`. Se verifica con JUnit: copian los datos del turno y exigen un turno cancelado con id.
 
 ## 3. Persistencia
 
