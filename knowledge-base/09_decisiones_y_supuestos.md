@@ -139,6 +139,7 @@ Las decisiones **DD-01 a DD-08** fueron tomadas por el equipo (no se reabren sin
 **Cómo validar**: PA-05.
 
 ### SU-07 — Reprogramación tardía: se permite y se registra
+**Estado**: confirmado por el líder el 2026-11-25 (PA-06 resuelta).
 **Supuesto**: el personal puede reprogramar fuera de plazo; queda `reprogramado_tarde = true`. (Que **el paciente no reprograma por token** ya no es supuesto: lo decidió el líder el 2026-11-20; solo cancela, RN-18, RN-19.)
 **Origen**: RN-05 menciona cancelar y reprogramar, pero solo define el registro como tardía para la cancelación.
 **Riesgo si es falso**: falta una política de penalidad o bloqueo.

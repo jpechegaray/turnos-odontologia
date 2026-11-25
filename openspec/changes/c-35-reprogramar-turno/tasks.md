@@ -63,9 +63,9 @@
 
 ## 4. Verificación final
 
-- [ ] 4.1 Actualizar PA-06 en la KB y la nota de `CLAUDE.md` y `AGENTS.md` (design D8).
-- [ ] 4.2 Correr la suite completa del backend (`./mvnw verify`): todo en verde.
-- [ ] 4.3 Escribir `verify.md` con el veredicto y la trazabilidad entre escenarios y tests.
+- [x] 4.1 Actualizar PA-06 en la KB y la nota de `CLAUDE.md` y `AGENTS.md` (design D8).
+- [x] 4.2 Correr la suite completa del backend (`./mvnw verify`): todo en verde.
+- [x] 4.3 Escribir `verify.md` con el veredicto y la trazabilidad entre escenarios y tests.
 
 ## Workflow follow-up
 
