@@ -8,7 +8,7 @@
 
 ## Tareas
 
-16/16 completas. La 7.1 se completa con esta verificación. Las del `## Workflow follow-up` (PR, merge y archivo) quedan fuera del seguimiento, como define el schema.
+14/14 completas. La 7.1 se completa con esta verificación. Las del `## Workflow follow-up` (PR, merge y archivo) quedan fuera del seguimiento, como define el schema.
 
 ## Matriz escenario → test
 
