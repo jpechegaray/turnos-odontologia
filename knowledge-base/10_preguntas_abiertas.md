@@ -76,7 +76,7 @@ Este archivo reúne: (1) las inconsistencias detectadas, (2) las preguntas abier
 
 | ID | Pregunta | Origen | Bloquea | Decisor |
 |---|---|---|---|---|
-| PA-05 | ¿Con cuánta anticipación se manda el recordatorio (24 hs, 48 hs, configurable)? ¿Uno solo o varios? (hoy: 24 hs configurable, uno) | `discovery.md` §11 | `notificaciones` | Equipo |
+| PA-05 | **Resuelta (2026-11-25, decisión del líder).** Se envía un recordatorio por horario, con 24 hs de anticipación por defecto y configurable (C-37, SU-06). | `discovery.md` §11 | Ninguno (resuelta) | Líder |
 | PA-08 | Ley 25.326: ¿el consultorio debe inscribir la base de datos ante la AAIP y qué texto de consentimiento y política de retención se muestra al paciente? | `discovery.md` §10 | `reserva-publica` (texto de consentimiento) | Equipo / cátedra |
 | PA-09 | En la reserva online, ¿el paciente puede elegir "cualquier profesional"? ¿Cómo se asigna el sillón? (hoy: elige profesional y el sistema asigna el sillón, SU-03) | Flujo 4 | `reserva-publica` | Equipo |
 | PA-13 | ¿Qué política se aplica a los pacientes con ausencias reiteradas (AUSENTE)? ¿Se limitan sus reservas online? | RN-20 | Ninguno (futuro) | Equipo |

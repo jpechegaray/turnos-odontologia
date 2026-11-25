@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 32 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-37, C-40 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 33 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35 y C-37). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-40 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -56,7 +56,7 @@
 | C-34 | ⬜ pendiente | Cualquiera | 4 | S | front-registro-notificaciones | C-16, C-25 |  |
 | C-35 | ✅ hecho | **Juan Pablo** | 5 | M | reprogramar-turno | C-19, C-27 |  |
 | C-36 | ⬜ pendiente | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
-| C-37 | ⬜ pendiente | Cualquiera | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
+| C-37 | ✅ hecho | Juan Pablo (Cualquiera) | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
 | C-38 | ⬜ pendiente | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
 | C-40 | ⬜ pendiente | Cualquiera | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
@@ -702,7 +702,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `knowledge-base/05_reglas_de_negocio.md` RN-05, RN-29, RN-36
   - `knowledge-base/09_decisiones_y_supuestos.md` SU-06, SU-11
 - **Criterio de salida**: Las 7 claves existen con su valor por defecto tras arrancar; `PUT` con plazo 169 devuelve 422; un RECEPCION recibe 403 al modificar.
-- **Riesgo o precondición**: PA-05 (anticipación del recordatorio) abierta: se entrega 24 hs configurable, como indica el supuesto SU-06.
+- **Riesgo o precondición**: PA-05 resuelta en C-37: 24 hs de anticipación por defecto, configurable (SU-06).
 
 ### [C-09] `C-09-frontend-base-ui-y-cliente-api`
 - **Estado**: `[x]` hecho por Valentino (PR #64, 2026-11-21)
@@ -1268,8 +1268,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: El flujo por reprogramación se prueba de extremo a extremo en C-51 (C-35 solo publica `HuecoLiberado`). RM-06.
 
 ### [C-37] `C-37-recordatorio-email-planificador`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 5 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #116, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 5 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `PlanificadorRecordatorios` (`@Scheduled` cada 5 minutos): turnos `PROGRAMADO` o `CONFIRMADO` con email dentro de la ventana `[ahora, ahora + anticipación]`, registro `PENDIENTE` idempotente y envío por el puerto, con reintentos hasta 3
   - Puerto de lectura de agenda `TurnosParaRecordatorio` (archivo nuevo en `agenda.application`)
@@ -1287,7 +1287,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `knowledge-base/04_modelo_de_datos.md` §NotificacionEnviada
   - `knowledge-base/10_preguntas_abiertas.md` PA-05
 - **Criterio de salida**: Los 4 casos de idempotencia y reprogramación pasan con `InMemoryNotificacionAdapter` y `Clock`; ningún turno cancelado recibe recordatorio.
-- **Riesgo o precondición**: PA-05 abierta (anticipación): se usa 24 hs configurable. PA-16: pacientes sin email se omiten. Decisión a confirmar en el propose: emitir token para turnos internos.
+- **Riesgo o precondición**: PA-05 resuelta: un recordatorio por horario, con 24 hs de anticipación por defecto, configurable. Los pacientes sin email se omiten (PA-16). Cada intento válido emite un enlace nuevo, también para turnos internos, y conserva los enlaces anteriores.
 
 ### [C-38] `C-38-reserva-publica-disponibilidad`
 - **Estado**: `[ ]` pendiente
@@ -1597,7 +1597,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 | Pregunta | Change afectado | Tipo | Qué hacer |
 |---|---|---|---|
 | PA-06 Política de reprogramación tardía del personal | C-35, C-44 | Resuelta (2026-11-25) | Se permite y se registra con `reprogramado_tarde`; lo implementó C-35 |
-| PA-05 Anticipación del recordatorio | C-08, C-37 | Riesgo bajo | 24 hs configurable (SU-06); confirmar con el equipo antes de C-37 |
+| PA-05 Anticipación del recordatorio | C-08, C-37 | Resuelta | Un recordatorio por horario, 24 hs configurable (SU-06) |
 | PA-08 Texto de consentimiento y retención (Ley 25.326) | C-41, C-48 | Precondición | El equipo define el texto antes de abrir C-41 |
 | PA-09 Elegir cualquier profesional en la reserva online | C-38, C-41, C-48 | Riesgo | Hoy se elige profesional y el sistema asigna el sillón (SU-03) |
 | PA-14 Turnos con más de un profesional o sillón | C-19 | Riesgo | Se asume uno de cada; cambiarlo rediseña las restricciones EXCLUDE |
