@@ -86,4 +86,40 @@ public record Turno(
                 cancelado.estado(), canal, notas, tardia, reprogramadoTarde, ahora, actor,
                 actor == ActorCancelacion.USUARIO ? usuarioId : null, motivo, creadoPorUsuarioId, creadoEn, version);
     }
+
+    /**
+     * RN-12 y RN-05 para reprogramar (C-35): un turno en estado final da 409 aunque ya haya pasado; después,
+     * uno que ya empezó (a la hora exacta de inicio ya empezó) da 422.
+     */
+    public void exigirReprogramable(Instant ahora) {
+        if (estado.esFinal()) {
+            throw new ReglaNegocioException("TURNO_TRANSICION_INVALIDA", EstadoError.CONFLICTO_409,
+                    "Un turno " + estado + " no se puede reprogramar");
+        }
+        if (!ahora.isBefore(intervalo.inicio())) {
+            throw new ReglaNegocioException("RN-05", EstadoError.NO_PROCESABLE_422,
+                    "No se puede reprogramar un turno que ya empezó; se registra la asistencia (RN-20)");
+        }
+    }
+
+    /**
+     * Mueve el mismo turno (RN-18): cambia profesional, sillón e intervalo y conserva id, estado, notas, canal y
+     * versión. La tardía se mide sobre el inicio original y la marca, una vez puesta, se conserva (SU-07, PA-06).
+     * El horario nuevo lo valida antes el servicio con {@code ValidadorTurno}.
+     */
+    public Turno reprogramar(Long profesionalNuevoId, Long sillonNuevoId, Intervalo nuevo, Instant ahora,
+            Duration plazo) {
+        exigirReprogramable(ahora);
+        boolean tarde = reprogramadoTarde || PoliticaCancelacion.esTardia(intervalo.inicio(), ahora, plazo);
+        int duracion = Math.toIntExact(Duration.between(nuevo.inicio(), nuevo.fin()).toMinutes());
+        return new Turno(id, pacienteId, profesionalNuevoId, sillonNuevoId, prestacionId, nuevo, duracion, estado,
+                canal, notas, cancelacionTardia, tarde, canceladoEn, canceladoPor, canceladoPorUsuarioId,
+                motivoCancelacion, creadoPorUsuarioId, creadoEn, version);
+    }
+
+    /** El pedido de reprogramación no cambia nada: mismo profesional, sillón e intervalo. */
+    public boolean mismoHorario(Long otroProfesionalId, Long otroSillonId, Intervalo otroIntervalo) {
+        return profesionalId.equals(otroProfesionalId) && sillonId.equals(otroSillonId)
+                && intervalo.equals(otroIntervalo);
+    }
 }

@@ -9,19 +9,19 @@
 
 ## 1. Dominio
 
-- [ ] 1.1 Agregar `Intervalo.menos(otro)` (design D1). Se verifica con JUnit:
+- [x] 1.1 Agregar `Intervalo.menos(otro)` (design D1). Se verifica con JUnit:
   - sin contacto;
   - contiguo;
   - cubierto;
   - corrimiento a la derecha y a la izquierda;
   - recorte en el medio (dos tramos).
-- [ ] 1.2 Agregar `Turno.exigirReprogramable`, `Turno.reprogramar` y `Turno.mismoHorario` (design D2). Se verifica con JUnit:
+- [x] 1.2 Agregar `Turno.exigirReprogramable`, `Turno.reprogramar` y `Turno.mismoHorario` (design D2). Se verifica con JUnit:
   - estados finales → `409`;
   - inicio igual a ahora → `422 RN-05`;
   - tardía con el plazo exacto y un minuto después;
   - la marca se conserva;
   - se conservan `id`, estado, notas y versión.
-- [ ] 1.3 Agregar `TurnoReprogramado.de` y `HuecoLiberado.porReprogramacion` (design D3). Se verifica con JUnit:
+- [x] 1.3 Agregar `TurnoReprogramado.de` y `HuecoLiberado.porReprogramacion` (design D3). Se verifica con JUnit:
   - "Moverse dentro del propio intervalo libera solo lo que dejó";
   - "Cambiar de profesional libera el intervalo completo";
   - sin hueco si el nuevo cubre al anterior.
