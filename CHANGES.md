@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 31 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31 y C-33; Ola 5: C-35). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-32 (Nico), C-36 (Valentino, camino crítico) y los "Cualquiera" C-29, C-30, C-34 y C-40. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 32 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-37, C-40 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -51,7 +51,7 @@
 | C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
 | C-30 | ⬜ pendiente | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
 | C-31 | ✅ hecho | **Juan Pablo** | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
-| C-32 | ⬜ pendiente | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
+| C-32 | ✅ hecho | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
 | C-33 | ✅ hecho | Juan Pablo (Cualquiera) | 4 | M | datos-ficticios-seed | C-03, C-05, C-07, C-10, C-11, C-19 |  |
 | C-34 | ⬜ pendiente | Cualquiera | 4 | S | front-registro-notificaciones | C-16, C-25 |  |
 | C-35 | ✅ hecho | **Juan Pablo** | 5 | M | reprogramar-turno | C-19, C-27 |  |
@@ -1168,7 +1168,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-06 (`listaespera` compartido con C-36, C-42 y C-43 en olas distintas).
 
 ### [C-32] `C-32-token-turno-emision-y-validacion`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Nico (PR #111, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Nico — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Entidad `TokenTurno` (hash único, `expira_en` igual al inicio del turno, `revocado_en`, `ultimo_uso_en`) en `reservapublica.token`
