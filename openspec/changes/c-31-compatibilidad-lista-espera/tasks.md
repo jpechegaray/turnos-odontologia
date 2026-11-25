@@ -44,13 +44,13 @@
 
 ## 3. API y acceso
 
-- [ ] 3.1 Agregar `ServicioListaEspera.compatibles(...)` y `GET /api/lista-espera/compatibles` (design D5 y D6). Se verifica con integración:
+- [x] 3.1 Agregar `ServicioListaEspera.compatibles(...)` y `GET /api/lista-espera/compatibles` (design D5 y D6). Se verifica con integración:
   - "Recepción ve solo las entradas compatibles";
   - "Las sugerencias se ordenan por antigüedad y muestran todas las entradas del paciente";
   - "Un hueco que ya empezó no tiene sugerencias";
   - "La consulta rechaza un hueco inválido";
   - "La consulta rechaza un profesional inexistente o inactivo".
-- [ ] 3.2 Agregar el matcher en `SecurityConfig` y `@PreAuthorize` (design D7). Se verifica con:
+- [x] 3.2 Agregar el matcher en `SecurityConfig` y `@PreAuthorize` (design D7). Se verifica con:
   - "El odontólogo no consulta las entradas compatibles";
   - "Sin sesión no se consultan las entradas compatibles";
   - un test que llama al servicio como odontólogo y espera `AccessDeniedException`.
