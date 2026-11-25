@@ -45,7 +45,7 @@
 | C-23 | ✅ hecho | Santino (Cualquiera) | 3 | S | front-pacientes | C-07, C-16 |  |
 | C-24 | ✅ hecho | Lionel (Cualquiera) | 3 | S | front-usuarios-admin | C-13, C-16 |  |
 | C-25 | ✅ hecho | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
-| C-26 | ✅ hecho | Juan Pablo (Cualquiera) | 4 | M | horarios-libres-disponibilidad | C-19 |  |
+| C-26 | ✅ hecho | **Juan Pablo** | 4 | M | horarios-libres-disponibilidad | C-19 |  |
 | C-27 | ✅ hecho | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
 | C-28 | ⬜ pendiente | Cualquiera | 4 | M | consultar-agenda-dia-semana | C-19 |  |
 | C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
@@ -122,12 +122,12 @@
 | `C-23` front-pacientes | 3 | Cualquiera | S | LOW | C-07, C-16 | C-50 |
 | `C-24` front-usuarios-admin | 3 | Cualquiera | S | MEDIUM | C-13, C-16 | C-50 |
 | `C-25` registro-notificaciones-consulta | 3 | Cualquiera | S | LOW | C-15 | C-34 |
-| `C-26` horarios-libres-disponibilidad | 4 | Cualquiera | M | MEDIUM | C-19 | C-38, C-43, C-45 |
+| `C-26` horarios-libres-disponibilidad | 4 | Juan Pablo | M | MEDIUM | C-19 | C-38, C-43, C-45 |
 | `C-27` cancelar-turno-y-liberar-hueco (camino crítico) | 4 | Juan Pablo | M | MEDIUM | C-08, C-19 | C-35, C-36, C-39, C-44, C-46 |
 | `C-28` consultar-agenda-dia-semana | 4 | Cualquiera | M | LOW | C-19 | C-40 |
 | `C-29` marcar-asistencia-ausencia | 4 | Cualquiera | S | MEDIUM | C-19 | C-46 |
 | `C-30` guardas-integridad-con-turnos | 4 | Cualquiera | M | MEDIUM | C-04, C-05, C-06, C-12, C-19 | ninguno (hoja) |
-| `C-31` compatibilidad-lista-espera | 4 | Cualquiera | M | MEDIUM | C-18, C-19 | C-36, C-43, C-47 |
+| `C-31` compatibilidad-lista-espera | 4 | Juan Pablo | M | MEDIUM | C-18, C-19 | C-36, C-43, C-47 |
 | `C-32` token-turno-emision-y-validacion | 4 | Nico | M | CRITICAL | C-14, C-19 | C-37, C-39, C-41, C-42 |
 | `C-33` datos-ficticios-seed | 4 | Cualquiera | M | LOW | C-03, C-05, C-07, C-10, C-11, C-19 | C-51 |
 | `C-34` front-registro-notificaciones | 4 | Cualquiera | S | LOW | C-16, C-25 | C-50 |
@@ -191,12 +191,12 @@ flowchart LR
     C25["C-25 registro-notificaciones-consulta<br/>Cualquiera · S"]
   end
   subgraph OLA4["Ola 4"]
-    C26["C-26 horarios-libres-disponibilidad<br/>Cualquiera · M"]
+    C26["C-26 horarios-libres-disponibilidad<br/>Juan Pablo · M"]
     C27["C-27 cancelar-turno-y-liberar-hueco<br/>Juan Pablo · M"]
     C28["C-28 consultar-agenda-dia-semana<br/>Cualquiera · M"]
     C29["C-29 marcar-asistencia-ausencia<br/>Cualquiera · S"]
     C30["C-30 guardas-integridad-con-turnos<br/>Cualquiera · M"]
-    C31["C-31 compatibilidad-lista-espera<br/>Cualquiera · M"]
+    C31["C-31 compatibilidad-lista-espera<br/>Juan Pablo · M"]
     C32["C-32 token-turno-emision-y-validacion<br/>Nico · M"]
     C33["C-33 datos-ficticios-seed<br/>Cualquiera · M"]
     C34["C-34 front-registro-notificaciones<br/>Cualquiera · S"]
@@ -407,12 +407,12 @@ Regla de las olas: dentro de una misma ola ningún par de changes toca los mismo
 **GATE 4** — abre la Ola 4 ← FORK
 - Condición: C-19 mergeado con la entidad `Turno` completa, los eventos de dominio y `schema-constraints.sql`; test de carrera en verde.
 - Requiere mergeados en `master`: `C-03`, `C-04`, `C-05`, `C-06`, `C-07`, `C-08`, `C-10`, `C-11`, `C-12`, `C-14`, `C-16`, `C-18`, `C-19`, `C-25`
-  - `C-26` horarios-libres-disponibilidad — **Cualquiera**
+  - `C-26` horarios-libres-disponibilidad — **Juan Pablo**
   - `C-27` cancelar-turno-y-liberar-hueco — **Juan Pablo**
   - `C-28` consultar-agenda-dia-semana — **Cualquiera**
   - `C-29` marcar-asistencia-ausencia — **Cualquiera**
   - `C-30` guardas-integridad-con-turnos — **Cualquiera**
-  - `C-31` compatibilidad-lista-espera — **Cualquiera**
+  - `C-31` compatibilidad-lista-espera — **Juan Pablo**
   - `C-32` token-turno-emision-y-validacion — **Nico**
   - `C-33` datos-ficticios-seed — **Cualquiera**
   - `C-34` front-registro-notificaciones — **Cualquiera**
@@ -514,13 +514,13 @@ Estimación en puntos: S = 1, M = 2, L = 3. Solo cuentan los changes **con dueñ
 
 | Integrante | Changes con dueño (por ola) | Carga fija |
 |---|---|---|
-| Juan Pablo | Ola 3: C-19 (L); Ola 4: C-27 (M); Ola 8: C-51 (M) | 7 puntos (3 changes) |
+| Juan Pablo | Ola 3: C-19 (L); Ola 4: C-26 (M); Ola 4: C-27 (M); Ola 4: C-31 (M); Ola 8: C-51 (M) | 11 puntos (5 changes) |
 | Santino | Ola 0: C-01 (M); Ola 0: C-02 (S); Ola 2: C-14 (S) | 4 puntos (3 changes) |
 | Nico | Ola 1: C-03 (L); Ola 2: C-16 (S); Ola 4: C-32 (M); Ola 5: C-39 (M) | 8 puntos (4 changes) |
 | Valentino | Ola 1: C-04 (S); Ola 2: C-13 (M); Ola 5: C-36 (L); Ola 6: C-42 (M) | 8 puntos (4 changes) |
 | Lionel | Ola 2: C-10 (S); Ola 2: C-17 (S); Ola 5: C-38 (M); Ola 6: C-41 (L) | 7 puntos (4 changes) |
 | Julián | Ola 2: C-15 (M); Ola 7: C-48 (M); Ola 7: C-49 (M); Ola 8: C-50 (M) | 8 puntos (4 changes) |
-| **Cualquiera** | C-05 (S), C-06 (S), C-07 (M), C-08 (S), C-09 (M), C-11 (M), C-12 (S), C-18 (M), C-20 (S), C-21 (M), C-22 (M), C-23 (S), C-24 (S), C-25 (S), C-26 (M), C-28 (M), C-29 (S), C-30 (M), C-31 (M), C-33 (M), C-34 (S), C-35 (M), C-37 (M), C-40 (M), C-43 (M), C-44 (S), C-45 (M), C-46 (M), C-47 (M) | 47 puntos (29 changes) |
+| **Cualquiera** | C-05 (S), C-06 (S), C-07 (M), C-08 (S), C-09 (M), C-11 (M), C-12 (S), C-18 (M), C-20 (S), C-21 (M), C-22 (M), C-23 (S), C-24 (S), C-25 (S), C-28 (M), C-29 (S), C-30 (M), C-33 (M), C-34 (S), C-35 (M), C-37 (M), C-40 (M), C-43 (M), C-44 (S), C-45 (M), C-46 (M), C-47 (M) | 43 puntos (27 changes) |
 
 Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada integrante termina con ~15 puntos; Juan Pablo debería tomar menos "Cualquiera" porque revisa todos los PR.
 
@@ -1052,7 +1052,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 
 ### [C-26] `C-26-horarios-libres-disponibilidad`
 - **Estado**: `[x]` hecho por Juan Pablo (PR #104, 2026-11-25; archivado 2026-11-25)
-- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 4 — **Tamaño**: M (4-6 h)
+- **Responsable**: Juan Pablo (era Cualquiera) — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `CalculadorDisponibilidad` puro: dado profesional, prestación y rango devuelve los inicios libres respetando RN-01, RN-02, RN-04, RN-09 y RN-13, y propone un sillón libre
   - `GET /api/agenda/disponibilidad` (RECEPCION y ADMIN) y servicio de aplicación reutilizable por la reserva pública (C-38) y la asignación manual (C-43)
@@ -1149,7 +1149,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 
 ### [C-31] `C-31-compatibilidad-lista-espera`
 - **Estado**: `[x]` hecho por Juan Pablo (PR #106, 2026-11-25; archivado 2026-11-25)
-- **Responsable**: Cualquiera — **Ola**: 4 — **Tamaño**: M (4-6 h)
+- **Responsable**: Juan Pablo (era Cualquiera) — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `CompatibilidadListaEspera` (función pura, sin base de datos): profesional realiza la prestación, profesional preferido, duración por defecto que cabe en el hueco, fechas y franja (RN-22)
   - `SelectorDeAvisos` puro: tope `lista_espera.max_avisos_por_hueco`, orden por antigüedad y un solo aviso por paciente (SU-14)
