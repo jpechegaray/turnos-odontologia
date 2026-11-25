@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import type { Rol } from "../../../app/rutas/tipos";
 import { Alerta, Boton, Campo, Tarjeta } from "../../../shared/ui";
-import { CampoSeleccion } from "./CampoSeleccion";
+import { CampoSeleccion } from "../../../shared/ui/CampoSeleccion";
 import { traducirErrorUsuario } from "./errores";
 import { ETIQUETAS_ROL } from "./roles";
 import type { ProfesionalVinculable, UsuarioRespuesta } from "./tipos";
