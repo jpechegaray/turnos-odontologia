@@ -140,3 +140,36 @@ BEGIN
 END
 $$
 ^^^
+-- C-15: idempotencia de notificaciones. Hibernate crea estas restricciones en una base nueva
+-- (create-drop de tests); en dev con ddl-auto=update no las agrega a una tabla ya existente.
+-- Los avisos de oferta (turno_id NULL) y los de turno (oferta_hueco_id NULL) no colisionan porque
+-- PostgreSQL considera distintos los NULL. Sin FKs: oferta_hueco todavía no existe (C-36), y el registro
+-- se inserta en REQUIRES_NEW, que no ve un turno que la transacción del consumidor aún no confirmó.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'uk_notificacion_turno_tipo_inicio'
+          AND conrelid = 'notificacion_enviada'::regclass
+    ) THEN
+        ALTER TABLE notificacion_enviada ADD CONSTRAINT uk_notificacion_turno_tipo_inicio
+            UNIQUE (turno_id, tipo, inicio_referencia);
+    END IF;
+END
+$$
+^^^
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'uk_notificacion_oferta_tipo'
+          AND conrelid = 'notificacion_enviada'::regclass
+    ) THEN
+        ALTER TABLE notificacion_enviada ADD CONSTRAINT uk_notificacion_oferta_tipo
+            UNIQUE (oferta_hueco_id, tipo);
+    END IF;
+END
+$$
+^^^
+CREATE INDEX IF NOT EXISTS ix_notificacion_estado_programada ON notificacion_enviada (estado, programada_para)
+^^^

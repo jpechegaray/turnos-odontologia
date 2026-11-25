@@ -8,3 +8,9 @@ spring:
 lista-espera:
   vencimiento:
     cron: "-"
+# Correo (C-15): adaptador en memoria y planificador apagado; la suite nunca abre SMTP ni dispara tareas.
+app:
+  notificaciones:
+    canal: memoria
+    planificador:
+      habilitado: false
