@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -120,7 +121,15 @@ public class ServicioNotificaciones {
         transaccionProcesamiento.executeWithoutResult(status -> {
             Instant ahora = reloj.instant();
             for (NotificacionEnviada notificacion : repositorio.reclamarVencidas(ahora, maximoIntentos)) {
-                enviarYGuardar(notificacion, datosParaReintento(notificacion), ahora);
+                var datos = datosParaReintento(notificacion);
+                if (datos.isPresent()) {
+                    var envio = datos.get();
+                    var registro = notificacion.tipo() == TipoNotificacion.RECORDATORIO
+                            ? notificacion.dirigidaA(envio.destinatario()) : notificacion;
+                    enviarYGuardar(registro, envio, ahora);
+                } else {
+                    repositorio.guardar(notificacion.descartada("Recordatorio descartado: turno o destinatario no vigente"));
+                }
             }
         });
     }
@@ -140,16 +149,17 @@ public class ServicioNotificaciones {
     }
 
     private NotificacionEnviada registrarFallo(NotificacionEnviada notificacion, RuntimeException fallo, Instant ahora) {
+        String error = notificacion.tipo() == TipoNotificacion.RECORDATORIO ? ERROR_POR_DEFECTO : mensajeDe(fallo);
         int maximoIntentos = propiedades.reintento().maximoIntentos();
         int intentosResultantes = notificacion.intentos() + 1;
         if (intentosResultantes >= maximoIntentos) {
-            return notificacion.conIntentoFallido(mensajeDe(fallo), null);
+            return notificacion.conIntentoFallido(error, null);
         }
         Duration espera = NotificacionEnviada.esperaCreciente(
                 intentosResultantes,
                 propiedades.reintento().esperaInicial(),
                 propiedades.reintento().multiplicador());
-        return notificacion.conIntentoFallido(mensajeDe(fallo), ahora.plus(espera));
+        return notificacion.conIntentoFallido(error, ahora.plus(espera));
     }
 
     private static String mensajeDe(RuntimeException fallo) {
@@ -161,12 +171,15 @@ public class ServicioNotificaciones {
      * La fila no guarda el cuerpo (puede llevar un enlace con token, RN-07): el consumidor que lo registró
      * vuelve a aportar los datos. Sin consumidor que responda, se envía la versión mínima.
      */
-    private DatosNotificacion datosParaReintento(NotificacionEnviada notificacion) {
-        return reconstructores.stream()
+    private Optional<DatosNotificacion> datosParaReintento(NotificacionEnviada notificacion) {
+        var datos = reconstructores.stream()
                 .map(reconstructor -> reconstructor.datosPara(notificacion))
                 .flatMap(java.util.Optional::stream)
-                .findFirst()
-                .orElseGet(() -> new DatosNotificacion(
-                        notificacion.destinatario(), null, notificacion.inicioReferencia(), null, null, null));
+                .findFirst();
+        if (datos.isPresent() || reconstructores.stream().anyMatch(r -> r.descartarSiFaltanDatos(notificacion))) {
+            return datos;
+        }
+        return Optional.of(new DatosNotificacion(notificacion.destinatario(), null,
+                notificacion.inicioReferencia(), null, null, null));
     }
 }
