@@ -239,7 +239,7 @@ La API SHALL dar de baja una ficha marcándola como inactiva, sin eliminar la fi
 
 ### Requirement: Permisos por rol en la ficha de paciente
 
-La API SHALL permitir crear, editar, consultar y buscar fichas a los roles `RECEPCION` y `ADMIN`, y dar de baja solo a `ADMIN`. El rol `ODONTOLOGO` MUST recibir 403 en todas las operaciones de este módulo, y una petición anónima MUST recibir 401.
+La API SHALL permitir crear, editar, consultar y buscar fichas a los roles `RECEPCION` y `ADMIN`, y dar de baja solo a `ADMIN`. El rol `ODONTOLOGO` SHALL consultar por id solo la ficha de un paciente con algún turno de su profesional vinculado, en cualquier estado (RN-33). En cualquier otra operación de este módulo, o con otro paciente, MUST recibir 403. Una petición anónima MUST recibir 401.
 
 #### Scenario: Recepción crea, edita y busca fichas
 
@@ -262,9 +262,21 @@ La API SHALL permitir crear, editar, consultar y buscar fichas a los roles `RECE
 
 #### Scenario: El odontólogo no accede a las fichas
 
-- **GIVEN** un odontólogo autenticado
-- **WHEN** intenta consultar, buscar o crear una ficha
+- **GIVEN** un odontólogo autenticado y un paciente sin turnos con su profesional
+- **WHEN** intenta consultar esa ficha, buscar fichas o crear una
 - **THEN** cada operación responde con estado 403 y formato Problem Details
+
+#### Scenario: El odontólogo consulta la ficha de un paciente de sus turnos
+
+- **GIVEN** un odontólogo vinculado a un profesional y un paciente con un turno de ese profesional
+- **WHEN** consulta `GET /api/pacientes/{id}` de ese paciente
+- **THEN** la respuesta tiene estado 200 con la ficha del paciente
+
+#### Scenario: El odontólogo no consulta la ficha de un paciente de otro profesional
+
+- **GIVEN** un odontólogo vinculado a un profesional y un paciente que solo tiene turnos con otro profesional
+- **WHEN** consulta `GET /api/pacientes/{id}` de ese paciente
+- **THEN** la respuesta tiene estado 403 y formato Problem Details, sin datos del paciente
 
 #### Scenario: Una petición anónima recibe 401
 

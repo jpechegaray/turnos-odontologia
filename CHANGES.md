@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 29 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-31 y C-33). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-32 (Nico), C-36 (Valentino, camino crítico) y los "Cualquiera" C-28, C-29, C-30, C-34 y C-35. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 30 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31 y C-33). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-32 (Nico), C-36 (Valentino, camino crítico) y los "Cualquiera" C-29, C-30, C-34, C-35 y C-40. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -47,7 +47,7 @@
 | C-25 | ✅ hecho | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
 | C-26 | ✅ hecho | **Juan Pablo** | 4 | M | horarios-libres-disponibilidad | C-19 |  |
 | C-27 | ✅ hecho | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
-| C-28 | ⬜ pendiente | Cualquiera | 4 | M | consultar-agenda-dia-semana | C-19 |  |
+| C-28 | ✅ hecho | Valentino (Cualquiera) | 4 | M | consultar-agenda-dia-semana | C-19 |  |
 | C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
 | C-30 | ⬜ pendiente | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
 | C-31 | ✅ hecho | **Juan Pablo** | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
@@ -1091,7 +1091,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-04. El aviso a la lista de espera lo hace C-36.
 
 ### [C-28] `C-28-consultar-agenda-dia-semana`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Valentino (PR #110, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `GET /api/agenda?vista=dia|semana&profesionalId&sillonId&fecha`: turnos con estado, horarios de atención y bloqueos (modelo de lectura) en hora de Buenos Aires
