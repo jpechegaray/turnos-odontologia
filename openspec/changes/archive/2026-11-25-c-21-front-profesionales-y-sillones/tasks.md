@@ -97,8 +97,9 @@
 
 - [x] 13.1 Ejecutar `npm test`, `npm run lint` y `npm run build` en `frontend/` y verificar que todo termina sin errores.
 - [x] 13.2 Revisar con `git grep -nE "#[0-9a-fA-F]{3,8}\b|[0-9]+px|rgb\(|font-family" -- frontend/src/features/profesionales` que no haya colores, espaciados ni fuentes fijos (solo `var(--…)` de `tokens.css`). Si aparece una coincidencia, reemplazarla por el token correspondiente.
-- [ ] 13.3 Probar en desarrollo contra el backend real de C-05, C-06 y C-10 con cuentas ficticias. `ADMIN` da de alta, edita, da de baja y reactiva un profesional y un sillón, y asigna y quita prestaciones a un profesional. `RECEPCION` y `ODONTOLOGO` abren `/profesionales`, `/sillones` y el panel sin controles de escritura. Registrar la evidencia sin credenciales ni cookies.
+- [x] 13.3 Probar en desarrollo contra el backend real de C-05, C-06 y C-10 con cuentas ficticias. `ADMIN` da de alta, edita, da de baja y reactiva un profesional y un sillón, y asigna y quita prestaciones a un profesional. `RECEPCION` y `ODONTOLOGO` abren `/profesionales`, `/sillones` y el panel sin controles de escritura. Registrar la evidencia sin credenciales ni cookies.
   - Avance (2026-11-23): la prueba manual como `ADMIN` la hizo el usuario y resultó correcta. La de `RECEPCION` y `ODONTOLOGO` se pospone por decisión del equipo hasta que C-24 (front-usuarios-admin) permita crear esas cuentas desde la UI. Mientras tanto, la cobertura de esos roles la dan los tests de Vitest de las tres specs.
+  - Hecho (2026-11-25): con cuentas creadas desde C-24, el usuario probó `RECEPCION` y `ODONTOLOGO` contra el backend real y confirmó que abren `/profesionales`, `/sillones` y el panel sin controles de escritura, y que el odontólogo ve solo su profesional. Evidencia registrada sin credenciales ni cookies.
 - [x] 13.4 Confirmar con `git diff --name-only master` que no se modificó ningún archivo de `backend/` ni de `features/prestaciones`. Si aparece un hueco real de API, detenerse y reportarlo en lugar de tocar el backend.
 
 ## Workflow follow-up

@@ -40,7 +40,7 @@
 | C-18 | ⬜ pendiente | Cualquiera | 2 | M | lista-espera-alta-y-gestion | C-04, C-06, C-07 |  |
 | C-19 | ⬜ pendiente | **Juan Pablo** | 3 | L | crear-turno-sin-solapamientos | C-03, C-04, C-05, C-07, C-10, C-11, C-12 | OPSX evaluado, camino crítico, HIGH |
 | C-20 | ✅ hecho | Julián (Cualquiera) | 3 | S | front-prestaciones-y-configuracion | C-04, C-08, C-16 |  |
-| C-21 | ⬜ pendiente | Cualquiera | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
+| C-21 | ✅ hecho | Lionel (Cualquiera) | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
 | C-22 | ⬜ pendiente | Cualquiera | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
 | C-23 | ⬜ pendiente | Cualquiera | 3 | S | front-pacientes | C-07, C-16 |  |
 | C-24 | ⬜ pendiente | Cualquiera | 3 | S | front-usuarios-admin | C-13, C-16 |  |
@@ -959,7 +959,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: ADMIN crea una prestación y cambia el plazo de cancelación desde la UI contra el backend; RECEPCION no ve los botones de edición; tests en verde.
 
 ### [C-21] `C-21-front-profesionales-y-sillones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #87, 2026-11-24; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 3 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `features/profesionales/profesionales` y `features/profesionales/sillones`: listas, altas, edición y baja lógica
