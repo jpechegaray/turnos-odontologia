@@ -4,7 +4,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 1. Política de cancelación
 
-- [ ] 1.1 Crear `agenda.domain.PoliticaCancelacion` con `esTardia(inicio, ahora, plazo)` (design D1). Se verifica con JUnit, sin Spring:
+- [x] 1.1 Crear `agenda.domain.PoliticaCancelacion` con `esTardia(inicio, ahora, plazo)` (design D1). Se verifica con JUnit, sin Spring:
   - "Cancelar a 24 horas exactas no es tardío";
   - "Cancelar un minuto después del plazo es tardío";
   - plazo 0 (nunca tardía antes del inicio) y plazo 48 horas.
