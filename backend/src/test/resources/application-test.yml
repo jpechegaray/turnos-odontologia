@@ -3,7 +3,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-# Correo: adaptador en memoria y planificador apagado; la suite nunca abre SMTP ni dispara tareas.
+
+# C-18: el vencimiento de la lista de espera no corre solo en las pruebas; se invoca con un reloj fijo.
+lista-espera:
+  vencimiento:
+    cron: "-"
+# Correo (C-15): adaptador en memoria y planificador apagado; la suite nunca abre SMTP ni dispara tareas.
 app:
   notificaciones:
     canal: memoria

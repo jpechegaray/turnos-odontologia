@@ -1,0 +1,125 @@
+/* Paneles de horarios y bloqueos por profesional: solo variables de design-system/tokens.css. */
+.panel-agenda {
+  margin-top: var(--space-5);
+}
+
+.agenda-dias {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.agenda-dia {
+  display: grid;
+  /* Ancho fijo para que los días queden alineados entre filas. */
+  grid-template-columns: calc(var(--space-8) * 2) 1fr;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-2) 0;
+  border-bottom: thin solid var(--color-border);
+}
+
+.agenda-dia__nombre {
+  font-weight: var(--weight-semibold);
+}
+
+.agenda-dia__vacio {
+  color: var(--color-text-muted);
+}
+
+.agenda-lista {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agenda-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.agenda-formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(var(--space-8) * 2.5), 1fr));
+  gap: var(--space-3);
+  align-items: end;
+  padding: var(--space-3) var(--space-4);
+  border: thin solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+/* Sin esto, los inputs de fecha y hora imponen su ancho intrínseco y desbordan la columna. */
+.agenda-formulario > * {
+  min-width: 0;
+}
+
+.agenda-formulario > .alert,
+.agenda-formulario__acciones {
+  grid-column: 1 / -1;
+}
+
+.agenda-formulario__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Igual que `.select` de design-system/components.html, con medidas en tokens. */
+.select {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: 0 var(--space-6) 0 var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  appearance: none;
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--space-5) + var(--space-1)) 55%,
+    calc(100% - var(--space-4) + var(--space-1) / 2) 55%;
+  background-size: calc(var(--space-2) * 0.75) calc(var(--space-2) * 0.75);
+  background-repeat: no-repeat;
+  border: thin solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
+}
+
+.select:focus-visible {
+  outline: none;
+  border-color: var(--focus-color);
+  box-shadow: var(--focus-ring);
+}
+
+.agenda-formulario__ancho {
+  grid-column: 1 / -1;
+}
+
+.agenda-lista--bloqueos {
+  margin-bottom: var(--space-4);
+}
+
+.agenda-lista--bloqueos .agenda-item {
+  padding: var(--space-2) 0;
+  border-bottom: thin solid var(--color-border);
+}
+
+.bloqueo__periodo {
+  font-variant-numeric: tabular-nums;
+}
+
+.bloqueo__motivo {
+  flex: 1;
+  color: var(--color-text-muted);
+}
+
+/* Acción de fila del panel abierto (`aria-pressed`), en la tabla de profesionales. */
+.btn--secondary[aria-pressed="true"] {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
