@@ -21,7 +21,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /** Persistencia de turnos con PostgreSQL real: guardado, consulta de ocupados y traducción de RN-15 a 409. */
@@ -107,14 +106,18 @@ class TurnosPersistenciaIT extends PruebaIntegracionBase {
     }
 
     @Test
-    @DisplayName("Guardar un turno con una versión vieja lanza un conflicto de bloqueo optimista")
+    @DisplayName("Guardar un turno con una versión vieja responde 409 TURNO_MODIFICADO")
     void versionVieja() {
         var guardado = persistencia.guardar(nuevo(profesional, sillon));
         var ahora = DIEZ.minus(Duration.ofHours(48));
         persistencia.guardar(guardado.pasarA(EstadoTurno.CONFIRMADO));
 
         assertThatThrownBy(() -> persistencia.guardar(guardado.cancelar(ActorCancelacion.USUARIO, null, null, ahora,
-                Duration.ofHours(24)))).isInstanceOf(ObjectOptimisticLockingFailureException.class);
+                Duration.ofHours(24)))).isInstanceOfSatisfying(ReglaNegocioException.class, error -> {
+                    assertThat(error.codigo()).isEqualTo("TURNO_MODIFICADO");
+                    assertThat(error.estado()).isEqualTo(EstadoError.CONFLICTO_409);
+                });
+        assertThat(persistencia.buscar(guardado.id()).orElseThrow().estado()).isEqualTo(EstadoTurno.CONFIRMADO);
     }
 
     @Test

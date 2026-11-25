@@ -39,6 +39,6 @@ Ninguna.
 - `agenda.application`: nuevo `CancelarTurnoService`.
 - `agenda.infrastructure`: `TurnoJpa` suma `cancelado_por_usuario_id` (FK a `usuario` en `schema-constraints.sql`, idempotente) y el repositorio una lectura con `PESSIMISTIC_WRITE`.
 - `agenda.web`: `POST /api/turnos/{id}/cancelar`; `RespuestaTurno` suma los campos de cancelación.
-- `shared.web.ManejadorErrores`: traduce el conflicto de bloqueo optimista a `409`.
+- `agenda.infrastructure.TurnosPersistencia`: traduce el conflicto de bloqueo optimista a `409 TURNO_MODIFICADO`.
 - `SecurityConfig`: matcher de escritura de `POST /api/turnos/{id}/cancelar`.
 - Se consume sin modificarlo `ConfiguracionServicio.plazoCancelacionHoras()`.

@@ -3,11 +3,14 @@ package ar.edu.utn.turnos.agenda.infrastructure;
 import ar.edu.utn.turnos.agenda.domain.Turno;
 import ar.edu.utn.turnos.agenda.domain.TurnoOcupado;
 import ar.edu.utn.turnos.agenda.domain.ValidadorTurno;
+import ar.edu.utn.turnos.shared.error.EstadoError;
+import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Repository;
 
 /** Persistencia de turnos y traducción de la garantía de la base (RN-15) al mismo error que da la validación. */
@@ -64,6 +67,10 @@ public class TurnosPersistencia {
                 throw ValidadorTurno.solapado("SILLON");
             }
             throw ex;
+        } catch (ObjectOptimisticLockingFailureException ex) {
+            // Otra transacción modificó el turno desde que se leyó (@Version): conflicto, no error interno.
+            throw new ReglaNegocioException("TURNO_MODIFICADO", EstadoError.CONFLICTO_409,
+                    "El turno cambió mientras se modificaba; volvé a consultarlo");
         }
     }
 

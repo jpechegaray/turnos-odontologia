@@ -46,8 +46,8 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 5. Concurrencia
 
-- [ ] 5.1 Traducir `ObjectOptimisticLockingFailureException` a `409 TURNO_MODIFICADO` en `ManejadorErrores`. Se verifica con un test del manejador.
-- [ ] 5.2 Escribir "Dos cancelaciones simultáneas del mismo turno": dos hilos con sesiones distintas y un `CountDownLatch`, `@RepeatedTest(5)`. Se verifica: un `200`, un `409` y un solo `HuecoLiberado`.
+- [x] 5.1 Traducir `ObjectOptimisticLockingFailureException` a `409 TURNO_MODIFICADO` en `TurnosPersistencia.guardar` (design D5, ajuste del apply). Se verifica con `TurnosPersistenciaIT`: guardar con una versión vieja responde ese 409 y no cambia la fila.
+- [x] 5.2 Escribir "Dos cancelaciones simultáneas del mismo turno": dos hilos con sesiones distintas y un `CountDownLatch`, `@RepeatedTest(5)`. Se verifica: un `200`, un `409` y un solo `HuecoLiberado`.
 
 ## 6. Acceso
 

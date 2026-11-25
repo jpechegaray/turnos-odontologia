@@ -52,7 +52,11 @@ Se compara `Duration` contra `Duration`, no horas enteras: con horas enteras 23:
 
 `CancelarTurnoService` lee el turno con `PESSIMISTIC_WRITE` (`SELECT … FOR UPDATE`). Una segunda cancelación simultánea espera, lee `CANCELADO` y recibe `409`. Así `HuecoLiberado` se publica una sola vez.
 
-Además, `ManejadorErrores` traduce `ObjectOptimisticLockingFailureException` a `409 TURNO_MODIFICADO`. Hoy `guardar` haría un `merge` con la versión vieja y respondería `500`. Es la red de seguridad para C-29 y C-35.
+Además, `TurnosPersistencia.guardar` traduce `ObjectOptimisticLockingFailureException` a `409 TURNO_MODIFICADO`. Antes, `guardar` hacía un `merge` con la versión vieja y respondía `500`. Es la red de seguridad para C-29 y C-35.
+
+**Ajuste durante el apply:** la traducción se hizo en `TurnosPersistencia` y no en `ManejadorErrores`, porque `turno` es la única entidad con `@Version` y un código `TURNO_*` no corresponde al manejador compartido. Es el mismo lugar donde C-19 traduce las violaciones de las `EXCLUDE`.
+
+**Dos barreras, verificadas con mutaciones:** sin el lock de fila, la carrera sigue en verde porque el `@Version` responde `409 TURNO_MODIFICADO` al perdedor, que no llega a publicar eventos. Sin el lock y sin la traducción, la carrera falla 5 de 5.
 
 **Para C-35:** reprogramar tiene que tomar este mismo lock de fila y, además, los advisory locks de C-19 antes de validar el nuevo intervalo.
 
