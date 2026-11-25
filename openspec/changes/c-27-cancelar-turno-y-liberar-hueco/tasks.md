@@ -59,7 +59,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 7. Verificación final
 
-- [ ] 7.1 Correr `./mvnw verify` (con Docker) y, en `frontend`, `npm run lint`, `npm test` y `npm run build`: todo en verde. Después correr `openspec-verify` para generar `verify.md`, con cada escenario mapeado a su test y el veredicto.
+- [x] 7.1 Correr `./mvnw verify` (con Docker) y, en `frontend`, `npm run lint`, `npm test` y `npm run build`: todo en verde. Después correr `openspec-verify` para generar `verify.md`, con cada escenario mapeado a su test y el veredicto.
 
 ## Workflow follow-up
 
