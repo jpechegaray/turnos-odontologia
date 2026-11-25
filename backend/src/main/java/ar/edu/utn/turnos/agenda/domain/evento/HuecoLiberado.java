@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.agenda.domain.evento;
 
+import ar.edu.utn.turnos.agenda.domain.Turno;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 
 /**
@@ -7,4 +8,11 @@ import ar.edu.utn.turnos.shared.tiempo.Intervalo;
  * publicarán C-27 y C-35; lo escuchará la oferta de huecos de la lista de espera (C-36, RN-23).
  */
 public record HuecoLiberado(Long profesionalId, Long sillonId, Intervalo hueco, Long turnoOrigenId) {
+
+    /** Hueco que deja un turno cancelado (RN-06). */
+    public static HuecoLiberado de(Turno cancelado) {
+        TurnoCancelado.exigirGuardadoYCancelado(cancelado);
+        return new HuecoLiberado(cancelado.profesionalId(), cancelado.sillonId(), cancelado.intervalo(),
+                cancelado.id());
+    }
 }

@@ -8,7 +8,9 @@ import ar.edu.utn.turnos.shared.notificacion.domain.EstadoNotificacion;
 import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionEnviada;
 import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionRepositorio;
 import ar.edu.utn.turnos.shared.notificacion.domain.TipoNotificacion;
+import ar.edu.utn.turnos.shared.paginacion.Pagina;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -137,5 +139,71 @@ class NotificacionRepositorioIT extends PruebaIntegracionBase {
         assertThatThrownBy(() -> repositorio.guardar(avisoDeTurno(10L, inicioHueco)))
                 .isInstanceOf(DataIntegrityViolationException.class);
         assertThat(jpaRepository.count()).isEqualTo(3);
+    }
+
+    // --- Búsqueda paginada (C-25) ---
+
+    /** Turno 10: una ENVIADA y una FALLIDA; turno 20: una FALLIDA; turno 30: una PENDIENTE; más una oferta. */
+    private List<Long> registrarVariadas() {
+        Instant base = Instant.parse("2026-12-10T14:30:00Z");
+        Long enviada = repositorio.guardar(avisoDeTurno(10L, base)
+                .conEnvioExitoso(Instant.parse("2026-12-09T14:30:00Z"))).id();
+        Long fallidaTurno10 = repositorio.guardar(NotificacionEnviada.pendiente(TipoNotificacion.CONFIRMACION_RESERVA,
+                "paciente@example.test", 10L, null, 5L, base, base).conIntentoFallido("error", null)).id();
+        Long fallidaTurno20 = repositorio.guardar(avisoDeTurno(20L, base).conIntentoFallido("error", null)).id();
+        Long pendiente = repositorio.guardar(avisoDeTurno(30L, base)).id();
+        Long oferta = repositorio.guardar(avisoDeOferta(100L, base)).id();
+        return List.of(enviada, fallidaTurno10, fallidaTurno20, pendiente, oferta);
+    }
+
+    private static List<Long> ids(Pagina<NotificacionEnviada> pagina) {
+        return pagina.contenido().stream().map(NotificacionEnviada::id).toList();
+    }
+
+    @Test
+    @DisplayName("Sin filtros la búsqueda devuelve todas, de la más reciente a la más antigua")
+    void buscarSinFiltros() {
+        List<Long> registradas = registrarVariadas();
+
+        Pagina<NotificacionEnviada> pagina = repositorio.buscar(null, null, 0, 20);
+
+        assertThat(ids(pagina)).containsExactlyElementsOf(registradas.reversed());
+        assertThat(pagina.totalElementos()).isEqualTo(5);
+        assertThat(pagina.totalPaginas()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("La búsqueda filtra por estado, por turno y por ambos a la vez")
+    void buscarConFiltros() {
+        List<Long> r = registrarVariadas();
+
+        Pagina<NotificacionEnviada> fallidas = repositorio.buscar(EstadoNotificacion.FALLIDA, null, 0, 20);
+        Pagina<NotificacionEnviada> turno10 = repositorio.buscar(null, 10L, 0, 20);
+        Pagina<NotificacionEnviada> fallidasTurno10 = repositorio.buscar(EstadoNotificacion.FALLIDA, 10L, 0, 20);
+
+        assertThat(ids(fallidas)).containsExactly(r.get(2), r.get(1));
+        assertThat(fallidas.totalElementos()).isEqualTo(2);
+        assertThat(ids(turno10)).containsExactly(r.get(1), r.get(0));
+        assertThat(turno10.totalElementos()).isEqualTo(2);
+        assertThat(ids(fallidasTurno10)).containsExactly(r.get(1));
+        assertThat(fallidasTurno10.totalElementos()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("La búsqueda pagina con totales filtrados y una página posterior a la última viene vacía")
+    void buscarPaginado() {
+        List<Long> r = registrarVariadas();
+
+        Pagina<NotificacionEnviada> primera = repositorio.buscar(null, null, 0, 2);
+        Pagina<NotificacionEnviada> tercera = repositorio.buscar(null, null, 2, 2);
+        Pagina<NotificacionEnviada> posterior = repositorio.buscar(null, null, 5, 2);
+
+        assertThat(ids(primera)).containsExactly(r.get(4), r.get(3));
+        assertThat(primera.totalPaginas()).isEqualTo(3);
+        assertThat(ids(tercera)).containsExactly(r.get(0));
+        assertThat(posterior.contenido()).isEmpty();
+        assertThat(posterior.totalElementos()).isEqualTo(5);
+        assertThat(posterior.pagina()).isEqualTo(5);
+        assertThat(posterior.tamanio()).isEqualTo(2);
     }
 }
