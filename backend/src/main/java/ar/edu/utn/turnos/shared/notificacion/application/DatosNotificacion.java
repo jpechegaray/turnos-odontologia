@@ -21,4 +21,8 @@ public record DatosNotificacion(
         String prestacion,
         String profesional,
         String enlace) {
+    @Override
+    public String toString() {
+        return "DatosNotificacion[contenido omitido]";
+    }
 }

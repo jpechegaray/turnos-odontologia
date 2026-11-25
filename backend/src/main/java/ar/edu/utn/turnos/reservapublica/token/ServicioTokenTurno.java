@@ -6,6 +6,7 @@ import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import ar.edu.utn.turnos.shared.token.ServicioToken;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +28,20 @@ public class ServicioTokenTurno {
 
     @Transactional
     public TokenEmitido emitir(Long turnoId) {
-        var turno = turnos.bloquearParaToken(turnoId).orElseThrow(ServicioTokenTurno::emisionRechazada);
+        return emitirSiVigente(turnoId).orElseThrow(ServicioTokenTurno::emisionRechazada);
+    }
+
+    /** El planificador puede descartar un recordatorio que venció mientras armaba el correo. */
+    @Transactional
+    public Optional<TokenEmitido> emitirSiVigente(Long turnoId) {
+        var turno = turnos.bloquearParaToken(turnoId).orElse(null);
         var ahora = reloj.instant();
-        if (turno.estado() == EstadoTurno.CANCELADO || !ahora.isBefore(turno.inicio())) {
-            throw emisionRechazada();
+        if (turno == null || turno.estado() == EstadoTurno.CANCELADO || !ahora.isBefore(turno.inicio())) {
+            return Optional.empty();
         }
         var generado = criptografia.generar();
         tokens.save(new TokenTurno(turnoId, generado.hash(), turno.inicio(), ahora));
-        return new TokenEmitido(generado.claro());
+        return Optional.of(new TokenEmitido(generado.claro()));
     }
 
     @Transactional
