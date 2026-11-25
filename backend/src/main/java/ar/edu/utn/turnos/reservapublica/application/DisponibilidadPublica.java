@@ -86,7 +86,8 @@ public class DisponibilidadPublica {
         }
     }
 
-    private void validarRecursos(Long profesionalId, Long prestacionId) {
+    /** El 404 uniforme de la reserva online: profesional y prestación activos y el profesional la realiza. */
+    public void validarRecursos(Long profesionalId, Long prestacionId) {
         boolean profesionalActivo = profesionales.buscarPorId(profesionalId)
                 .map(ProfesionalConsulta.Datos::activo).orElse(false);
         boolean prestacionActiva = profesionalActivo && prestaciones.buscarPorId(prestacionId)

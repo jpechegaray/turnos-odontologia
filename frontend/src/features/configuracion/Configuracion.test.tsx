@@ -19,6 +19,9 @@ const CONFIGURACION = {
   "reserva_online.max_turnos_activos_por_email": 3,
   "lista_espera.max_avisos_por_hueco": 10,
   "consultorio.nombre": "Consultorio Ficticio",
+  "consultorio.domicilio": "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires",
+  "consultorio.email_contacto": "contacto@consultorio-ficticio.example",
+  "consultorio.retencion_anios": 2,
 } as const;
 
 const CAMPOS: ReadonlyArray<readonly [string, string]> = [
@@ -29,6 +32,9 @@ const CAMPOS: ReadonlyArray<readonly [string, string]> = [
   ["Máximo de turnos activos por email", "3"],
   ["Máximo de avisos por hueco en lista de espera", "10"],
   ["Nombre del consultorio", "Consultorio Ficticio"],
+  ["Domicilio del consultorio", "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires"],
+  ["Email de contacto del consultorio", "contacto@consultorio-ficticio.example"],
+  ["Retención de datos (años)", "2"],
 ];
 
 const registro = construirRegistro({
@@ -167,6 +173,34 @@ it("Un nombre de consultorio en blanco bloquea el guardado sin llamar a la API",
   expect(escrituras(fetch)).toHaveLength(0);
 });
 
+it("Un domicilio o un email de contacto en blanco bloquea el guardado sin llamar a la API", async () => {
+  const fetch = montar("ADMIN", ({ url, metodo }) => {
+    if (metodo === "GET" && url === "/api/configuracion") return Response.json(CONFIGURACION);
+    return Response.json({});
+  });
+
+  await escribir("Domicilio del consultorio", "");
+  await escribir("Email de contacto del consultorio", "");
+  await userEvent.click(screen.getByRole("button", { name: "Guardar configuración" }));
+
+  expect(await screen.findAllByText("Hay valores fuera de los límites permitidos.")).toHaveLength(2);
+  expect(escrituras(fetch)).toHaveLength(0);
+});
+
+it("Una retención fuera de rango bloquea el guardado sin llamar a la API", async () => {
+  const fetch = montar("ADMIN", ({ url, metodo }) => {
+    if (metodo === "GET" && url === "/api/configuracion") return Response.json(CONFIGURACION);
+    return Response.json({});
+  });
+
+  for (const valor of ["0", "21"]) {
+    await escribir("Retención de datos (años)", valor);
+    await userEvent.click(screen.getByRole("button", { name: "Guardar configuración" }));
+    expect(await screen.findByText("Hay valores fuera de los límites permitidos.")).toBeInTheDocument();
+  }
+  expect(escrituras(fetch)).toHaveLength(0);
+});
+
 it("Los valores límite permitidos se aceptan", async () => {
   const fetch = montar("ADMIN", ({ url, metodo, cuerpo }) => {
     if (metodo === "GET" && url === "/api/configuracion") return Response.json(CONFIGURACION);
@@ -176,6 +210,7 @@ it("Los valores límite permitidos se aceptan", async () => {
 
   await escribir("Plazo de cancelación (horas)", "0");
   await escribir("Anticipación del recordatorio (horas)", "168");
+  await escribir("Retención de datos (años)", "20");
   await userEvent.click(screen.getByRole("button", { name: "Guardar configuración" }));
 
   const put = await waitFor(() => {
@@ -188,6 +223,7 @@ it("Los valores límite permitidos se aceptan", async () => {
     ...CONFIGURACION,
     "cancelacion.plazo_horas": 0,
     "recordatorio.anticipacion_horas": 168,
+    "consultorio.retencion_anios": 20,
   });
 });
 

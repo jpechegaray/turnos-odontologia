@@ -47,6 +47,18 @@ public class ConfiguracionServicio {
         return valor(ParametroConfiguracion.NOMBRE_CONSULTORIO);
     }
 
+    public String domicilioConsultorio() {
+        return valor(ParametroConfiguracion.DOMICILIO_CONSULTORIO);
+    }
+
+    public String emailContactoConsultorio() {
+        return valor(ParametroConfiguracion.EMAIL_CONTACTO_CONSULTORIO);
+    }
+
+    public int retencionAnios() {
+        return entero(ParametroConfiguracion.RETENCION_ANIOS);
+    }
+
     public Map<String, Object> consultar() {
         var vigentes = repositorio.consultarValores().stream()
                 .collect(Collectors.toMap(ValorVigente::getClave, ValorVigente::getValor));

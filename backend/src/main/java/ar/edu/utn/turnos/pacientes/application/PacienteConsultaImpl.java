@@ -4,6 +4,7 @@ import ar.edu.utn.turnos.pacientes.domain.Paciente;
 import ar.edu.utn.turnos.pacientes.domain.PacienteRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,11 @@ public class PacienteConsultaImpl implements PacienteConsulta {
     @Override
     public Optional<Paciente> porEmail(String email) {
         return repositorio.porEmail(email);
+    }
+
+    @Override
+    public List<Paciente> activosPorEmail(String email) {
+        return repositorio.activosPorEmail(email);
     }
 
     @Override

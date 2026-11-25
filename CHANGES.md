@@ -60,7 +60,7 @@
 | C-38 | ✅ hecho | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
 | C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
-| C-41 | ⬜ pendiente | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
+| C-41 | 🔄 en revisión | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
 | C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
 | C-44 | ⬜ pendiente | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
@@ -1352,7 +1352,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 ## FASE 6 — Ola 6: Reserva online, tomar hueco, asignación manual y creación de turnos en el front
 
 ### [C-41] `C-41-reserva-publica-crear-reserva`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[ ]` implementado por Lionel, en revisión (PR por abrir)
 - **Responsable**: Lionel — **Ola**: 6 — **Tamaño**: L (8-10 h)
 - **Scope**:
   - `POST /api/public/reservas`: revalida llamando al servicio de crear turno de `agenda` (no duplica reglas; canal `ONLINE`; duración por defecto; el sistema asigna el sillón), 409 con alternativas si el hueco se ocupó
@@ -1371,7 +1371,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `knowledge-base/09_decisiones_y_supuestos.md` SU-03, SU-04
   - `knowledge-base/10_preguntas_abiertas.md` PA-08, PA-09
 - **Criterio de salida**: Todos los criterios de US-015 cubiertos por tests; la carrera de reservas responde 201 y 409; ninguna ficha existente cambia por una reserva; el consentimiento figura en el registro.
-- **Riesgo o precondición**: Precondición PA-08: el equipo define el texto de consentimiento (Ley 25.326) antes de abrir este change. PA-09 y PA-16 abiertas. RM-05.
+- **Riesgo o precondición**: PA-08 resuelta (2026-11-25, `docs/propuestas/pa-08-consentimiento-datos.md`; versión del texto `2026-11-v1`, SU-16). PA-09 sigue abierta y C-41 mantiene SU-03; PA-16 abierta. RM-05.
 
 ### [C-42] `C-42-tomar-hueco-desde-oferta`
 - **Estado**: `[ ]` pendiente

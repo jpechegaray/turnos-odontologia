@@ -1,6 +1,6 @@
 # PA-08: consentimiento y datos personales en la reserva online
 
-- **Estado:** propuesta, pendiente de aprobación del equipo y de consulta con la cátedra.
+- **Estado:** aprobada (2026-11-25, por el equipo). La implementa C-41.
 - **Fecha:** 2026-11-25.
 - **Autor:** Lionel.
 - **Bloquea:** C-41 `reserva-publica-crear-reserva` (US-015) y el texto del formulario de C-48.

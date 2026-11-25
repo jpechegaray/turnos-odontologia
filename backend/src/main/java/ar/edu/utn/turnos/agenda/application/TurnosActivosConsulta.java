@@ -2,6 +2,7 @@ package ar.edu.utn.turnos.agenda.application;
 
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -25,6 +26,12 @@ public interface TurnosActivosConsulta {
 
     /** Turnos activos de la prestación con {@code fin} posterior al reloj actual, ordenados por {@code inicio ASC, id ASC}. */
     List<TurnoEnConflicto> futurosDePrestacion(Long prestacionId);
+
+    /**
+     * Cantidad de turnos activos de esas fichas que empiezan después de {@code ahora}: el tope por email de la
+     * reserva online (RN-27). Una colección vacía cuenta cero.
+     */
+    long contarFuturosActivos(Collection<Long> pacienteIds, Instant ahora);
 
     /** Proyección mínima de un turno en conflicto (sin datos del paciente, RN-35). */
     record TurnoEnConflicto(Long id, Instant inicio, Instant fin, String estado) {

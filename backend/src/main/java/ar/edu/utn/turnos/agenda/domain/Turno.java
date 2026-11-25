@@ -56,6 +56,18 @@ public record Turno(
                 creadoPorUsuarioId, creadoEn, null);
     }
 
+    /**
+     * Turno de la reserva online (Flujo 4, US-015): nace PROGRAMADO, con canal ONLINE, sin notas y sin usuario
+     * creador, porque lo pide el paciente y no el personal.
+     */
+    public static Turno nuevoOnline(Long pacienteId, Long profesionalId, Long sillonId, Long prestacionId,
+            Intervalo intervalo, Instant creadoEn) {
+        int duracion = Math.toIntExact(Duration.between(intervalo.inicio(), intervalo.fin()).toMinutes());
+        return new Turno(null, pacienteId, profesionalId, sillonId, prestacionId, intervalo, duracion,
+                EstadoTurno.PROGRAMADO, CanalTurno.ONLINE, null, false, false, null, null, null, null,
+                null, creadoEn, null);
+    }
+
     /** Aplica la tabla de transiciones de RN-12; una transición no permitida es un conflicto (409). */
     public Turno pasarA(EstadoTurno destino) {
         if (!estado.puedePasarA(destino)) {
