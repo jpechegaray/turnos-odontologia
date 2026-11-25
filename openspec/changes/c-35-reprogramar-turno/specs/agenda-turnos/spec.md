@@ -64,7 +64,7 @@ El horario nuevo SHALL validarse con las mismas reglas que el alta (RN-01 a RN-0
 
 #### Scenario: El horario nuevo respeta el inicio futuro, la grilla y los recursos activos
 - **WHEN** recepción reprograma a un inicio pasado, a un minuto fuera de la grilla de cinco, a un sillón inactivo o a un profesional que no realiza la prestación
-- **THEN** recibe `422` en Problem Details con el código de la regla (`RN-13`, `RN-09` o `RN-11`) y el turno no cambia
+- **THEN** recibe `422` en Problem Details con el código de la regla (`RN-13`, `RN-09`, `SILLON_INACTIVO` o `RN-11`) y el turno no cambia
 
 ### Requirement: Reprogramación tardía según el plazo configurado
 

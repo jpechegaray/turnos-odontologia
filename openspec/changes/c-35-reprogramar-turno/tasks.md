@@ -28,26 +28,26 @@
 
 ## 2. Servicio y API
 
-- [ ] 2.1 Extraer `ConsultaRecursosTurno` de `CrearTurnoService` (design D5). La suite de C-19 sigue en verde.
-- [ ] 2.2 Crear `ReprogramarTurnoService`, `SolicitudReprogramarTurno` y `POST /api/turnos/{id}/reprogramar`, y sumar `reprogramadoTarde` a `RespuestaTurno` (design D4 y D6). Se verifica con integración:
+- [x] 2.1 Extraer `ConsultaRecursosTurno` de `CrearTurnoService` (design D5). La suite de C-19 sigue en verde.
+- [x] 2.2 Crear `ReprogramarTurnoService`, `SolicitudReprogramarTurno` y `POST /api/turnos/{id}/reprogramar`, y sumar `reprogramadoTarde` a `RespuestaTurno` (design D4 y D6). Se verifica con integración:
   - "Recepción mueve un turno a otro horario";
   - "Se puede cambiar de profesional, de sillón y de duración";
   - "Un turno confirmado sigue confirmado";
   - "Reprogramar al mismo horario no cambia nada";
   - "Un pedido sin inicio se rechaza";
   - "Un turno inexistente no se puede reprogramar".
-- [ ] 2.3 Cubrir estado y validaciones del horario:
+- [x] 2.3 Cubrir estado y validaciones del horario:
   - "Un turno cancelado no se puede reprogramar";
   - "Un turno que ya empezó no se puede reprogramar";
   - "Un turno se mueve quince minutos dentro de su propio intervalo";
   - "Un horario ocupado por otro turno responde conflicto";
   - "Un horario fuera de atención se rechaza";
   - "El horario nuevo respeta el inicio futuro, la grilla y los recursos activos".
-- [ ] 2.4 Cubrir la tardía:
+- [x] 2.4 Cubrir la tardía:
   - "Reprogramar dentro del plazo queda marcado como tardío";
   - "Reprogramar a 24 horas exactas no es tardío";
   - "La marca de tardía se conserva".
-- [ ] 2.5 Cubrir la liberación y los eventos con `@RecordApplicationEvents`:
+- [x] 2.5 Cubrir la liberación y los eventos con `@RecordApplicationEvents`:
   - "El horario anterior se puede volver a dar";
   - "Reprogramar publica el turno reprogramado y el hueco anterior";
   - "Una reprogramación rechazada no publica eventos".
@@ -55,7 +55,7 @@
 ## 3. Concurrencia y acceso
 
 - [ ] 3.1 Escribir "Una reprogramación y un alta compiten por el mismo horario" (design D7): dos hilos con un `CountDownLatch` y `@RepeatedTest(5)`.
-- [ ] 3.2 Agregar el matcher en `SecurityConfig` y `@PreAuthorize`. Se verifica con:
+- [x] 3.2 Agregar el matcher en `SecurityConfig` y `@PreAuthorize`. Se verifica con:
   - "El odontólogo no puede reprogramar turnos";
   - "Sin sesión no se puede reprogramar un turno";
   - "Sin CSRF válido no se puede reprogramar un turno";

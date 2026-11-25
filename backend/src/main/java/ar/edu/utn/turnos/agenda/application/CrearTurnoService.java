@@ -1,22 +1,13 @@
 package ar.edu.utn.turnos.agenda.application;
 
 import ar.edu.utn.turnos.agenda.domain.ConsultasAgenda;
-import ar.edu.utn.turnos.agenda.domain.EstadoRecurso;
-import ar.edu.utn.turnos.agenda.domain.RecursosTurno;
 import ar.edu.utn.turnos.agenda.domain.SolicitudTurno;
 import ar.edu.utn.turnos.agenda.domain.Turno;
 import ar.edu.utn.turnos.agenda.domain.ValidadorTurno;
 import ar.edu.utn.turnos.agenda.domain.evento.TurnoCreado;
 import ar.edu.utn.turnos.agenda.infrastructure.TurnosPersistencia;
-import ar.edu.utn.turnos.pacientes.application.PacienteConsulta;
-import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
-import ar.edu.utn.turnos.prestaciones.application.PrestacionResumen;
-import ar.edu.utn.turnos.profesionales.prestacion.application.ProfesionalRealizaPrestacion;
-import ar.edu.utn.turnos.profesionales.profesional.application.ProfesionalConsulta;
-import ar.edu.utn.turnos.profesionales.sillon.application.SillonConsulta;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Optional;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -30,26 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CrearTurnoService {
     private final TurnosPersistencia turnos;
-    private final PacienteConsulta pacientes;
-    private final ProfesionalConsulta profesionales;
-    private final SillonConsulta sillones;
-    private final ConsultaPrestaciones prestaciones;
-    private final ProfesionalRealizaPrestacion profesionalPrestaciones;
+    private final ConsultaRecursosTurno recursos;
     private final ConsultasAgenda consultas;
     private final ApplicationEventPublisher eventos;
     private final Clock reloj;
     private final ValidadorTurno validador;
 
-    public CrearTurnoService(TurnosPersistencia turnos, PacienteConsulta pacientes, ProfesionalConsulta profesionales,
-            SillonConsulta sillones, ConsultaPrestaciones prestaciones,
-            ProfesionalRealizaPrestacion profesionalPrestaciones, ConsultasAgenda consultas,
+    CrearTurnoService(TurnosPersistencia turnos, ConsultaRecursosTurno recursos, ConsultasAgenda consultas,
             ApplicationEventPublisher eventos, Clock reloj) {
         this.turnos = turnos;
-        this.pacientes = pacientes;
-        this.profesionales = profesionales;
-        this.sillones = sillones;
-        this.prestaciones = prestaciones;
-        this.profesionalPrestaciones = profesionalPrestaciones;
+        this.recursos = recursos;
         this.consultas = consultas;
         this.eventos = eventos;
         this.reloj = reloj;
@@ -64,25 +45,10 @@ public class CrearTurnoService {
     public Turno crear(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
         // RN-15: las altas sobre el mismo profesional o sillón se ordenan; la segunda valida contra la primera.
         turnos.bloquearRecursos(solicitud.profesionalId(), solicitud.sillonId());
-        var intervalo = validador.validar(solicitud, recursos(solicitud), consultas, null);
+        var intervalo = validador.validar(solicitud, recursos.de(solicitud), consultas, null);
         var turno = turnos.guardar(Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(), solicitud.sillonId(),
                 solicitud.prestacionId(), intervalo, notas, creadoPorUsuarioId, Instant.now(reloj)));
         eventos.publishEvent(TurnoCreado.de(turno));
         return turno;
-    }
-
-    private RecursosTurno recursos(SolicitudTurno solicitud) {
-        Optional<PrestacionResumen> prestacion = prestaciones.buscarPorId(solicitud.prestacionId());
-        return new RecursosTurno(
-                estado(pacientes.porId(solicitud.pacienteId()).map(p -> p.activo())),
-                estado(profesionales.buscarPorId(solicitud.profesionalId()).map(p -> p.activo())),
-                estado(sillones.buscarPorId(solicitud.sillonId()).map(s -> s.activo())),
-                estado(prestacion.map(PrestacionResumen::activa)),
-                prestacion.map(PrestacionResumen::duracionDefaultMin).orElse(0),
-                profesionalPrestaciones.realiza(solicitud.profesionalId(), solicitud.prestacionId()));
-    }
-
-    private static EstadoRecurso estado(Optional<Boolean> activo) {
-        return activo.map(a -> a ? EstadoRecurso.ACTIVO : EstadoRecurso.INACTIVO).orElse(EstadoRecurso.INEXISTENTE);
     }
 }
