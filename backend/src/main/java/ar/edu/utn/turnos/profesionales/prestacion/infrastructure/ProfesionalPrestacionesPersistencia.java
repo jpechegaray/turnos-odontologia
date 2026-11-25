@@ -22,6 +22,21 @@ public class ProfesionalPrestacionesPersistencia implements ProfesionalRealizaPr
         return repositorio.existsById(new ProfesionalPrestacionId(profesionalId, prestacionId));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> profesionalesQueRealizan(Long prestacionId) {
+        return Set.copyOf(repositorio.profesionalIdsDePrestacion(prestacionId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> prestacionesConProfesional(Collection<Long> profesionalIds) {
+        if (profesionalIds.isEmpty()) {
+            return Set.of();
+        }
+        return Set.copyOf(repositorio.prestacionIdsDeProfesionales(profesionalIds));
+    }
+
     @Transactional(readOnly = true)
     public Set<Long> prestacionIdsDe(Long profesionalId) {
         return repositorio.findByIdProfesionalId(profesionalId).stream()

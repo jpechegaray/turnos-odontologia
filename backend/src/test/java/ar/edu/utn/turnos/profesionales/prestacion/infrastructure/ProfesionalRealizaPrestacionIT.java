@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.profesionales.prestacion.application.ProfesionalRealizaPrestacion;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,26 @@ class ProfesionalRealizaPrestacionIT extends PruebaIntegracionBase {
         jdbc.update("update prestacion set activa = false where id = ?", blanqueamiento);
 
         assertThat(consulta.realiza(profesional, blanqueamiento)).isTrue();
+    }
+
+    @Test
+    @DisplayName("La consulta interna lista los profesionales que realizan una prestación")
+    void listaProfesionalesDeUnaPrestacion() {
+        asociar(otroProfesional, consultaId);
+
+        assertThat(consulta.profesionalesQueRealizan(consultaId)).containsExactlyInAnyOrder(profesional, otroProfesional);
+        assertThat(consulta.profesionalesQueRealizan(-1L)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("La consulta interna lista las prestaciones que realiza alguno de los profesionales dados")
+    void listaPrestacionesConProfesional() {
+        Long sinProfesional = crearPrestacion("Implante Realiza", true);
+
+        assertThat(consulta.prestacionesConProfesional(List.of(profesional, otroProfesional)))
+                .containsExactlyInAnyOrder(consultaId, limpiezaId).doesNotContain(sinProfesional);
+        assertThat(consulta.prestacionesConProfesional(List.of(profesional))).containsExactly(consultaId);
+        assertThat(consulta.prestacionesConProfesional(List.of())).isEmpty();
     }
 
     private void asociar(Long idProfesional, Long idPrestacion) {

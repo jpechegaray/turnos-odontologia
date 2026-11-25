@@ -130,6 +130,23 @@ class CatalogoPrestacionesServicioIT extends PruebaIntegracionBase {
     }
 
     @Test
+    @DisplayName("Otro módulo lista solo las prestaciones activas")
+    void puertoListaSoloActivas() {
+        Prestacion activa = repositorio.saveAndFlush(new Prestacion(
+                new ar.edu.utn.turnos.prestaciones.domain.NombrePrestacion("Ortodoncia Activa"),
+                new ar.edu.utn.turnos.prestaciones.domain.DuracionPrestacion(30)));
+        Prestacion inactiva = repositorio.saveAndFlush(new Prestacion(
+                new ar.edu.utn.turnos.prestaciones.domain.NombrePrestacion("Ortodoncia Inactiva"),
+                new ar.edu.utn.turnos.prestaciones.domain.DuracionPrestacion(30)));
+        inactiva.desactivar();
+        repositorio.flush();
+
+        assertThat(consulta.listarActivas()).extracting(PrestacionResumen::id)
+                .contains(activa.getId()).doesNotContain(inactiva.getId());
+        assertThat(consulta.listarActivas()).allMatch(PrestacionResumen::activa);
+    }
+
+    @Test
     @DisplayName("Sin usuario autenticado la escritura se rechaza")
     void escrituraSinUsuario() {
         assertThatThrownBy(() -> catalogo.crear("Consulta", 30))
