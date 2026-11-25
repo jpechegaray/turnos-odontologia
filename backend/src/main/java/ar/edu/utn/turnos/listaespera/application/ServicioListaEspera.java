@@ -2,6 +2,7 @@ package ar.edu.utn.turnos.listaespera.application;
 
 import ar.edu.utn.turnos.listaespera.domain.EntradaListaEspera;
 import ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera;
+import ar.edu.utn.turnos.listaespera.domain.Hueco;
 import ar.edu.utn.turnos.listaespera.infrastructure.ListaEsperaPersistencia;
 import ar.edu.utn.turnos.pacientes.application.PacienteConsulta;
 import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
@@ -31,14 +32,17 @@ public class ServicioListaEspera {
     private final PacienteConsulta pacientes;
     private final ConsultaPrestaciones prestaciones;
     private final ProfesionalConsulta profesionales;
+    private final BuscadorCompatibles buscador;
     private final Clock reloj;
 
     public ServicioListaEspera(ListaEsperaPersistencia entradas, PacienteConsulta pacientes,
-            ConsultaPrestaciones prestaciones, ProfesionalConsulta profesionales, Clock reloj) {
+            ConsultaPrestaciones prestaciones, ProfesionalConsulta profesionales, BuscadorCompatibles buscador,
+            Clock reloj) {
         this.entradas = entradas;
         this.pacientes = pacientes;
         this.prestaciones = prestaciones;
         this.profesionales = profesionales;
+        this.buscador = buscador;
         this.reloj = reloj;
     }
 
@@ -83,6 +87,23 @@ public class ServicioListaEspera {
     public void cancelar(Long id) {
         var entrada = entradas.buscar(id).orElseThrow(ServicioListaEspera::noEncontrada);
         entradas.guardar(entrada.cancelar());
+    }
+
+    /**
+     * Sugerencias para recepción (RN-22, SU-15): todas las entradas compatibles con el hueco, por antigüedad,
+     * sin tope ni deduplicación. Un hueco que ya empezó no tiene sugerencias.
+     */
+    @PreAuthorize(PUEDE_GESTIONAR)
+    @Transactional(readOnly = true)
+    public List<EntradaListaEspera> compatibles(Long profesionalId, Instant inicio, Instant fin) {
+        if (!fin.isAfter(inicio)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El fin del hueco debe ser posterior al inicio");
+        }
+        verificarProfesional(profesionalId);
+        if (!Instant.now(reloj).isBefore(inicio)) {
+            return List.of();
+        }
+        return buscador.compatibles(new Hueco(profesionalId, inicio, fin));
     }
 
     /**
