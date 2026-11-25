@@ -6,4 +6,8 @@ package ar.edu.utn.turnos.shared.notificacion.domain;
  * en la capa de aplicación a partir de los datos que aporta el consumidor.
  */
 public record MensajeNotificacion(String destinatario, String asunto, String cuerpo) {
+    @Override
+    public String toString() {
+        return "MensajeNotificacion[contenido omitido]";
+    }
 }

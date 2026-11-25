@@ -118,6 +118,17 @@ public record NotificacionEnviada(
                 enviadaEn);
     }
 
+    /** Termina un pendiente obsoleto sin contabilizar un intento de envío. */
+    public NotificacionEnviada descartada(String motivo) {
+        return new NotificacionEnviada(id, tipo, canal, destinatario, turnoId, ofertaHuecoId, pacienteId,
+                inicioReferencia, EstadoNotificacion.FALLIDA, intentos, motivo, null, enviadaEn);
+    }
+
+    public NotificacionEnviada dirigidaA(String email) {
+        return new NotificacionEnviada(id, tipo, canal, email, turnoId, ofertaHuecoId, pacienteId,
+                inicioReferencia, estado, intentos, ultimoError, programadaPara, enviadaEn);
+    }
+
     /** Indica si todavía se permite un nuevo intento para el máximo configurado. */
     public boolean admiteReintento(int maximoIntentos) {
         return estado != EstadoNotificacion.ENVIADA && intentos < maximoIntentos;
