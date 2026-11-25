@@ -19,6 +19,15 @@ spring:
       # Separador propio para que C-19 pueda agregar bloques DO $$ ... $$ sin cortarlos.
       separator: "^^^"
       continue-on-error: false
+  # Correo transaccional: credenciales SOLO por entorno (.env no versionado). C-15.
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 # Springdoc apagado por defecto; application-dev.yml lo enciende.
 springdoc:
@@ -39,7 +48,16 @@ server:
 app:
 #   seguridad:        # dueño: C-03
 #   configuracion:    # dueño: C-08
-#   notificaciones:   # dueño: C-15 (mail)
+  notificaciones:   # dueño: C-15 (mail)
+    canal: ${NOTIFICACIONES_CANAL:smtp}
+    remitente: ${SMTP_FROM:turnos@consultorio.test}
+    planificador:
+      habilitado: true
+      intervalo: 5m
+    reintento:
+      maximo-intentos: 3
+      espera-inicial: 5m
+      multiplicador: 2
   ratelimit:        # dueño: C-17
     max-solicitudes-por-ip: 60
     ventana-ip: 1m
