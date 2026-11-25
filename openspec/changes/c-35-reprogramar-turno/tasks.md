@@ -54,7 +54,7 @@
 
 ## 3. Concurrencia y acceso
 
-- [ ] 3.1 Escribir "Una reprogramación y un alta compiten por el mismo horario" (design D7): dos hilos con un `CountDownLatch` y `@RepeatedTest(5)`.
+- [x] 3.1 Escribir "Una reprogramación y un alta compiten por el mismo horario" (design D7): dos hilos con un `CountDownLatch` y `@RepeatedTest(5)`.
 - [x] 3.2 Agregar el matcher en `SecurityConfig` y `@PreAuthorize`. Se verifica con:
   - "El odontólogo no puede reprogramar turnos";
   - "Sin sesión no se puede reprogramar un turno";
