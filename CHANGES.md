@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 26 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25 y C-27). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-32 (Nico) y los "Cualquiera" C-26, C-28, C-29, C-30, C-31, C-33, C-34 y C-35. C-36 (Valentino, camino crítico) espera a C-31. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 27 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26 y C-27). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-32 (Nico) y los "Cualquiera" C-28, C-29, C-30, C-31, C-33, C-34 y C-35. C-36 (Valentino, camino crítico) espera a C-31. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -45,7 +45,7 @@
 | C-23 | ✅ hecho | Santino (Cualquiera) | 3 | S | front-pacientes | C-07, C-16 |  |
 | C-24 | ✅ hecho | Lionel (Cualquiera) | 3 | S | front-usuarios-admin | C-13, C-16 |  |
 | C-25 | ✅ hecho | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
-| C-26 | ⬜ pendiente | Cualquiera | 4 | M | horarios-libres-disponibilidad | C-19 |  |
+| C-26 | ✅ hecho | Juan Pablo (Cualquiera) | 4 | M | horarios-libres-disponibilidad | C-19 |  |
 | C-27 | ✅ hecho | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
 | C-28 | ⬜ pendiente | Cualquiera | 4 | M | consultar-agenda-dia-semana | C-19 |  |
 | C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
@@ -1051,8 +1051,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > Cuatro changes entran en `agenda`: solo agregan archivos nuevos porque C-19 deja la entidad `Turno` completa.
 
 ### [C-26] `C-26-horarios-libres-disponibilidad`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 4 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #104, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `CalculadorDisponibilidad` puro: dado profesional, prestación y rango devuelve los inicios libres respetando RN-01, RN-02, RN-04, RN-09 y RN-13, y propone un sillón libre
   - `GET /api/agenda/disponibilidad` (RECEPCION y ADMIN) y servicio de aplicación reutilizable por la reserva pública (C-38) y la asignación manual (C-43)
