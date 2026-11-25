@@ -48,7 +48,7 @@
 | C-26 | ✅ hecho | **Juan Pablo** | 4 | M | horarios-libres-disponibilidad | C-19 |  |
 | C-27 | ✅ hecho | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
 | C-28 | ✅ hecho | Valentino (Cualquiera) | 4 | M | consultar-agenda-dia-semana | C-19 |  |
-| C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
+| C-29 | ✅ hecho | Lionel (Cualquiera) | 4 | S | marcar-asistencia-ausencia | C-19 |  |
 | C-30 | ⬜ pendiente | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
 | C-31 | ✅ hecho | **Juan Pablo** | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
 | C-32 | ✅ hecho | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
@@ -1111,7 +1111,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-04.
 
 ### [C-29] `C-29-marcar-asistencia-ausencia`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #117, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 4 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `POST /api/turnos/{id}/asistencia` con `ATENDIDO` o `AUSENTE`: solo desde el inicio del turno y sobre `PROGRAMADO` o `CONFIRMADO`; RECEPCION y ADMIN; 403 a ODONTOLOGO
