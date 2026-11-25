@@ -47,6 +47,9 @@ class TurnosApiIT extends PruebaIntegracionBase {
     @Autowired
     ApplicationEvents eventos;
 
+    @Autowired
+    ar.edu.utn.turnos.agenda.application.CrearTurnoService crearTurno;
+
     Long paciente;
     Long profesional;
     Long sillon;
@@ -350,6 +353,60 @@ class TurnosApiIT extends PruebaIntegracionBase {
     void unTurnoAtendidoSigueOcupandoLugar() throws Exception {
         DatosAgenda.turno(jdbc, paciente, profesional, sillon, prestacion, lunes("10:00"), lunes("10:30"), "ATENDIDO");
         rechazaSolapado(cuerpo("10:00", 30), "PROFESIONAL");
+    }
+
+    // --- Tarea 7.1: acceso (RN-20, RN-33, regla dura 4) ---
+
+    RequestPostProcessor sesionDe(String rol) {
+        var usuario = DatosAgenda.usuario(jdbc, rol);
+        return sesion((Long) usuario[0], (String) usuario[1], Rol.valueOf(rol));
+    }
+
+    @Test
+    @DisplayName("El odontólogo no puede crear turnos")
+    void elOdontologoNoPuedeCrearTurnos() throws Exception {
+        crear(cuerpo("10:00", 30), sesionDe("ODONTOLOGO")).andExpect(status().isForbidden());
+        assertThat(turnosDelProfesional()).isZero();
+    }
+
+    @Test
+    @DisplayName("El servicio rechaza al odontólogo aunque se saltee el filtro HTTP")
+    void elServicioRechazaAlOdontologo() {
+        var odontologo = new UsernamePasswordAuthenticationToken("odontologo-ficticio", null,
+                List.of(new SimpleGrantedAuthority("ROLE_ODONTOLOGO")));
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(odontologo);
+        try {
+            var solicitud = new ar.edu.utn.turnos.agenda.domain.SolicitudTurno(paciente, profesional, sillon, prestacion,
+                    java.time.OffsetDateTime.parse(lunes("10:00")).toInstant(), 30);
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> crearTurno.crear(solicitud, null, null))
+                    .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+        assertThat(turnosDelProfesional()).isZero();
+    }
+
+    @Test
+    @DisplayName("El administrador también puede crear turnos")
+    void elAdministradorPuedeCrearTurnos() throws Exception {
+        crear(cuerpo("10:00", 30), sesionDe("ADMIN")).andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("Sin sesión no se puede crear un turno")
+    void sinSesionNoSePuedeCrearUnTurno() throws Exception {
+        mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON).content(cuerpo("10:00", 30)).with(csrfValido()))
+                .andExpect(status().isUnauthorized());
+        assertThat(turnosDelProfesional()).isZero();
+    }
+
+    @Test
+    @DisplayName("Sin CSRF válido no se puede crear un turno")
+    void sinCsrfValidoNoSePuedeCrearUnTurno() throws Exception {
+        mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON).content(cuerpo("10:00", 30))
+                        .with(comoRecepcion).with(csrfConCabeceraIncorrecta()))
+                .andExpect(status().isForbidden());
+        assertThat(turnosDelProfesional()).isZero();
     }
 
     @Test

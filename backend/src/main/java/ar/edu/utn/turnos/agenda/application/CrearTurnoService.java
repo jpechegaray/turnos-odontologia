@@ -18,6 +18,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +59,7 @@ public class CrearTurnoService {
     /**
      * @param creadoPorUsuarioId usuario del personal que da el turno (trazabilidad); puede ser null
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     @Transactional
     public Turno crear(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
         // RN-15: las altas sobre el mismo profesional o sillón se ordenan; la segunda valida contra la primera.

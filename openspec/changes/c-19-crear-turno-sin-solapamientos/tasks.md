@@ -77,7 +77,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 7. Acceso
 
-- [ ] 7.1 Agregar el matcher de `POST /api/turnos` en `SecurityConfig` y `@PreAuthorize` en el servicio. Se verifica con los escenarios:
+- [x] 7.1 Agregar el matcher de `POST /api/turnos` en `SecurityConfig` y `@PreAuthorize` en el servicio. Se verifica con los escenarios:
   - "El odontólogo no puede crear turnos";
   - "Sin sesión no se puede crear un turno";
   - "Sin CSRF válido no se puede crear un turno".
