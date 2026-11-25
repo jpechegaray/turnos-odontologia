@@ -1,7 +1,10 @@
 package ar.edu.utn.turnos.shared.notificacion.infrastructure;
 
+import ar.edu.utn.turnos.shared.notificacion.domain.EstadoNotificacion;
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +30,20 @@ interface NotificacionEnviadaJpaRepository extends JpaRepository<NotificacionEnv
     List<NotificacionEnviadaJpa> reclamarVencidas(
             @Param("ahora") OffsetDateTime ahora,
             @Param("maximoIntentos") int maximoIntentos);
+
+    /** Consulta del registro (C-25): filtros opcionales y combinables, la más reciente primero. */
+    @Query(value = """
+            select n from NotificacionEnviadaJpa n
+            where (:estado is null or n.estado = :estado)
+              and (:turnoId is null or n.turnoId = :turnoId)
+            order by n.id desc
+            """, countQuery = """
+            select count(n) from NotificacionEnviadaJpa n
+            where (:estado is null or n.estado = :estado)
+              and (:turnoId is null or n.turnoId = :turnoId)
+            """)
+    Page<NotificacionEnviadaJpa> buscar(
+            @Param("estado") EstadoNotificacion estado,
+            @Param("turnoId") Long turnoId,
+            Pageable pageable);
 }

@@ -1,11 +1,15 @@
 package ar.edu.utn.turnos.shared.notificacion.infrastructure;
 
+import ar.edu.utn.turnos.shared.notificacion.domain.EstadoNotificacion;
 import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionEnviada;
 import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionRepositorio;
+import ar.edu.utn.turnos.shared.paginacion.Pagina;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,5 +44,14 @@ public class NotificacionRepositorioAdapter implements NotificacionRepositorio {
                 .stream()
                 .map(NotificacionEnviadaJpa::aDominio)
                 .toList();
+    }
+
+    @Override
+    public Pagina<NotificacionEnviada> buscar(EstadoNotificacion estado, Long turnoId, int pagina, int tamanio) {
+        Page<NotificacionEnviadaJpa> resultado = jpaRepository.buscar(estado, turnoId, PageRequest.of(pagina, tamanio));
+        List<NotificacionEnviada> contenido = resultado.getContent().stream()
+                .map(NotificacionEnviadaJpa::aDominio)
+                .toList();
+        return new Pagina<>(contenido, pagina, tamanio, resultado.getTotalElements());
     }
 }

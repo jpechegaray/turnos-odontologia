@@ -380,6 +380,13 @@ class ServicioNotificacionesTest {
                     .toList();
         }
 
+        /** La consulta del registro (C-25) no la usa el servicio de envío; se prueba en NotificacionRepositorioIT. */
+        @Override
+        public ar.edu.utn.turnos.shared.paginacion.Pagina<NotificacionEnviada> buscar(
+                EstadoNotificacion estado, Long turnoId, int pagina, int tamanio) {
+            throw new UnsupportedOperationException("ServicioNotificaciones no consulta el registro");
+        }
+
         List<NotificacionEnviada> todos() {
             return List.copyOf(filas.values());
         }
