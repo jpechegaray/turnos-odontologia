@@ -78,6 +78,10 @@ Usá el proxy `/api` de Vite para mantener el mismo origen. El backend decide lo
 
 Para probar el login local, definí `SEED_ADMIN_PASSWORD` en tu `.env` antes de arrancar el backend con el perfil `dev`. El usuario ficticio es `admin@consultorio.test`; si ya existe, el arranque no cambia su contraseña. Mantené `APP_COOKIE_SECURE=false` solo para HTTP local y `APP_CORS_ORIGIN` en el origen exacto del frontend cuando uses CORS.
 
+### Registros de acceso y enlaces de turno (C-39)
+
+El token es una credencial en la URL. Si habilitás los registros de acceso de Tomcat, conservá el patrón sin URL ni cabeceras. En todo proxy, balanceador o servicio de observabilidad que reciba `/api/public/turnos/{token}` o `/turno/{token}`, omití la URL completa o enmascará el segmento del token antes de registrar la solicitud. No registres `Referer`, cabeceras ni volcados de solicitud que puedan contener el enlace. Verificá esta configuración con un token ficticio antes de publicar enlaces.
+
 ### Cargar la agenda de demostración
 
 Para preparar una base de desarrollo nueva, configurá `SEED_ADMIN_PASSWORD` y `SEED_STAFF_PASSWORD` en tu `.env` local. La clave del personal debe tener al menos 8 caracteres y hasta 72 bytes UTF-8. Dejá `SEED_STAFF_PASSWORD` vacía si solo necesitás el administrador inicial.

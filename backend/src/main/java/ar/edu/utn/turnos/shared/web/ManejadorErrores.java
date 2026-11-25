@@ -1,6 +1,7 @@
 package ar.edu.utn.turnos.shared.web;
 
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -29,12 +31,15 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ManejadorErrores.class);
 
     @ExceptionHandler(ReglaNegocioException.class)
-    public ProblemDetail manejarRegla(ReglaNegocioException ex) {
+    public ProblemDetail manejarRegla(ReglaNegocioException ex, HttpServletRequest request) {
         HttpStatus estado = HttpStatus.valueOf(ex.estado().codigoHttp());
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(estado, ex.getMessage());
         problema.setTitle(estado.getReasonPhrase());
         problema.setProperty(PROPIEDAD_CODIGO, ex.codigo());
         ex.propiedades().forEach(problema::setProperty);
+        if (RutaConTokenDeTurno.coincide(request)) {
+            problema.setInstance(RutaConTokenDeTurno.REFERENCIA);
+        }
         return problema;
     }
 
@@ -50,18 +55,35 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, problema, headers, status, request);
     }
 
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        if (request instanceof ServletWebRequest servlet && RutaConTokenDeTurno.coincide(servlet.getRequest())) {
+            // Los mensajes MVC por defecto pueden repetir la ruta solicitada (por ejemplo, si no hay un recurso).
+            var seguro = ProblemDetail.forStatus(status);
+            seguro.setInstance(RutaConTokenDeTurno.REFERENCIA);
+            body = seguro;
+        }
+        return super.handleExceptionInternal(ex, body, headers, status, request);
+    }
+
     /**
-     * Último recurso: 500 genérico. La excepción se registra en el log del servidor y nunca viaja
-     * en la respuesta. Las de seguridad se relanzan para que las traduzca Spring Security (401/403).
+     * Último recurso: 500 genérico. Las excepciones de seguridad se relanzan a Spring Security (401/403).
+     * En rutas con credenciales, no se registra el mensaje ni la traza de la excepción.
      */
     @ExceptionHandler(Exception.class)
-    public ProblemDetail manejarInesperado(Exception ex) throws Exception {
+    public ProblemDetail manejarInesperado(Exception ex, HttpServletRequest request) throws Exception {
         if (ex instanceof AccessDeniedException || ex instanceof AuthenticationException) {
             throw ex;
         }
-        LOG.error("Error inesperado", ex);
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, DETALLE_GENERICO);
         problema.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        if (RutaConTokenDeTurno.coincide(request)) {
+            LOG.error("Error inesperado en un enlace de turno ({})", ex.getClass().getSimpleName());
+            problema.setInstance(RutaConTokenDeTurno.REFERENCIA);
+        } else {
+            LOG.error("Error inesperado", ex);
+        }
         return problema;
     }
 }

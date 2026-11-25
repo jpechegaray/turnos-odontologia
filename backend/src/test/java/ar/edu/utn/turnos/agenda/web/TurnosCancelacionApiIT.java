@@ -9,6 +9,7 @@ import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.agenda.DatosAgenda;
 import ar.edu.utn.turnos.agenda.domain.evento.HuecoLiberado;
 import ar.edu.utn.turnos.agenda.domain.evento.TurnoCancelado;
+import ar.edu.utn.turnos.reservapublica.token.ServicioTokenTurno;
 import ar.edu.utn.turnos.seguridad.domain.Rol;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import ar.edu.utn.turnos.shared.tiempo.RelojFijoConfig;
@@ -46,6 +47,9 @@ class TurnosCancelacionApiIT extends PruebaIntegracionBase {
 
     @Autowired
     ApplicationEvents eventos;
+
+    @Autowired
+    ServicioTokenTurno tokens;
 
     Long paciente;
     Long profesional;
@@ -361,6 +365,9 @@ class TurnosCancelacionApiIT extends PruebaIntegracionBase {
         var id = turno(Duration.ofHours(72), "PROGRAMADO");
 
         mockMvc.perform(cancelacion(id).with(csrfValido())).andExpect(status().isUnauthorized());
+        mockMvc.perform(cancelacion(id).with(csrfValido())
+                        .header("Authorization", "Bearer " + tokens.emitir(id).claro()))
+                .andExpect(status().isUnauthorized());
         assertThat(estado(id)).isEqualTo("PROGRAMADO");
     }
 
