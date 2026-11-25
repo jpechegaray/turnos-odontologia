@@ -14,11 +14,11 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 2. Dominio del turno
 
-- [ ] 2.1 Crear `EstadoTurno` con la tabla de transiciones de RN-12 y el record de dominio `Turno`. Se verifica con JUnit:
+- [x] 2.1 Crear `EstadoTurno` con la tabla de transiciones de RN-12 y el record de dominio `Turno`. Se verifica con JUnit:
   - los escenarios "Transiciones permitidas desde un turno programado" y "Un estado final no cambia", este último con `TURNO_TRANSICION_INVALIDA`;
   - `CONFIRMADO` también puede pasar a `CANCELADO`, `ATENDIDO` o `AUSENTE`;
   - un turno nuevo queda `PROGRAMADO` y con canal `INTERNO`.
-- [ ] 2.2 Crear los eventos `TurnoCreado`, `TurnoCancelado`, `TurnoReprogramado` y `HuecoLiberado` como records en `agenda.domain.evento`. Se verifica con `ArquitecturaTest` en verde: el paquete no depende de frameworks.
+- [x] 2.2 Crear los eventos `TurnoCreado`, `TurnoCancelado`, `TurnoReprogramado` y `HuecoLiberado` como records en `agenda.domain.evento`. Se verifica con `ArquitecturaTest` en verde: el paquete no depende de frameworks.
 
 ## 3. Validador puro
 

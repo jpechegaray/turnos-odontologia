@@ -108,7 +108,7 @@ Se separan como en `listaespera`:
 
 `TurnoCreado`, `TurnoCancelado`, `TurnoReprogramado` y `HuecoLiberado` son records sin dependencias en `agenda.domain.evento`.
 
-`CrearTurnoService` publica `TurnoCreado(turnoId, pacienteId, profesionalId, inicio, fin)` con `ApplicationEventPublisher`, después de guardar y dentro de la transacción. Los futuros oyentes usarán `@TransactionalEventListener` para actuar solo si la transacción se confirma. Hoy nadie escucha el evento.
+`CrearTurnoService` publica `TurnoCreado(turnoId, pacienteId, profesionalId, sillonId, intervalo)`, que arma `TurnoCreado.de(turno)` a partir del turno guardado, con `ApplicationEventPublisher`, después de guardar y dentro de la transacción. Los futuros oyentes usarán `@TransactionalEventListener` para actuar solo si la transacción se confirma. Hoy nadie escucha el evento.
 
 ### D8. API y seguridad
 
