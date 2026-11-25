@@ -66,6 +66,18 @@ export function formatearHora(instante: Instante): string {
   return `${dosDigitos(hora)}:${dosDigitos(minuto)}`;
 }
 
+/** Fecha local del consultorio en formato aaaa-mm-dd, el mismo que usa la API para las fechas civiles. */
+export function fechaLocal(instante: Instante): string {
+  const { dia, mes, anio } = partesLocales(aMilisegundos(instante));
+  return `${anio}-${dosDigitos(mes)}-${dosDigitos(dia)}`;
+}
+
+/** Minutos transcurridos desde la medianoche del consultorio (0 a 1439). */
+export function minutosDelDia(instante: Instante): number {
+  const { hora, minuto } = partesLocales(aMilisegundos(instante));
+  return hora * 60 + minuto;
+}
+
 /** Diferencia en milisegundos entre la hora local de la zona y UTC en ese instante. */
 function desfase(milis: number): number {
   const segundoExacto = Math.floor(milis / 1000) * 1000;

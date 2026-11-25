@@ -1,0 +1,78 @@
+/*
+ * Agenda del personal (C-40). Toma la sección "Agenda diaria por sillón" de design-system/components.html
+ * y usa solo variables de design-system/tokens.css (regla 13). La cantidad de columnas y de filas llega
+ * en línea como --agenda-columnas y --agenda-filas; cada fila representa 15 minutos (--agenda-row-h).
+ */
+/* minmax(0, 1fr): la grilla ancha se desplaza dentro de su contenedor sin ensanchar la página. */
+.pagina-agenda { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+
+.agenda-barra { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: flex-end; }
+.agenda-barra__grupo { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.agenda-periodo { margin: 0; font-size: var(--text-lg); font-weight: var(--weight-semibold); }
+.agenda-periodo[aria-busy="true"] { color: var(--color-text-muted); }
+
+/* Vista diaria */
+.agenda-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+.agenda-wrap:focus-visible, .semana:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.agenda { display: grid; grid-template-columns: 56px repeat(var(--agenda-columnas, 1), minmax(160px, 1fr)); }
+.agenda__columna {
+  display: grid;
+  grid-template-rows: 44px repeat(var(--agenda-filas, 1), var(--agenda-row-h));
+  /* Fuera del horario de atención la columna queda atenuada; las líneas marcan cada fila. */
+  background-color: var(--color-surface-muted);
+  background-image: linear-gradient(to bottom, transparent calc(var(--agenda-row-h) - 1px), var(--agenda-linea) 0);
+  background-size: 100% var(--agenda-row-h);
+  background-position: 0 44px;
+  border-left: 1px solid var(--color-border);
+}
+.agenda__columna--horas { background-color: var(--color-surface); border-left: 0; }
+.agenda__columna > * { grid-column: 1; }
+.agenda__col-head { grid-row: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 var(--space-3);
+  font-weight: var(--weight-semibold); font-size: var(--text-sm); background: var(--color-surface-muted);
+  border-bottom: 1px solid var(--color-border-strong); position: sticky; top: 0; z-index: 2; }
+.agenda__col-head small { font-weight: var(--weight-regular); color: var(--color-text-muted); font-size: var(--text-xs); }
+.agenda__corner { grid-row: 1; background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border-strong); }
+.agenda__time { font-size: var(--text-xs); color: var(--color-text-muted); padding: 2px var(--space-2) 0 0; text-align: right; }
+.agenda__time--hour { font-weight: var(--weight-semibold); color: var(--color-text); }
+.agenda__atencion { background: var(--color-surface); border-bottom: 1px solid var(--agenda-linea-hora); }
+
+.slot { position: relative; z-index: 1; margin: 1px 3px; padding: 3px var(--space-2); border-radius: var(--radius-sm); border: 1px solid;
+  font-size: var(--text-xs); line-height: 1.25; overflow: hidden; display: flex; flex-direction: column; gap: 1px; }
+.slot strong, .semana__item strong { font-size: var(--text-sm); font-weight: var(--weight-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot__meta { font-weight: var(--weight-medium); }
+/* En un turno de 30 minutos entran tres líneas: nada se encoge y el badge comparte línea con el detalle. */
+.slot > *, .semana__item > * { flex-shrink: 0; min-width: 0; }
+.slot__pie { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.slot__pie .slot__detalle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot .badge, .semana__item .badge { align-self: flex-start; padding-block: 0; line-height: 1.25; }
+.slot--bloqueo { background: repeating-linear-gradient(135deg, var(--agenda-bloqueo-bg) 0 8px, transparent 8px 16px), var(--agenda-bloqueo-bg);
+  color: var(--agenda-bloqueo-fg); border-color: var(--agenda-bloqueo-border); }
+.slot--cancelado strong, .semana__item--cancelado strong { text-decoration: line-through; }
+
+/* El nombre del paciente abre la ficha: se ve como texto con subrayado, no como un botón de acción. */
+.slot__paciente { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.slot__paciente:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+
+/* Vista semanal */
+.semana { display: grid; grid-template-columns: repeat(7, minmax(150px, 1fr)); gap: var(--space-2); overflow-x: auto;
+  padding-bottom: var(--space-2); }
+.semana__dia { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2); min-width: 0;
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.semana__titulo { margin: 0; font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.semana__atencion { margin: 0; padding: 0; list-style: none; font-size: var(--text-xs); color: var(--color-text-muted); }
+.semana__lista { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+.semana__item { display: flex; flex-direction: column; gap: 1px; padding: var(--space-2); font-size: var(--text-xs);
+  border: 1px solid; border-left-width: 4px; border-radius: var(--radius-sm); min-width: 0; overflow: hidden; }
+.semana__vacio { margin: 0; font-size: var(--text-xs); color: var(--color-text-muted); }
+
+.leyenda { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+
+.ficha-paciente { display: grid; gap: var(--space-3); justify-items: start; }
+.ficha-paciente__datos { display: grid; grid-template-columns: auto 1fr; gap: var(--space-1) var(--space-4); margin: 0; font-size: var(--text-sm); }
+.ficha-paciente__datos dt { color: var(--color-text-muted); }
+.ficha-paciente__datos dd { margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slot__paciente { transition: none; }
+}
