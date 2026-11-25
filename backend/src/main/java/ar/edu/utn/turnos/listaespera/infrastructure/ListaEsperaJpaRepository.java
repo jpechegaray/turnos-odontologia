@@ -23,6 +23,16 @@ interface ListaEsperaJpaRepository extends JpaRepository<ListaEsperaJpa, Long> {
     List<ListaEsperaJpa> filtrar(@Param("estado") EstadoListaEspera estado, @Param("pacienteId") Long pacienteId,
             @Param("prestacionId") Long prestacionId);
 
+    /** Candidatas a un hueco (design D4): solo reduce el volumen; la regla final es la función pura. */
+    @Query("""
+            select e from ListaEsperaJpa e
+            where e.estado = ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera.ACTIVA
+              and (e.profesionalId is null or e.profesionalId = :profesionalId)
+              and e.fechaDesde <= :fecha and e.fechaHasta >= :fecha
+            order by e.creadoEn asc, e.id asc
+            """)
+    List<ListaEsperaJpa> candidatas(@Param("profesionalId") Long profesionalId, @Param("fecha") LocalDate fecha);
+
     @Modifying
     @Query("""
             update ListaEsperaJpa e set e.estado = ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera.VENCIDA

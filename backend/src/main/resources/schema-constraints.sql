@@ -173,6 +173,18 @@ $$
 ^^^
 CREATE INDEX IF NOT EXISTS ix_notificacion_estado_programada ON notificacion_enviada (estado, programada_para)
 ^^^
+-- C-27 (RN-19): el usuario del personal que canceló el turno. Nulo cuando cancela el paciente por token.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_turno_cancelado_por_usuario' AND conrelid = 'turno'::regclass
+    ) THEN
+        ALTER TABLE turno ADD CONSTRAINT fk_turno_cancelado_por_usuario
+            FOREIGN KEY (cancelado_por_usuario_id) REFERENCES usuario (id);
+    END IF;
+END
+$$
+^^^
 -- C-32: referencia entre módulos por ID, sin acoplar entidades JPA.
 DO $$
 BEGIN

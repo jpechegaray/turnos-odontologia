@@ -26,7 +26,8 @@ public record Turno(
         boolean cancelacionTardia,
         boolean reprogramadoTarde,
         Instant canceladoEn,
-        String canceladoPor,
+        ActorCancelacion canceladoPor,
+        Long canceladoPorUsuarioId,
         String motivoCancelacion,
         Long creadoPorUsuarioId,
         Instant creadoEn,
@@ -51,7 +52,7 @@ public record Turno(
             Intervalo intervalo, String notas, Long creadoPorUsuarioId, Instant creadoEn) {
         int duracion = Math.toIntExact(Duration.between(intervalo.inicio(), intervalo.fin()).toMinutes());
         return new Turno(null, pacienteId, profesionalId, sillonId, prestacionId, intervalo, duracion,
-                EstadoTurno.PROGRAMADO, CanalTurno.INTERNO, notas, false, false, null, null, null,
+                EstadoTurno.PROGRAMADO, CanalTurno.INTERNO, notas, false, false, null, null, null, null,
                 creadoPorUsuarioId, creadoEn, null);
     }
 
@@ -62,7 +63,27 @@ public record Turno(
                     "El turno no puede pasar de " + estado + " a " + destino);
         }
         return new Turno(id, pacienteId, profesionalId, sillonId, prestacionId, intervalo, duracionMin, destino,
-                canal, notas, cancelacionTardia, reprogramadoTarde, canceladoEn, canceladoPor, motivoCancelacion,
-                creadoPorUsuarioId, creadoEn, version);
+                canal, notas, cancelacionTardia, reprogramadoTarde, canceladoEn, canceladoPor, canceladoPorUsuarioId,
+                motivoCancelacion, creadoPorUsuarioId, creadoEn, version);
+    }
+
+    /**
+     * Cancela el turno (RN-05, RN-12, RN-19). Primero aplica la transición, así un turno en estado final
+     * responde 409 aunque ya haya pasado; después rechaza con 422 un turno que ya empezó (a la hora exacta
+     * de inicio ya empezó). Registra quién, cuándo, el motivo y si la cancelación es tardía.
+     *
+     * @param usuarioId usuario del personal que cancela; null cuando el actor es el paciente por token
+     */
+    public Turno cancelar(ActorCancelacion actor, Long usuarioId, String motivo, Instant ahora, Duration plazo) {
+        Objects.requireNonNull(actor, "actor");
+        var cancelado = pasarA(EstadoTurno.CANCELADO);
+        if (!ahora.isBefore(intervalo.inicio())) {
+            throw new ReglaNegocioException("RN-05", EstadoError.NO_PROCESABLE_422,
+                    "No se puede cancelar un turno que ya empezó; se registra la asistencia (RN-20)");
+        }
+        boolean tardia = PoliticaCancelacion.esTardia(intervalo.inicio(), ahora, plazo);
+        return new Turno(id, pacienteId, profesionalId, sillonId, prestacionId, intervalo, duracionMin,
+                cancelado.estado(), canal, notas, tardia, reprogramadoTarde, ahora, actor,
+                actor == ActorCancelacion.USUARIO ? usuarioId : null, motivo, creadoPorUsuarioId, creadoEn, version);
     }
 }

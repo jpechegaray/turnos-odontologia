@@ -32,4 +32,11 @@ public class BloqueosPersistencia implements BloqueoConsulta {
     public boolean solapa(Long profesionalId, Intervalo intervalo) {
         return bloqueos.solapa(profesionalId, intervalo.inicio(), intervalo.fin());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BloqueoDatos> queSolapan(Long profesionalId, Intervalo intervalo) {
+        return bloqueos.queSolapan(profesionalId, intervalo.inicio(), intervalo.fin()).stream()
+                .map(Bloqueo::datos).toList();
+    }
 }

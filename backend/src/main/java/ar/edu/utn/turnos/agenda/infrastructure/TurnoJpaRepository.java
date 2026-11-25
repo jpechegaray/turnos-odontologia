@@ -14,6 +14,11 @@ interface TurnoJpaRepository extends JpaRepository<TurnoJpa, Long> {
     @Query("select t from TurnoJpa t where t.id = :id")
     Optional<TurnoJpa> bloquearPorId(@Param("id") Long id);
 
+    /** {@code SELECT ... FOR UPDATE}: las modificaciones del mismo turno se ordenan (C-27, design D5). */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from TurnoJpa t where t.id = :id")
+    Optional<TurnoJpa> paraActualizar(@Param("id") Long id);
+
     /**
      * Turnos que ocupan lugar (no CANCELADO, RN-10) del profesional o del sillón y que comparten algún
      * instante con {@code [inicio, fin)}: la misma comparación estricta que {@code Intervalo.solapaCon} (RN-02).

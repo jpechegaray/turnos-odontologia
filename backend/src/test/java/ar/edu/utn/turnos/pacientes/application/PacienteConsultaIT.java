@@ -7,7 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,5 +87,28 @@ class PacienteConsultaIT extends PruebaIntegracionBase {
         // THEN
         assertThat(encontradoPorId).isNotPresent();
         assertThat(encontradoPorEmail).isNotPresent();
+    }
+
+    @Test
+    @DisplayName("La consulta por varios identificadores devuelve solo los pedidos e ignora los inexistentes")
+    void consultaPorVariosIdentificadores() {
+        Long primero = repositorio.guardar(Paciente.nuevo("Ana", "Ficticia", null, "varios1@example.test", null,
+                null, null, null)).id();
+        Long segundo = repositorio.guardar(Paciente.nuevo("Bruno", "Inventado", null, "varios2@example.test", null,
+                null, null, null)).id();
+        repositorio.guardar(Paciente.nuevo("Carla", "Nopedida", null, "varios3@example.test", null,
+                null, null, null));
+
+        Map<Long, Paciente> encontrados = consulta.porIds(Set.of(primero, segundo, Long.MAX_VALUE));
+
+        assertThat(encontrados).containsOnlyKeys(primero, segundo);
+        assertThat(encontrados.get(primero).apellido()).isEqualTo("Ficticia");
+        assertThat(encontrados.get(segundo).nombre()).isEqualTo("Bruno");
+    }
+
+    @Test
+    @DisplayName("La consulta por un conjunto vacío de identificadores devuelve vacío")
+    void consultaPorConjuntoVacio() {
+        assertThat(consulta.porIds(Set.of())).isEmpty();
     }
 }

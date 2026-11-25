@@ -113,10 +113,22 @@ public class SecurityConfig {
                         // Lista de espera (C-18): el odontólogo solo lee; 403 antes de validar el cuerpo.
                         .requestMatchers(HttpMethod.POST, "/api/lista-espera").hasAnyRole("ADMIN", "RECEPCION")
                         .requestMatchers(HttpMethod.DELETE, "/api/lista-espera/{id}").hasAnyRole("ADMIN", "RECEPCION")
+                        // Sugerencias de un hueco (C-31): sirven para asignarlo, así que el odontólogo no las ve.
+                        .requestMatchers(HttpMethod.GET, "/api/lista-espera/compatibles")
+                            .hasAnyRole("ADMIN", "RECEPCION")
                         // Turnos (C-19): el odontólogo no da turnos (RN-20, RN-33); 403 antes de validar el cuerpo.
                         .requestMatchers(HttpMethod.POST, "/api/turnos").hasAnyRole("ADMIN", "RECEPCION")
+                        // Cancelar (C-27): ídem; el odontólogo recibe 403 antes de validar el motivo.
+                        .requestMatchers(HttpMethod.POST, "/api/turnos/{id}/cancelar").hasAnyRole("ADMIN", "RECEPCION")
                         // Registro de notificaciones (C-25, US-020): el odontólogo no lo consulta.
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasAnyRole("ADMIN", "RECEPCION")
+                        // Regla general de RN-33 (C-28): el odontólogo es solo lectura. Va después de las reglas
+                        // específicas (login y públicas ya se resolvieron arriba; logout lo atiende LogoutFilter)
+                        // y da 403 antes de que MVC valide el cuerpo. Las restricciones solo-ADMIN siguen aplicando.
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configuracionCors(origen)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/public/**")
