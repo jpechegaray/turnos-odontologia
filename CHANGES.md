@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 35 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35, C-37 y C-40; Ola 6: C-45). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-44 y C-46. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 38 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-29, C-31, C-32, C-33 y C-34; Ola 5: C-35, C-36, C-37 y C-40; Ola 6: C-45). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-42 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-30, C-43, C-44 y C-46. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -53,9 +53,9 @@
 | C-31 | ✅ hecho | **Juan Pablo** | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
 | C-32 | ✅ hecho | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
 | C-33 | ✅ hecho | Juan Pablo (Cualquiera) | 4 | M | datos-ficticios-seed | C-03, C-05, C-07, C-10, C-11, C-19 |  |
-| C-34 | ⬜ pendiente | Cualquiera | 4 | S | front-registro-notificaciones | C-16, C-25 |  |
+| C-34 | ✅ hecho | Valentino (Cualquiera) | 4 | S | front-registro-notificaciones | C-16, C-25 |  |
 | C-35 | ✅ hecho | **Juan Pablo** | 5 | M | reprogramar-turno | C-19, C-27 |  |
-| C-36 | ⬜ pendiente | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
+| C-36 | ✅ hecho | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
 | C-37 | ✅ hecho | Juan Pablo (Cualquiera) | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
 | C-38 | ⬜ pendiente | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
@@ -1206,8 +1206,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: Es el único change que edita `shared.seed`.
 
 ### [C-34] `C-34-front-registro-notificaciones`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 4 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Valentino (PR #125, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Valentino (era Cualquiera) — **Ola**: 4 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `features/notificaciones`: listado filtrable por estado y turno, con el último error de las fallidas
   - Tests Vitest
@@ -1246,7 +1246,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-06 abierta: la política de reprogramación tardía del personal (hoy se permite y se registra) puede cambiar; solo afecta la marca `reprogramado_tarde`. RM-04.
 
 ### [C-36] `C-36-oferta-hueco-aviso-automatico`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Valentino (PR #121, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Valentino — **Ola**: 5 — **Tamaño**: L (8-10 h)
 - **Scope**:
   - Entidad `OfertaHueco` (hash de token único, `expira_en` igual al inicio del hueco, estado `ENVIADA|TOMADA|VENCIDA`, única por `(lista_espera_id, profesional_id, hueco_inicio)`) en `listaespera.oferta`
