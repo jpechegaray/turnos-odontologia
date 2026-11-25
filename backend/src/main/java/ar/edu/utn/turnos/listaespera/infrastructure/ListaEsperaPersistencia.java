@@ -47,6 +47,11 @@ public class ListaEsperaPersistencia {
         return entradas.filtrar(estado, pacienteId, prestacionId).stream().map(ListaEsperaJpa::dominio).toList();
     }
 
+    /** Entradas activas del profesional o sin preferido cuyo rango incluye la fecha, por antigüedad. */
+    public List<EntradaListaEspera> candidatas(Long profesionalId, LocalDate fecha) {
+        return entradas.candidatas(profesionalId, fecha).stream().map(ListaEsperaJpa::dominio).toList();
+    }
+
     public int vencerAnterioresA(LocalDate hoy) {
         return entradas.vencerAnterioresA(hoy);
     }

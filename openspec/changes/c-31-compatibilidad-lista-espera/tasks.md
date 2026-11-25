@@ -34,10 +34,10 @@
 
 ## 2. Persistencia y aplicación
 
-- [ ] 2.1 Agregar `ListaEsperaPersistencia.candidatas(profesionalId, fecha)` (design D4). Se verifica con Testcontainers:
+- [x] 2.1 Agregar `ListaEsperaPersistencia.candidatas(profesionalId, fecha)` (design D4). Se verifica con Testcontainers:
   - trae solo entradas `ACTIVA`, del profesional o sin preferido, con la fecha dentro del rango, incluidos los extremos;
   - las devuelve ordenadas por antigüedad.
-- [ ] 2.2 Crear `BuscadorCompatibles` con `compatibles(Hueco)` y `aAvisar(Hueco)` (design D5). Se verifica con Testcontainers:
+- [x] 2.2 Crear `BuscadorCompatibles` con `compatibles(Hueco)` y `aAvisar(Hueco)` (design D5). Se verifica con Testcontainers:
   - filtra por duración, por `realiza` y por prestación inactiva;
   - `aAvisar` aplica el tope de la configuración y la deduplicación;
   - funciona sin usuario autenticado.
