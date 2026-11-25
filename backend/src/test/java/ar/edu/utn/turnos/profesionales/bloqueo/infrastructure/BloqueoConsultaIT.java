@@ -53,6 +53,22 @@ class BloqueoConsultaIT extends PruebaIntegracionBase {
         assertThat(consulta.solapa(otroProfesional, intervalo(30, 90))).isFalse();
     }
 
+    @Test
+    @DisplayName("Los bloqueos que tocan el intervalo se listan con sus datos y respetan [inicio, fin)")
+    void listaBloqueosQueSolapan() {
+        jdbc.update("insert into bloqueo (profesional_id, inicio, fin, motivo) values (?, ?, ?, ?)",
+                otroProfesional, DIEZ, DIEZ.plusHours(2), "Vacaciones");
+
+        assertThat(consulta.queSolapan(profesional, intervalo(30, 90)))
+                .extracting(b -> b.profesionalId() + "-" + b.motivo())
+                .containsExactly(profesional + "-Congreso");
+        assertThat(consulta.queSolapan(null, intervalo(30, 90)))
+                .extracting(b -> b.profesionalId() + "-" + b.motivo())
+                .contains(profesional + "-Congreso", otroProfesional + "-Vacaciones");
+        assertThat(consulta.queSolapan(profesional, intervalo(60, 90))).isEmpty();
+        assertThat(consulta.queSolapan(profesional, intervalo(-30, 0))).isEmpty();
+    }
+
     private Long crearProfesional(String matricula) {
         return jdbc.queryForObject("""
                 insert into profesional (nombre, apellido, matricula, activo)

@@ -133,7 +133,9 @@ class SesionPersonalIT extends PruebaIntegracionBase {
     @DisplayName("Una operación que requiere CSRF rechaza tokens faltantes o inválidos")
     void rechazaCsrfFaltanteOInvalido() throws Exception {
         String email = "csrf@consultorio.test";
-        guardar(email);
+        // RECEPCION y no ODONTOLOGO: desde C-28 toda escritura del odontólogo da 403 antes de llegar al
+        // controlador (RN-33), y este test verifica CSRF, no permisos por rol.
+        guardar(email, Rol.RECEPCION);
         MockHttpSession sesion = ingresar(email);
         Cookie csrf = obtenerCsrf(sesion);
         var loginSinCsrf = post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
@@ -217,9 +219,13 @@ class SesionPersonalIT extends PruebaIntegracionBase {
     }
 
     private String guardar(String email) {
+        return guardar(email, Rol.ODONTOLOGO);
+    }
+
+    private String guardar(String email, Rol rol) {
         String hash = new BCryptPasswordEncoder().encode(CLAVE);
         usuarios.saveAndFlush(new Usuario(email, hash, "Personal Ficticio",
-                Rol.ODONTOLOGO, Instant.parse("2026-11-21T12:00:00Z")));
+                rol, Instant.parse("2026-11-21T12:00:00Z")));
         return hash;
     }
 
