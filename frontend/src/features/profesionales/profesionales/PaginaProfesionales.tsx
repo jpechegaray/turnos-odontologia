@@ -3,6 +3,7 @@ import { api } from "../../../shared/api/clienteApi";
 import { Alerta, Boton, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
 import { AccionesFila } from "../AccionesFila";
 import { useEsAdministrador } from "../permisos";
+import "../panel-agenda.css";
 import { mensajeDeError } from "./errores";
 import { FormularioProfesional } from "./FormularioProfesional";
 import { cuerpoModificacion, type ProfesionalRespuesta, type ProfesionalSolicitud } from "./tipos";
@@ -26,18 +27,25 @@ export type PanelProfesionalProps = Readonly<{
   informarError: (mensaje: string) => void;
 }>;
 
+/** Pieza que se abre desde una acción de fila con la etiqueta indicada. */
+export type PanelDefinicion = Readonly<{ etiqueta: string; Componente: ComponentType<PanelProfesionalProps> }>;
+
 export type PaginaProfesionalesProps = Readonly<{
   /**
-   * Punto de extensión: la acción de fila `etiqueta` elige un profesional y monta `Componente`
-   * debajo de la tabla con `key` por id. Sin `panel`, la página no ofrece esa acción.
+   * Punto de extensión: cada panel suma una acción de fila con su `etiqueta`, en este orden. Elegirla
+   * monta su `Componente` debajo de la tabla, de a uno por vez, con `key` por etiqueta e id. Sin
+   * `paneles`, la página no ofrece esas acciones.
    */
-  panel?: Readonly<{ etiqueta: string; Componente: ComponentType<PanelProfesionalProps> }>;
+  paneles?: readonly PanelDefinicion[];
 }>;
 
-export function PaginaProfesionales({ panel }: PaginaProfesionalesProps = {}) {
+/** Panel abierto: qué pieza y para qué profesional. */
+type Seleccion = Readonly<{ etiqueta: string; profesional: ProfesionalRespuesta }>;
+
+export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps = {}) {
   const esAdmin = useEsAdministrador();
   const { estado, recargar } = useProfesionales();
-  const [seleccionado, actualizarSeleccionado] = useState<ProfesionalRespuesta>();
+  const [seleccion, actualizarSeleccion] = useState<Seleccion>();
   const [aviso, actualizarAviso] = useState<string>();
   const [editando, actualizarEditando] = useState<ProfesionalRespuesta>();
   const [confirmandoBaja, actualizarConfirmandoBaja] = useState<number>();
@@ -76,21 +84,31 @@ export function PaginaProfesionales({ panel }: PaginaProfesionalesProps = {}) {
     }
   }
 
-  const accionPanel = (p: ProfesionalRespuesta) =>
-    panel && (
-      <Boton variante="secundaria" tamano="chico" onClick={() => {
-        actualizarErrorAccion(undefined);
-        actualizarSeleccionado(p);
-      }}>
-        {panel.etiqueta}
-      </Boton>
+  const accionesPanel = (p: ProfesionalRespuesta) =>
+    paneles.length > 0 && (
+      <>
+        {paneles.map(({ etiqueta }) => (
+          <Boton
+            key={etiqueta}
+            variante="secundaria"
+            tamano="chico"
+            aria-pressed={seleccion?.etiqueta === etiqueta && seleccion.profesional.id === p.id}
+            onClick={() => {
+              actualizarErrorAccion(undefined);
+              actualizarSeleccion({ etiqueta, profesional: p });
+            }}
+          >
+            {etiqueta}
+          </Boton>
+        ))}
+      </>
     );
 
-  // Roles de consulta: sin acciones de escritura; si hay `panel`, solo la acción que lo abre
-  // (visible para los tres roles) en una columna que no se llama «Acciones».
-  const columnasConsulta: readonly ColumnaTabla<ProfesionalRespuesta>[] = !panel ? COLUMNAS : [
+  // Roles de consulta: sin acciones de escritura; si hay `paneles`, solo las acciones que los abren
+  // (visibles para los tres roles) en una columna que no se llama «Acciones».
+  const columnasConsulta: readonly ColumnaTabla<ProfesionalRespuesta>[] = paneles.length === 0 ? COLUMNAS : [
     ...COLUMNAS,
-    { clave: "detalle", titulo: "Detalle", celda: (p) => accionPanel(p) },
+    { clave: "detalle", titulo: "Detalle", celda: (p) => accionesPanel(p) },
   ];
 
   const columnas: readonly ColumnaTabla<ProfesionalRespuesta>[] = !esAdmin ? columnasConsulta : [
@@ -107,15 +125,17 @@ export function PaginaProfesionales({ panel }: PaginaProfesionalesProps = {}) {
           onSolicitarBaja={(profesional) => actualizarConfirmandoBaja(profesional.id)}
           onConfirmarBaja={(profesional) => void cambiarEstado(profesional, false)}
           onCancelarBaja={() => actualizarConfirmandoBaja(undefined)}
-          extra={accionPanel(p)}
+          extra={accionesPanel(p)}
         />
       ),
     },
   ];
 
   // Tras una recarga que ya no trae al elegido, el panel se cierra; mientras carga, sigue montado.
-  const seleccionadoVigente =
-    estado.tipo === "listo" ? estado.profesionales.find((p) => p.id === seleccionado?.id) : seleccionado;
+  const seleccionadoVigente = estado.tipo === "listo"
+    ? estado.profesionales.find((p) => p.id === seleccion?.profesional.id)
+    : seleccion?.profesional;
+  const panelAbierto = paneles.find((p) => p.etiqueta === seleccion?.etiqueta);
 
   function contenido(actual: EstadoProfesionales) {
     switch (actual.tipo) {
@@ -161,9 +181,9 @@ export function PaginaProfesionales({ panel }: PaginaProfesionalesProps = {}) {
       {aviso && <Toast mensaje={aviso} />}
       {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
       {contenido(estado)}
-      {panel && seleccionadoVigente && (
-        <panel.Componente
-          key={seleccionadoVigente.id}
+      {panelAbierto && seleccionadoVigente && (
+        <panelAbierto.Componente
+          key={`${panelAbierto.etiqueta}-${seleccionadoVigente.id}`}
           profesional={seleccionadoVigente}
           refrescarLista={recargar}
           informarError={actualizarErrorAccion}

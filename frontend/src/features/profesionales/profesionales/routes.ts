@@ -1,16 +1,25 @@
 import { createElement } from "react";
 import type { RutaFeature } from "../../../app/rutas/tipos";
+import { PanelBloqueos } from "../bloqueos/PanelBloqueos";
+import { PanelHorarios } from "../horarios/PanelHorarios";
 import { PanelPrestaciones } from "../prestaciones/PanelPrestaciones";
-import { PaginaProfesionales, type PaginaProfesionalesProps } from "./PaginaProfesionales";
+import { PaginaProfesionales, type PaginaProfesionalesProps, type PanelDefinicion } from "./PaginaProfesionales";
 
-const PANEL_PRESTACIONES: NonNullable<PaginaProfesionalesProps["panel"]> = {
+const PANEL_PRESTACIONES: PanelDefinicion = {
   etiqueta: "Prestaciones",
   Componente: PanelPrestaciones,
 };
 
-/** `/profesionales` con el panel de prestaciones conectado a la acción de fila «Prestaciones». */
+/** Paneles por profesional, en el orden de sus acciones de fila. */
+const PANELES: readonly PanelDefinicion[] = [
+  PANEL_PRESTACIONES,
+  { etiqueta: "Horarios", Componente: PanelHorarios },
+  { etiqueta: "Bloqueos", Componente: PanelBloqueos },
+];
+
+/** `/profesionales` con los paneles conectados a sus acciones de fila. */
 function PantallaProfesionales() {
-  return createElement<PaginaProfesionalesProps>(PaginaProfesionales, { panel: PANEL_PRESTACIONES });
+  return createElement<PaginaProfesionalesProps>(PaginaProfesionales, { paneles: PANELES });
 }
 
 export const rutas: RutaFeature[] = [
