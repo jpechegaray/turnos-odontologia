@@ -5,3 +5,9 @@ export function useEsAdministrador(): boolean {
   const { estado } = useSesion();
   return estado.tipo === "activa" && estado.identidad.rol === "ADMIN";
 }
+
+/** `ADMIN` y `RECEPCION` editan horarios y bloqueos; `ODONTOLOGO` solo los consulta (RN-33). */
+export function usePuedeGestionarAgenda(): boolean {
+  const { estado } = useSesion();
+  return estado.tipo === "activa" && (estado.identidad.rol === "ADMIN" || estado.identidad.rol === "RECEPCION");
+}

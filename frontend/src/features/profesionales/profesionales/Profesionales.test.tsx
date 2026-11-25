@@ -7,6 +7,7 @@ import { construirRegistro } from "../../../app/rutas/registro";
 import { simularSesionActiva, type ResponderSimulado } from "../../../app/sesion.fixture";
 import type { Rol } from "../../../app/rutas/tipos";
 import { rutas } from "./routes";
+import { PaginaProfesionales, type PaginaProfesionalesProps, type PanelProfesionalProps } from "./PaginaProfesionales";
 
 type FetchSimulado = ReturnType<typeof simularSesionActiva>["fetch"];
 
@@ -471,4 +472,59 @@ it("El odontólogo sin vínculo ve un aviso de falta de vínculo", async () => {
   expect(screen.getByRole("navigation", { name: "Principal" })).toBeInTheDocument();
   sinControlesDeEscritura();
   expect(escrituras(fetch)).toHaveLength(0);
+});
+
+// --- C-22. Varios paneles por fila ---
+
+function PanelDePrueba(nombre: string) {
+  return function Panel({ profesional }: PanelProfesionalProps) {
+    return <section aria-label={`${nombre} de ${profesional.apellido}`}>{nombre}</section>;
+  };
+}
+
+const PANELES_DE_PRUEBA: PaginaProfesionalesProps["paneles"] = ["Prestaciones", "Horarios", "Bloqueos"].map(
+  (etiqueta) => ({ etiqueta, Componente: PanelDePrueba(etiqueta) }),
+);
+
+const registroConPaneles = construirRegistro({
+  profesionales: {
+    rutas: [
+      {
+        ruta: "/profesionales",
+        componente: () => <PaginaProfesionales paneles={PANELES_DE_PRUEBA} />,
+        roles: ["ADMIN", "RECEPCION", "ODONTOLOGO"],
+      },
+    ],
+  },
+});
+
+it("Cada fila ofrece Prestaciones, Horarios y Bloqueos y abre un solo panel a la vez", async () => {
+  for (const rol of ["ADMIN", "RECEPCION"] as const) {
+    simularSesionActiva(rol, responderLista([PEREZ]));
+    const montado = render(
+      <MemoryRouter initialEntries={["/profesionales"]}>
+        <AppRutas registro={registroConPaneles} />
+      </MemoryRouter>,
+    );
+
+    const fila = await screen.findByRole("row", { name: /Pérez/ });
+    const etiquetas = within(fila)
+      .getAllByRole("button")
+      .map((b) => b.textContent)
+      .filter((t) => ["Prestaciones", "Horarios", "Bloqueos"].includes(t ?? ""));
+    expect(etiquetas).toEqual(["Prestaciones", "Horarios", "Bloqueos"]);
+
+    await userEvent.click(within(fila).getByRole("button", { name: "Horarios" }));
+    expect(await screen.findByRole("region", { name: "Horarios de Pérez" })).toBeInTheDocument();
+    expect(within(fila).getByRole("button", { name: "Horarios" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(fila).getByRole("button", { name: "Bloqueos" })).toHaveAttribute("aria-pressed", "false");
+
+    await userEvent.click(within(fila).getByRole("button", { name: "Bloqueos" }));
+    expect(await screen.findByRole("region", { name: "Bloqueos de Pérez" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Horarios de Pérez" })).not.toBeInTheDocument();
+    expect(within(fila).getByRole("button", { name: "Bloqueos" })).toHaveAttribute("aria-pressed", "true");
+
+    montado.unmount();
+    vi.unstubAllGlobals();
+  }
 });
