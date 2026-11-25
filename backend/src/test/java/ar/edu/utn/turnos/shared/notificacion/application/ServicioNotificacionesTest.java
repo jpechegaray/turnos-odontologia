@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 
 import ar.edu.utn.turnos.configuracion.application.ConfiguracionServicio;
 import ar.edu.utn.turnos.shared.notificacion.domain.EstadoNotificacion;
+import ar.edu.utn.turnos.shared.notificacion.domain.MensajeNotificacion;
 import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionEnviada;
+import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionPort;
 import ar.edu.utn.turnos.shared.notificacion.domain.NotificacionRepositorio;
 import ar.edu.utn.turnos.shared.notificacion.domain.TipoNotificacion;
 import ar.edu.utn.turnos.shared.notificacion.infrastructure.InMemoryNotificacionAdapter;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -207,6 +210,62 @@ class ServicioNotificacionesTest {
         servicio.procesarVencidas();
         assertThat(repositorio.porId(aviso.id()).orElseThrow().intentos()).isEqualTo(2);
         assertThat(adaptador.intentos()).isEqualTo(intentosAntesDelCorte);
+    }
+
+    @Test
+    @DisplayName("Un envío en curso no se duplica con el planificador")
+    void unEnvioEnCursoNoSeDuplicaConElPlanificador() {
+        // El planificador corre mientras el envío inmediato todavía no terminó: la fila recién registrada
+        // no debe estar a su alcance, o el paciente recibe el mismo email dos veces.
+        List<MensajeNotificacion> enviados = new java.util.ArrayList<>();
+        ServicioNotificaciones[] enCurso = new ServicioNotificaciones[1];
+        AtomicBoolean planificadorDisparado = new AtomicBoolean();
+        NotificacionPort puerto = mensaje -> {
+            if (planificadorDisparado.compareAndSet(false, true)) {
+                enCurso[0].procesarVencidas();
+            }
+            enviados.add(mensaje);
+        };
+        enCurso[0] = servicioCon(puerto, List.of());
+
+        enCurso[0].registrarYEnviar(TipoNotificacion.RECORDATORIO, 10L, null, 5L, datos("ana@example.test"));
+
+        assertThat(enviados).hasSize(1);
+        NotificacionEnviada fila = repositorio.todos().get(0);
+        assertThat(fila.estado()).isEqualTo(EstadoNotificacion.ENVIADA);
+        assertThat(fila.intentos()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Un reintento vuelve a armar el mensaje con los datos del consumidor")
+    void unReintentoVuelveAArmarElMensajeConLosDatosDelConsumidor() {
+        ReconstructorDatosNotificacion consumidor = notificacion -> notificacion.turnoId() != null
+                && notificacion.turnoId() == 10L
+                ? Optional.of(datos(notificacion.destinatario()))
+                : Optional.empty();
+        ServicioNotificaciones conConsumidor = servicioCon(adaptador, List.of(consumidor));
+        adaptador.fallarProximos(1);
+
+        conConsumidor.registrarYEnviar(TipoNotificacion.RECORDATORIO, 10L, null, 5L, datos("ana@example.test"));
+        reloj.ajustar(repositorio.todos().get(0).programadaPara());
+        conConsumidor.procesarVencidas();
+
+        assertThat(adaptador.enviados()).singleElement().satisfies(mensaje -> assertThat(mensaje.cuerpo())
+                .contains("Hola Ana Ficticia", "Prestación: Limpieza", "Profesional: Dra. Ficticia", "Enlace: https://t/abc"));
+    }
+
+    private ServicioNotificaciones servicioCon(
+            NotificacionPort puerto, List<ReconstructorDatosNotificacion> reconstructores) {
+        ConfiguracionServicio configuracion = mock(ConfiguracionServicio.class);
+        when(configuracion.nombreConsultorio()).thenReturn("Consultorio Ficticio");
+        return new ServicioNotificaciones(
+                repositorio,
+                puerto,
+                new PlantillaNotificacion(configuracion),
+                propiedades(),
+                reloj,
+                gestorDeTransaccionesNulo(),
+                reconstructores);
     }
 
     // ---------- Dobles de prueba ----------

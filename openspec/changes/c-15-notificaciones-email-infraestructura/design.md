@@ -123,6 +123,13 @@ app:
 - `application-test.yml` fija `app.notificaciones.canal: memoria` y `app.notificaciones.planificador.habilitado: false`, de modo que la suite no abra SMTP ni dispare tareas programadas.
 - `.env.example` ya trae las variables; se agrega `NOTIFICACIONES_CANAL=smtp` como documentación del interruptor. `.env` sigue ignorado por git.
 
+### 9. Ajustes de la revisión del PR (Juan Pablo, 2026-11-25)
+
+- **Envío inmediato y planificador no se pisan.** `registrarYEnviar` guarda la fila `PENDIENTE` con `programada_para = ahora + espera inicial` (5 min), no `ahora`. Antes, el planificador podía tomar la fila mientras el envío inmediato seguía en curso y el paciente recibía dos emails. La fila sigue sirviendo de red de seguridad: si el proceso cae antes de guardar el resultado, el planificador la retoma después de esa espera.
+- **Los reintentos conservan el contenido.** La fila no guarda el cuerpo, porque puede llevar un enlace con token (RN-07, regla dura 3). Cada consumidor implementa `ReconstructorDatosNotificacion` y devuelve los datos de sus notificaciones; el servicio los pide al reintentar. Sin consumidor que responda, se envía la versión mínima (destinatario y fecha). **C-25, C-36, C-37, C-41 y C-44 tienen que registrar su reconstructor.**
+- **FK a `turno`.** `turno` ya existe (C-19), pero la FK sigue fuera: el registro se inserta en `REQUIRES_NEW` y no ve un turno que la transacción del consumidor todavía no confirmó.
+- **Consumidores:** conviene llamar a `registrarYEnviar` después del commit (`@TransactionalEventListener(phase = AFTER_COMMIT)`), para no avisar de un turno que termina en rollback.
+
 ## Risks / Trade-offs
 
 - **Envío dentro de la transacción con lock de fila** → A la escala del MVP es aceptable; si el SMTP demora, el lock se extiende. Mitigación futura: outbox con estado de reclamo, fuera de C-15.

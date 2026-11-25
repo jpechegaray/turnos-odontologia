@@ -78,6 +78,11 @@ El sistema SHALL reintentar una notificación `FALLIDA` hasta un máximo de 3 in
 - **WHEN** el reloj alcanza o supera el inicio del hueco
 - **THEN** el planificador no vuelve a intentar ese aviso
 
+#### Scenario: Un reintento vuelve a armar el mensaje con los datos del consumidor
+- **GIVEN** un consumidor que sabe reconstruir los datos de su notificación y un primer envío que falla
+- **WHEN** el planificador reintenta la notificación
+- **THEN** el email reintentado lleva el mismo nombre, prestación, profesional y enlace que el original, sin que la fila guarde el cuerpo
+
 ### Requirement: Planificador de envíos pendientes y fallidos
 
 El sistema SHALL ejecutar un planificador periódico que envíe las notificaciones `PENDIENTE` con `programada_para` menor o igual al instante actual y reintente las `FALLIDA` con menos de 3 intentos cuyo próximo intento ya venció. Dos ejecuciones concurrentes MUST NOT producir un doble envío.
@@ -106,6 +111,11 @@ El sistema SHALL ejecutar un planificador periódico que envíe las notificacion
 - **GIVEN** notificaciones `PENDIENTE` guardadas antes de reiniciar el servicio
 - **WHEN** el planificador se ejecuta después del reinicio
 - **THEN** esas notificaciones se envían sin crear filas nuevas
+
+#### Scenario: Un envío en curso no se duplica con el planificador
+- **GIVEN** una notificación recién registrada cuyo envío inmediato todavía no terminó
+- **WHEN** el planificador se ejecuta en ese momento
+- **THEN** no toma esa fila y el paciente recibe un solo email
 
 ### Requirement: Configuración de correo por entorno
 

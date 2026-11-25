@@ -8,6 +8,8 @@ import ar.edu.utn.turnos.shared.notificacion.infrastructure.PropiedadesNotificac
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -18,7 +20,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  * Registro idempotente y envío de emails transaccionales, más el procesamiento de los vencidos por el
  * planificador (RN-30, RN-31, DD-07).
  *
- * <p><b>Registro.</b> {@link #registrarYEnviar} persiste un registro {@code PENDIENTE} antes de
+ * <p><b>Registro.</b> {@link #registrarYEnviar} persiste un registro {@code PENDIENTE}, programado una
+ * espera inicial más adelante para que el planificador no lo duplique mientras se envía, antes de
  * enviar, dentro de una transacción {@code REQUIRES_NEW} que captura {@link DataIntegrityViolationException}:
  * si la fila ya existe (misma clave única), no se reenvía y el error no escapa. Un destinatario nulo o
  * blanco no crea fila ni envía (RN-35).
@@ -30,7 +33,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  *
  * <p><b>Planificador.</b> {@link #procesarVencidas} reclama, dentro de una transacción, las filas
  * vencidas con {@code FOR UPDATE SKIP LOCKED} y las procesa en el mismo ciclo; dos ejecuciones
- * concurrentes no duplican un envío. Todo instante sale del {@link Clock} inyectable (DD-05).
+ * concurrentes no duplican un envío. Para reintentar pide los datos a los {@link ReconstructorDatosNotificacion}
+ * de los consumidores. Todo instante sale del {@link Clock} inyectable (DD-05).
  */
 @Service
 public class ServicioNotificaciones {
@@ -44,6 +48,7 @@ public class ServicioNotificaciones {
     private final Clock reloj;
     private final TransactionTemplate transaccionRegistro;
     private final TransactionTemplate transaccionProcesamiento;
+    private final List<ReconstructorDatosNotificacion> reconstructores;
 
     public ServicioNotificaciones(
             NotificacionRepositorio repositorio,
@@ -52,7 +57,20 @@ public class ServicioNotificaciones {
             PropiedadesNotificaciones propiedades,
             Clock reloj,
             PlatformTransactionManager gestorTransacciones) {
+        this(repositorio, puerto, plantilla, propiedades, reloj, gestorTransacciones, List.of());
+    }
+
+    @Autowired
+    public ServicioNotificaciones(
+            NotificacionRepositorio repositorio,
+            NotificacionPort puerto,
+            PlantillaNotificacion plantilla,
+            PropiedadesNotificaciones propiedades,
+            Clock reloj,
+            PlatformTransactionManager gestorTransacciones,
+            List<ReconstructorDatosNotificacion> reconstructores) {
         this.repositorio = repositorio;
+        this.reconstructores = List.copyOf(reconstructores);
         this.puerto = puerto;
         this.plantilla = plantilla;
         this.propiedades = propiedades;
@@ -75,9 +93,11 @@ public class ServicioNotificaciones {
         if (datos == null || datos.destinatario() == null || datos.destinatario().isBlank()) {
             return;
         }
-        Instant ahora = reloj.instant();
+        // El envío inmediato lo hace este hilo. La fila queda programada una espera más adelante para que el
+        // planificador no la tome mientras tanto (doble email); solo la retoma si este envío nunca terminó.
+        Instant reservaHasta = reloj.instant().plus(propiedades.reintento().esperaInicial());
         NotificacionEnviada pendiente = NotificacionEnviada.pendiente(
-                tipo, datos.destinatario(), turnoId, ofertaHuecoId, pacienteId, datos.inicio(), ahora);
+                tipo, datos.destinatario(), turnoId, ofertaHuecoId, pacienteId, datos.inicio(), reservaHasta);
         NotificacionEnviada registrada;
         try {
             registrada = transaccionRegistro.execute(status -> repositorio.guardar(pendiente));
@@ -100,7 +120,7 @@ public class ServicioNotificaciones {
         transaccionProcesamiento.executeWithoutResult(status -> {
             Instant ahora = reloj.instant();
             for (NotificacionEnviada notificacion : repositorio.reclamarVencidas(ahora, maximoIntentos)) {
-                enviarYGuardar(notificacion, datosDe(notificacion), ahora);
+                enviarYGuardar(notificacion, datosParaReintento(notificacion), ahora);
             }
         });
     }
@@ -137,8 +157,16 @@ public class ServicioNotificaciones {
         return (mensaje == null || mensaje.isBlank()) ? ERROR_POR_DEFECTO : mensaje;
     }
 
-    private static DatosNotificacion datosDe(NotificacionEnviada notificacion) {
-        return new DatosNotificacion(
-                notificacion.destinatario(), null, notificacion.inicioReferencia(), null, null, null);
+    /**
+     * La fila no guarda el cuerpo (puede llevar un enlace con token, RN-07): el consumidor que lo registró
+     * vuelve a aportar los datos. Sin consumidor que responda, se envía la versión mínima.
+     */
+    private DatosNotificacion datosParaReintento(NotificacionEnviada notificacion) {
+        return reconstructores.stream()
+                .map(reconstructor -> reconstructor.datosPara(notificacion))
+                .flatMap(java.util.Optional::stream)
+                .findFirst()
+                .orElseGet(() -> new DatosNotificacion(
+                        notificacion.destinatario(), null, notificacion.inicioReferencia(), null, null, null));
     }
 }

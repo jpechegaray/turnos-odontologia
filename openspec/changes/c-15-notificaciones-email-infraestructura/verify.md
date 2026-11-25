@@ -15,7 +15,7 @@
 - Archivos modificados: `.env.example`, `backend/src/main/resources/application.yml`,
   `backend/src/main/resources/schema-constraints.sql`,
   `backend/src/test/resources/application-test.yml`.
-- Delta spec: `specs/notificaciones-email/spec.md` (5 requirements, 21 escenarios).
+- Delta spec: `specs/notificaciones-email/spec.md` (5 requirements, 23 escenarios).
 - **Frontend NO se ejecutó** (`npm test` en `frontend/` no es requerido): C-15 es backend-only y no
   toca archivos de `frontend/`.
 - No se cambió de rama, ni se hizo commit, push ni merge. Rama actual intacta:
@@ -103,7 +103,7 @@ existen y que el script es idempotente.
 `spring.mail` y `app.notificaciones` (canal, remitente, planificador, reintento). No se modificó
 ninguna otra sección.
 
-## Matriz escenario → test (21/21)
+## Matriz escenario → test (23/23)
 
 | # | Requirement | Escenario | Test (archivo:línea) | Resultado |
 |---|---|---|---|---|
@@ -128,8 +128,10 @@ ninguna otra sección.
 | 19 | Configuración por entorno | El arranque falla si falta una credencial SMTP obligatoria | `SmtpNotificacionAdapterTest.java:55` | Pasa |
 | 20 | Configuración por entorno | Las pruebas usan el adaptador en memoria | `ConfiguracionNotificacionesIT.java:29` + `InMemoryNotificacionAdapterTest.java:23` + `ConfiguracionCorreoTest.java:55` | Pasa |
 | 21 | Configuración por entorno | El repositorio no contiene credenciales SMTP | `ConfiguracionCorreoTest.java:64` + escaneo `git grep` de §6.2 | Pasa |
+| 22 | Reintentos | Un reintento vuelve a armar el mensaje con los datos del consumidor | `ServicioNotificacionesTest.java:240` | Pasa (agregado en la revisión) |
+| 23 | Planificador | Un envío en curso no se duplica con el planificador | `ServicioNotificacionesTest.java:216` | Pasa (agregado en la revisión) |
 
-**Resultado:** 21/21 escenarios cubiertos y en verde. Cada `@DisplayName` usa el texto exacto del
+**Resultado:** 23/23 escenarios cubiertos y en verde. Cada `@DisplayName` usa el texto exacto del
 escenario. El escenario 21 combina el test automatizado (verifica que `.env.example` solo tenga el
 placeholder) con el escaneo manual del repositorio.
 
@@ -196,3 +198,14 @@ los 21 escenarios de la delta spec tienen test con el `@DisplayName` exacto y pa
 `ArquitecturaTest` y `ArquitecturaTestsTest` pasan (dominio sin Spring/JPA); `openspec validate
 --strict` es válido; y el escaneo de secretos no encontró credenciales reales (`.env` ignorado y no
 versionado). Los desvíos y riesgos quedan documentados y no bloquean el archivado.
+
+## Revisión del PR (Juan Pablo, 2026-11-25)
+
+La revisión encontró dos defectos; los dos se reprodujeron primero con un test en rojo y se corrigieron (design §9):
+
+1. **Doble email.** La fila recién registrada quedaba programada para `ahora`, así que el planificador podía tomarla mientras el envío inmediato seguía en curso. Ahora queda programada una espera inicial más adelante.
+2. **Reintento sin contenido.** El reintento armaba el email solo con destinatario y fecha: perdía nombre, prestación, profesional y el enlace con token. Ahora lo arma con `ReconstructorDatosNotificacion`, que implementa cada consumidor.
+
+Además se mergeó `master` (C-18 y C-19) y se resolvieron los conflictos en `schema-constraints.sql` y `application-test.yml`, conservando los dos lados.
+
+`./mvnw verify` con `master` incluido: `BUILD SUCCESS`, 220 unitarios y 427 de integración, 0 fallidos. `openspec validate --strict`: válido.
