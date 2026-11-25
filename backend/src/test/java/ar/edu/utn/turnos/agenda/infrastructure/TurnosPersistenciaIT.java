@@ -5,19 +5,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.agenda.DatosAgenda;
+import ar.edu.utn.turnos.agenda.domain.ActorCancelacion;
 import ar.edu.utn.turnos.agenda.domain.EstadoTurno;
 import ar.edu.utn.turnos.agenda.domain.Turno;
 import ar.edu.utn.turnos.agenda.domain.TurnoOcupado;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /** Persistencia de turnos con PostgreSQL real: guardado, consulta de ocupados y traducción de RN-15 a 409. */
 class TurnosPersistenciaIT extends PruebaIntegracionBase {
@@ -29,6 +34,9 @@ class TurnosPersistenciaIT extends PruebaIntegracionBase {
 
     @Autowired
     private TurnosPersistencia persistencia;
+
+    @Autowired
+    private TransactionTemplate transaccion;
 
     private Long paciente;
     private Long profesional;
@@ -70,6 +78,43 @@ class TurnosPersistenciaIT extends PruebaIntegracionBase {
         assertThat(regla.estado()).isEqualTo(EstadoError.CONFLICTO_409);
         assertThat(regla.codigo()).isEqualTo("RN-01");
         assertThat(regla.propiedades()).containsEntry("recurso", recurso);
+    }
+
+    @Test
+    @DisplayName("Una cancelación leída con lock se guarda y se relee con todos sus campos")
+    void cancelacionConLock() {
+        var guardado = persistencia.guardar(nuevo(profesional, sillon));
+        Long usuario = (Long) DatosAgenda.usuario(jdbc, "RECEPCION")[0];
+        var ahora = DIEZ.minus(Duration.ofHours(2));
+
+        var cancelado = transaccion.execute(estado -> {
+            var leido = persistencia.buscarParaActualizar(guardado.id()).orElseThrow();
+            return persistencia.guardar(leido.cancelar(ActorCancelacion.USUARIO, usuario, "Motivo ficticio", ahora,
+                    Duration.ofHours(24)));
+        });
+
+        var releido = persistencia.buscar(guardado.id()).orElseThrow();
+        assertThat(releido).isEqualTo(cancelado);
+        assertThat(releido.estado()).isEqualTo(EstadoTurno.CANCELADO);
+        assertThat(releido.canceladoPor()).isEqualTo(ActorCancelacion.USUARIO);
+        assertThat(releido.canceladoPorUsuarioId()).isEqualTo(usuario);
+        assertThat(releido.canceladoEn()).isEqualTo(ahora);
+        assertThat(releido.cancelacionTardia()).isTrue();
+        assertThat(releido.motivoCancelacion()).isEqualTo("Motivo ficticio");
+        assertThat(releido.version()).isGreaterThan(guardado.version());
+        Optional<Turno> inexistente = transaccion.execute(estado -> persistencia.buscarParaActualizar(-1L));
+        assertThat(inexistente).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Guardar un turno con una versión vieja lanza un conflicto de bloqueo optimista")
+    void versionVieja() {
+        var guardado = persistencia.guardar(nuevo(profesional, sillon));
+        var ahora = DIEZ.minus(Duration.ofHours(48));
+        persistencia.guardar(guardado.pasarA(EstadoTurno.CONFIRMADO));
+
+        assertThatThrownBy(() -> persistencia.guardar(guardado.cancelar(ActorCancelacion.USUARIO, null, null, ahora,
+                Duration.ofHours(24)))).isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 
     @Test

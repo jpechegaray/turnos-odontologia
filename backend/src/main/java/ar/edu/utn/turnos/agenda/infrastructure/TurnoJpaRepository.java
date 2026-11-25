@@ -1,12 +1,20 @@
 package ar.edu.utn.turnos.agenda.infrastructure;
 
+import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface TurnoJpaRepository extends JpaRepository<TurnoJpa, Long> {
+
+    /** {@code SELECT ... FOR UPDATE}: las modificaciones del mismo turno se ordenan (C-27, design D5). */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from TurnoJpa t where t.id = :id")
+    Optional<TurnoJpa> paraActualizar(@Param("id") Long id);
 
     /**
      * Turnos que ocupan lugar (no CANCELADO, RN-10) del profesional o del sillón y que comparten algún

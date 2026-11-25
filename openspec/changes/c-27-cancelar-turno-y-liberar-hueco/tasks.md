@@ -21,8 +21,8 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 3. Persistencia
 
-- [ ] 3.1 Mapear `cancelado_por_usuario_id` en `TurnoJpa` y agregar su FK a `usuario` en `schema-constraints.sql`, en un bloque `DO $$` idempotente. Se verifica con Testcontainers: la FK existe en `pg_constraint` y correr el script dos veces no falla.
-- [ ] 3.2 Agregar a `TurnosPersistencia` la lectura `buscarParaActualizar(id)` con `PESSIMISTIC_WRITE` (design D5). Se verifica con Testcontainers: una cancelación guardada se relee con todos los campos.
+- [x] 3.1 Mapear `cancelado_por_usuario_id` en `TurnoJpa` y agregar su FK a `usuario` en `schema-constraints.sql`, en un bloque `DO $$` idempotente. Se verifica con Testcontainers: la FK existe en `pg_constraint` y correr el script dos veces no falla.
+- [x] 3.2 Agregar a `TurnosPersistencia` la lectura `buscarParaActualizar(id)` con `PESSIMISTIC_WRITE` (design D5). Se verifica con Testcontainers: una cancelación guardada se relee con todos los campos.
 
 ## 4. Servicio y API
 

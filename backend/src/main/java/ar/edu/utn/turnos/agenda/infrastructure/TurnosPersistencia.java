@@ -67,6 +67,14 @@ public class TurnosPersistencia {
         }
     }
 
+    /**
+     * Lee el turno bloqueando su fila hasta el fin de la transacción (exige una transacción activa). Una
+     * segunda modificación simultánea espera y lee el estado ya actualizado (C-27; C-35 también lo usa).
+     */
+    public Optional<Turno> buscarParaActualizar(Long id) {
+        return turnos.paraActualizar(id).map(TurnoJpa::dominio);
+    }
+
     public Optional<Turno> buscar(Long id) {
         return turnos.findById(id).map(TurnoJpa::dominio);
     }
