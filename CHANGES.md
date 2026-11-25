@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 40 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) está mergeado y falta archivarlo. Ya se pueden empezar: C-41 (Lionel), C-42 (Valentino, camino crítico) y los "Cualquiera" C-43 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 42 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) y C-41 (Lionel) ya están en `master` y tienen pendiente el archivo. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -63,7 +63,7 @@
 | C-41 | 🔄 en revisión | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
 | C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
-| C-44 | ⬜ pendiente | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
+| C-44 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
 | C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
@@ -1413,8 +1413,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-06.
 
 ### [C-44] `C-44-emails-cancelacion-reprogramacion`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 6 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #132, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 6 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Escuchas de `TurnoCancelado` y `TurnoReprogramado`: registran `NotificacionEnviada` de tipo `CANCELACION` o `REPROGRAMACION` y envían el email si el paciente tiene email (sin email no hay error)
   - Descarta el recordatorio pendiente del turno
@@ -1428,7 +1428,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `knowledge-base/06_funcionalidades.md` US-011 (criterio de email)
   - `knowledge-base/07_flujos_principales.md` Flujo 2 y Flujo 3
 - **Criterio de salida**: Cancelar y reprogramar generan un email cada uno; un paciente sin email no produce errores; tests en verde.
-- **Riesgo o precondición**: PA-06 abierta (política de reprogramación tardía): el texto del email puede cambiar.
+- **Política de reprogramación tardía**: PA-06 resuelta en C-35. El aviso informa el nuevo horario.
 
 ### [C-45] `C-45-front-crear-turno`
 - **Estado**: `[x]` hecho por Juan Pablo (PR #122, 2026-11-25; archivado 2026-11-25)
