@@ -49,7 +49,7 @@
 | C-27 | ✅ hecho | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
 | C-28 | ✅ hecho | Valentino (Cualquiera) | 4 | M | consultar-agenda-dia-semana | C-19 |  |
 | C-29 | ✅ hecho | Lionel (Cualquiera) | 4 | S | marcar-asistencia-ausencia | C-19 |  |
-| C-30 | ⬜ pendiente | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
+| C-30 | ✅ hecho | Lionel (Cualquiera) | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
 | C-31 | ✅ hecho | **Juan Pablo** | 4 | M | compatibilidad-lista-espera | C-18, C-19 |  |
 | C-32 | ✅ hecho | **Nico** | 4 | M | token-turno-emision-y-validacion | C-14, C-19 | CRITICAL |
 | C-33 | ✅ hecho | Juan Pablo (Cualquiera) | 4 | M | datos-ficticios-seed | C-03, C-05, C-07, C-10, C-11, C-19 |  |
@@ -1129,7 +1129,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-04. PA-13 (política de ausencias reiteradas) queda fuera: solo se registra.
 
 ### [C-30] `C-30-guardas-integridad-con-turnos`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #123, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Puerto `TurnosActivosConsulta` en `agenda.application` (archivo nuevo)
