@@ -177,6 +177,148 @@ class TurnoTest {
                 .satisfies(TurnoTest::esTransicionInvalida);
     }
 
+    // ---------- C-29: marcar y corregir asistencia ----------
+
+    private static final Instant PASADO = INICIO.plus(Duration.ofHours(1));
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO"})
+    @DisplayName("Marcar la asistencia de un turno vigente que ya empezó lo deja ATENDIDO")
+    void marcarAtendidoDesdeVigente(EstadoTurno origen) {
+        var turno = guardado(origen);
+
+        var marcado = turno.marcarAsistencia(EstadoTurno.ATENDIDO, PASADO);
+
+        assertThat(marcado.estado()).isEqualTo(EstadoTurno.ATENDIDO);
+        assertThat(turno.estado()).isEqualTo(origen);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO"})
+    @DisplayName("Marcar la ausencia de un turno vigente que ya empezó lo deja AUSENTE")
+    void marcarAusenteDesdeVigente(EstadoTurno origen) {
+        var marcado = guardado(origen).marcarAsistencia(EstadoTurno.AUSENTE, PASADO);
+
+        assertThat(marcado.estado()).isEqualTo(EstadoTurno.AUSENTE);
+    }
+
+    @Test
+    @DisplayName("A la hora exacta de inicio ya se puede marcar")
+    void marcarALaHoraExacta() {
+        var marcado = guardado(EstadoTurno.PROGRAMADO).marcarAsistencia(EstadoTurno.ATENDIDO, INICIO);
+
+        assertThat(marcado.estado()).isEqualTo(EstadoTurno.ATENDIDO);
+    }
+
+    @Test
+    @DisplayName("Antes del inicio no se puede marcar")
+    void antesDelInicioNoSeMarca() {
+        var turno = guardado(EstadoTurno.PROGRAMADO);
+
+        assertThatThrownBy(() -> turno.marcarAsistencia(EstadoTurno.AUSENTE, INICIO.minusSeconds(60)))
+                .isInstanceOfSatisfying(ReglaNegocioException.class, error -> {
+                    assertThat(error.codigo()).isEqualTo("RN-20");
+                    assertThat(error.estado()).isEqualTo(EstadoError.NO_PROCESABLE_422);
+                });
+        assertThat(turno.estado()).isEqualTo(EstadoTurno.PROGRAMADO);
+    }
+
+    @Test
+    @DisplayName("Un turno cancelado no se marca aunque su inicio ya pasó: 409 TURNO_TRANSICION_INVALIDA")
+    void canceladoNoSeMarca() {
+        var turno = guardado(EstadoTurno.CANCELADO);
+
+        assertThatThrownBy(() -> turno.marcarAsistencia(EstadoTurno.ATENDIDO, PASADO))
+                .satisfies(TurnoTest::esTransicionInvalida);
+    }
+
+    @Test
+    @DisplayName("Marcar de nuevo un turno atendido en el pasado responde 409, no RN-20")
+    void atendidoEnElPasadoNoSeVuelveAMarcar() {
+        var turno = guardado(EstadoTurno.ATENDIDO);
+
+        assertThatThrownBy(() -> turno.marcarAsistencia(EstadoTurno.AUSENTE, PASADO))
+                .satisfies(TurnoTest::esTransicionInvalida);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO", "CANCELADO"})
+    @DisplayName("Marcar asistencia exige un destino ATENDIDO o AUSENTE")
+    void destinoInvalidoSeRechaza(EstadoTurno destino) {
+        var turno = guardado(EstadoTurno.PROGRAMADO);
+
+        assertThatIllegalArgumentException().isThrownBy(() -> turno.marcarAsistencia(destino, PASADO));
+    }
+
+    @Test
+    @DisplayName("Marcar asistencia no cambia el intervalo, los recursos ni las notas")
+    void marcarNoCambiaLoDemas() {
+        var turno = guardado(EstadoTurno.CONFIRMADO);
+
+        var marcado = turno.marcarAsistencia(EstadoTurno.ATENDIDO, PASADO);
+
+        assertThat(marcado).usingRecursiveComparison().ignoringFields("estado").isEqualTo(turno);
+    }
+
+    @Test
+    @DisplayName("La corrección pasa de ATENDIDO a AUSENTE y de AUSENTE a ATENDIDO sin mirar el reloj")
+    void correccionEntreMarcas() {
+        assertThat(guardado(EstadoTurno.ATENDIDO).corregirAsistencia(EstadoTurno.AUSENTE).estado())
+                .isEqualTo(EstadoTurno.AUSENTE);
+        assertThat(guardado(EstadoTurno.AUSENTE).corregirAsistencia(EstadoTurno.ATENDIDO).estado())
+                .isEqualTo(EstadoTurno.ATENDIDO);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"ATENDIDO", "AUSENTE"})
+    @DisplayName("Repetir la misma marca se rechaza")
+    void repetirMismaMarca(EstadoTurno marca) {
+        var turno = guardado(marca);
+
+        assertThatThrownBy(() -> turno.corregirAsistencia(marca)).satisfies(TurnoTest::esTransicionInvalida);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO", "CANCELADO"})
+    @DisplayName("Solo un turno ATENDIDO o AUSENTE admite corrección: 409 TURNO_TRANSICION_INVALIDA")
+    void correccionDesdeEstadoNoMarcado(EstadoTurno origen) {
+        var turno = guardado(origen);
+
+        for (var destino : new EstadoTurno[] {EstadoTurno.ATENDIDO, EstadoTurno.AUSENTE}) {
+            assertThatThrownBy(() -> turno.corregirAsistencia(destino)).satisfies(TurnoTest::esTransicionInvalida);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO", "CANCELADO"})
+    @DisplayName("La corrección solo lleva a la otra marca de asistencia: 409 TURNO_TRANSICION_INVALIDA")
+    void correccionADestinoInvalido(EstadoTurno destino) {
+        var turno = guardado(EstadoTurno.ATENDIDO);
+
+        assertThatThrownBy(() -> turno.corregirAsistencia(destino)).satisfies(TurnoTest::esTransicionInvalida);
+    }
+
+    @Test
+    @DisplayName("La corrección no cambia lo demás")
+    void correccionNoCambiaLoDemas() {
+        var turno = guardado(EstadoTurno.AUSENTE);
+
+        var corregido = turno.corregirAsistencia(EstadoTurno.ATENDIDO);
+
+        assertThat(corregido.estado()).isEqualTo(EstadoTurno.ATENDIDO);
+        assertThat(corregido).usingRecursiveComparison().ignoringFields("estado").isEqualTo(turno);
+    }
+
+    @Test
+    @DisplayName("La corrección de asistencia no abre otras transiciones")
+    void correccionNoAbreOtrasTransiciones() {
+        var corregido = guardado(EstadoTurno.ATENDIDO).corregirAsistencia(EstadoTurno.AUSENTE);
+
+        assertThatThrownBy(() -> corregido.cancelar(ActorCancelacion.USUARIO, 15L, null,
+                INICIO.minus(Duration.ofHours(72)), PLAZO)).satisfies(TurnoTest::esTransicionInvalida);
+        assertThatThrownBy(() -> corregido.pasarA(EstadoTurno.CONFIRMADO)).satisfies(TurnoTest::esTransicionInvalida);
+    }
+
     private static void esTransicionInvalida(Throwable error) {
         assertThat(error).isInstanceOf(ReglaNegocioException.class);
         var regla = (ReglaNegocioException) error;

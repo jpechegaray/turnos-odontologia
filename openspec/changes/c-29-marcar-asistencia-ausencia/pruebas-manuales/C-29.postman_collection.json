@@ -1,0 +1,222 @@
+{
+  "info": {
+    "name": "C-29 marcar asistencia (prueba manual)",
+    "description": "Prueba manual de POST /api/turnos/{id}/asistencia contra el backend local (perfil dev). Datos ficticios. Completá la variable `clave` antes de correr. Correla en orden con el Collection Runner: cada carpeta inicia su propia sesión. Los turnos se consumen: para repetir, recreá los datos y actualizá las variables de ids.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "clave", "value": "" },
+    { "key": "emailAdmin", "value": "admin.c29@consultorio.test" },
+    { "key": "emailRecepcion", "value": "recepcion.c29@consultorio.test" },
+    { "key": "emailOdontologo", "value": "odontologo.c29.6@consultorio.test" },
+    { "key": "turnoPasado", "value": "11" },
+    { "key": "turnoConfirmado", "value": "12" },
+    { "key": "turnoFuturo", "value": "13" },
+    { "key": "turnoCancelado", "value": "14" },
+    { "key": "turnoOdontologo", "value": "15" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Para todo pedido que no sea GET: pide un token CSRF fresco y lo manda en X-XSRF-TOKEN.",
+          "// Hace falta porque el login rota el token (CsrfAuthenticationStrategy).",
+          "if (pm.request.method === 'GET' || pm.info.requestName === 'Sin sesión no se puede marcar asistencia') { return; }",
+          "const base = pm.collectionVariables.get('baseUrl');",
+          "pm.sendRequest({ url: base + '/api/auth/csrf', method: 'GET' }, () => {",
+          "  pm.cookies.jar().get(base, 'XSRF-TOKEN', (err, token) => {",
+          "    if (token) { pm.request.headers.upsert({ key: 'X-XSRF-TOKEN', value: token }); }",
+          "  });",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1 Recepción",
+      "item": [
+        {
+          "name": "Login recepción",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('login 200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{emailRecepcion}}\",\"password\":\"{{clave}}\"}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Antes del inicio no se puede marcar",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('422 RN-20', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigo).to.eql('RN-20'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoFuturo}}/asistencia"
+          }
+        },
+        {
+          "name": "Un estado destino inválido se rechaza (CANCELADO)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400 campo estado', () => { pm.response.to.have.status(400); pm.expect(JSON.stringify(pm.response.json())).to.include('\"campo\":\"estado\"'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"CANCELADO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        },
+        {
+          "name": "Un estado destino inválido se rechaza (sin estado)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('400', () => pm.response.to.have.status(400));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        },
+        {
+          "name": "Un turno inexistente no admite asistencia",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('404 TURNO_INEXISTENTE', () => { pm.response.to.have.status(404); pm.expect(pm.response.json().codigo).to.eql('TURNO_INEXISTENTE'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/999999/asistencia"
+          }
+        },
+        {
+          "name": "Recepción marca un turno como atendido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 ATENDIDO', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().estado).to.eql('ATENDIDO'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        },
+        {
+          "name": "Recepción marca la ausencia de un turno confirmado",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 AUSENTE', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().estado).to.eql('AUSENTE'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"AUSENTE\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoConfirmado}}/asistencia"
+          }
+        },
+        {
+          "name": "Recepción no puede corregir una marca",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"AUSENTE\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        },
+        {
+          "name": "Logout recepción",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/api/auth/logout" }
+        }
+      ]
+    },
+    {
+      "name": "2 Administrador",
+      "item": [
+        {
+          "name": "Login admin",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('login 200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{emailAdmin}}\",\"password\":\"{{clave}}\"}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Un turno cancelado no se marca",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('409 TURNO_TRANSICION_INVALIDA', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigo).to.eql('TURNO_TRANSICION_INVALIDA'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoCancelado}}/asistencia"
+          }
+        },
+        {
+          "name": "Repetir la misma marca se rechaza",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('409 TURNO_TRANSICION_INVALIDA', () => { pm.response.to.have.status(409); pm.expect(pm.response.json().codigo).to.eql('TURNO_TRANSICION_INVALIDA'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        },
+        {
+          "name": "El administrador corrige una marca",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 AUSENTE', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().estado).to.eql('AUSENTE'); });"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"AUSENTE\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        },
+        {
+          "name": "Logout admin",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/api/auth/logout" }
+        }
+      ]
+    },
+    {
+      "name": "3 Odontólogo",
+      "item": [
+        {
+          "name": "Login odontólogo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('login 200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{emailOdontologo}}\",\"password\":\"{{clave}}\"}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "El odontólogo no puede marcar asistencia",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoOdontologo}}/asistencia"
+          }
+        },
+        {
+          "name": "Logout odontólogo",
+          "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/api/auth/logout" }
+        }
+      ]
+    },
+    {
+      "name": "4 Sin sesión",
+      "item": [
+        {
+          "name": "Sin sesión no se puede marcar asistencia",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"estado\":\"ATENDIDO\"}" },
+            "url": "{{baseUrl}}/api/turnos/{{turnoPasado}}/asistencia"
+          }
+        }
+      ]
+    }
+  ]
+}

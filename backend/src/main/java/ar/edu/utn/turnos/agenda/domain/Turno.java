@@ -86,4 +86,46 @@ public record Turno(
                 cancelado.estado(), canal, notas, tardia, reprogramadoTarde, ahora, actor,
                 actor == ActorCancelacion.USUARIO ? usuarioId : null, motivo, creadoPorUsuarioId, creadoEn, version);
     }
+
+    /**
+     * Primera marca de asistencia (RN-20): lleva un turno PROGRAMADO o CONFIRMADO a ATENDIDO o AUSENTE.
+     * Primero aplica la transición de RN-12, así un turno en estado final (incluido CANCELADO) responde
+     * 409 aunque ya haya pasado; después rechaza con 422 un turno que todavía no empezó (a la hora exacta
+     * de inicio ya se acepta). La corrección de una marca ya hecha no pasa por acá: es
+     * {@link #corregirAsistencia(EstadoTurno)}.
+     *
+     * @throws IllegalArgumentException si el destino no es ATENDIDO ni AUSENTE
+     */
+    public Turno marcarAsistencia(EstadoTurno destino, Instant ahora) {
+        if (!esMarcaDeAsistencia(destino)) {
+            throw new IllegalArgumentException("La asistencia solo se marca como ATENDIDO o AUSENTE");
+        }
+        var marcado = pasarA(destino);
+        if (ahora.isBefore(intervalo.inicio())) {
+            throw new ReglaNegocioException("RN-20", EstadoError.NO_PROCESABLE_422,
+                    "No se puede registrar la asistencia de un turno que todavía no empezó");
+        }
+        return marcado;
+    }
+
+    /**
+     * Corrige una marca de asistencia (ATENDIDO a AUSENTE o al revés). Es la única excepción a RN-12 y
+     * vive solo en este método: {@link EstadoTurno} sigue tratando ATENDIDO y AUSENTE como finales, así
+     * que cancelar o confirmar un turno corregido sigue respondiendo 409. No mira el reloj, porque la
+     * marca previa ya implica que el turno empezó. Cualquier otro origen o destino, incluida la misma
+     * marca, es 409 TURNO_TRANSICION_INVALIDA.
+     */
+    public Turno corregirAsistencia(EstadoTurno destino) {
+        if (!esMarcaDeAsistencia(estado) || !esMarcaDeAsistencia(destino) || destino == estado) {
+            throw new ReglaNegocioException("TURNO_TRANSICION_INVALIDA", EstadoError.CONFLICTO_409,
+                    "La asistencia solo se corrige de " + estado + " a la otra marca, no a " + destino);
+        }
+        return new Turno(id, pacienteId, profesionalId, sillonId, prestacionId, intervalo, duracionMin, destino,
+                canal, notas, cancelacionTardia, reprogramadoTarde, canceladoEn, canceladoPor, canceladoPorUsuarioId,
+                motivoCancelacion, creadoPorUsuarioId, creadoEn, version);
+    }
+
+    private static boolean esMarcaDeAsistencia(EstadoTurno estado) {
+        return estado == EstadoTurno.ATENDIDO || estado == EstadoTurno.AUSENTE;
+    }
 }
