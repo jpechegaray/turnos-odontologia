@@ -64,5 +64,12 @@ app:
     max-solicitudes-por-clave: 10
     ventana-clave: 1m
 #   reservapublica:   # dueños: C-14 y C-36
-#   listaespera:      # dueño: por asignar (lista de espera)
+  listaespera:      # dueño: C-36 (oferta de hueco)
+    url-publica: ${APP_PUBLIC_URL:http://localhost:5173}
+    avisos:
+      sincronico: false
+    ofertas:
+      vencimiento:
+        habilitado: true
+        intervalo: 1m
 #   agenda:           # dueño: por asignar (agenda)
