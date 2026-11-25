@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.shared.notificacion.domain;
 
+import ar.edu.utn.turnos.shared.paginacion.Pagina;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,11 @@ public interface NotificacionRepositorio {
      * dos ejecuciones concurrentes no las procesen a la vez.
      */
     List<NotificacionEnviada> reclamarVencidas(Instant ahora, int maximoIntentos);
+
+    /**
+     * Página del registro para su consulta (C-25), de la más reciente a la más antigua. Los filtros
+     * {@code estado} y {@code turnoId} son opcionales ({@code null} = sin filtro) y se combinan; los
+     * totales de la página reflejan los filtros.
+     */
+    Pagina<NotificacionEnviada> buscar(EstadoNotificacion estado, Long turnoId, int pagina, int tamanio);
 }

@@ -117,6 +117,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/turnos").hasAnyRole("ADMIN", "RECEPCION")
                         // Cancelar (C-27): ídem; el odontólogo recibe 403 antes de validar el motivo.
                         .requestMatchers(HttpMethod.POST, "/api/turnos/{id}/cancelar").hasAnyRole("ADMIN", "RECEPCION")
+                        // Registro de notificaciones (C-25, US-020): el odontólogo no lo consulta.
+                        .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configuracionCors(origen)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/public/**")
