@@ -33,4 +33,4 @@ C-28 expone `GET /api/agenda?vista=dia|semana&fecha=AAAA-MM-DD&profesionalId&sil
 - Mockups: no aplica
 - Approval: no aplica
 - Preview: no aplica
-- Visual verify: pendiente (en verify se revisa la pantalla en el navegador si hay uno disponible)
+- Visual verify: differences (2026-11-25) — revisión en navegador a 390x844 y 1440x900 con vista previa de datos ficticios; tres defectos corregidos y uno menor pendiente (ver verify.md)

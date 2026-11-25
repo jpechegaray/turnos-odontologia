@@ -35,8 +35,10 @@ export function ContenidoTurno({ turno, prestacion, detalle, onVerFicha }: Props
         )}
       </strong>
       <span className="slot__meta">{`${rangoLegible(turno.inicio, turno.fin)} · ${prestacion}`}</span>
-      <span className="slot__detalle">{detalle}</span>
-      <BadgeEstadoTurno estado={turno.estado} />
+      <span className="slot__pie">
+        <BadgeEstadoTurno estado={turno.estado} />
+        <span className="slot__detalle">{detalle}</span>
+      </span>
     </>
   );
 }

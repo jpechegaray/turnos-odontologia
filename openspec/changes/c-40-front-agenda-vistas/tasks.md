@@ -18,4 +18,4 @@ Aplicar TDD estricto por tarea: primero el test de Vitest en rojo, después el c
 
 ## 3. Verificación
 
-- [ ] 3.1 Ejecutar `npm run lint`, `npm test` y `npm run build` en `frontend`, y `openspec validate c-40-front-agenda-vistas --strict` en la raíz. Revisar la pantalla en el navegador a 390x844 y 1440x900 si hay uno disponible.
+- [x] 3.1 Ejecutar `npm run lint`, `npm test` y `npm run build` en `frontend`, y `openspec validate c-40-front-agenda-vistas --strict` en la raíz. Revisar la pantalla en el navegador a 390x844 y 1440x900 si hay uno disponible.

@@ -3,7 +3,8 @@
  * y usa solo variables de design-system/tokens.css (regla 13). La cantidad de columnas y de filas llega
  * en línea como --agenda-columnas y --agenda-filas; cada fila representa 15 minutos (--agenda-row-h).
  */
-.pagina-agenda { display: grid; gap: var(--space-4); }
+/* minmax(0, 1fr): la grilla ancha se desplaza dentro de su contenedor sin ensanchar la página. */
+.pagina-agenda { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 
 .agenda-barra { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: flex-end; }
 .agenda-barra__grupo { display: flex; gap: var(--space-1); flex-wrap: wrap; }
@@ -39,8 +40,11 @@
   font-size: var(--text-xs); line-height: 1.25; overflow: hidden; display: flex; flex-direction: column; gap: 1px; }
 .slot strong, .semana__item strong { font-size: var(--text-sm); font-weight: var(--weight-semibold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .slot__meta { font-weight: var(--weight-medium); }
-.slot__detalle { color: inherit; }
-.slot .badge, .semana__item .badge { align-self: flex-start; }
+/* En un turno de 30 minutos entran tres líneas: nada se encoge y el badge comparte línea con el detalle. */
+.slot > *, .semana__item > * { flex-shrink: 0; min-width: 0; }
+.slot__pie { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.slot__pie .slot__detalle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot .badge, .semana__item .badge { align-self: flex-start; padding-block: 0; line-height: 1.25; }
 .slot--bloqueo { background: repeating-linear-gradient(135deg, var(--agenda-bloqueo-bg) 0 8px, transparent 8px 16px), var(--agenda-bloqueo-bg);
   color: var(--agenda-bloqueo-fg); border-color: var(--agenda-bloqueo-border); }
 .slot--cancelado strong, .semana__item--cancelado strong { text-decoration: line-through; }
@@ -57,9 +61,9 @@
   background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .semana__titulo { margin: 0; font-size: var(--text-sm); font-weight: var(--weight-semibold); }
 .semana__atencion { margin: 0; padding: 0; list-style: none; font-size: var(--text-xs); color: var(--color-text-muted); }
-.semana__lista { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); }
+.semana__lista { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
 .semana__item { display: flex; flex-direction: column; gap: 1px; padding: var(--space-2); font-size: var(--text-xs);
-  border: 1px solid; border-left-width: 4px; border-radius: var(--radius-sm); }
+  border: 1px solid; border-left-width: 4px; border-radius: var(--radius-sm); min-width: 0; overflow: hidden; }
 .semana__vacio { margin: 0; font-size: var(--text-xs); color: var(--color-text-muted); }
 
 .leyenda { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
