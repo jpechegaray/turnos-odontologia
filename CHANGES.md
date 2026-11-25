@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 39 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-29, C-31, C-32, C-33 y C-34; Ola 5: C-35, C-36, C-37 y C-40; Ola 6: C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-42 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-30, C-43 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 40 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) está mergeado y falta archivarlo. Ya se pueden empezar: C-41 (Lionel), C-42 (Valentino, camino crítico) y los "Cualquiera" C-43 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -57,7 +57,7 @@
 | C-35 | ✅ hecho | **Juan Pablo** | 5 | M | reprogramar-turno | C-19, C-27 |  |
 | C-36 | ✅ hecho | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
 | C-37 | ✅ hecho | Juan Pablo (Cualquiera) | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
-| C-38 | ⬜ pendiente | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
+| C-38 | ✅ hecho | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
 | C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
 | C-41 | ⬜ pendiente | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
@@ -1290,7 +1290,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-05 resuelta: un recordatorio por horario, con 24 hs de anticipación por defecto, configurable. Los pacientes sin email se omiten (PA-16). Cada intento válido emite un enlace nuevo, también para turnos internos, y conserva los enlaces anteriores.
 
 ### [C-38] `C-38-reserva-publica-disponibilidad`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #130, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Lionel — **Ola**: 5 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `GET /api/public/prestaciones`, `/api/public/profesionales?prestacionId` y `/api/public/disponibilidad`: solo recursos activos y horarios realmente libres según `CalculadorDisponibilidad`, con la duración por defecto
