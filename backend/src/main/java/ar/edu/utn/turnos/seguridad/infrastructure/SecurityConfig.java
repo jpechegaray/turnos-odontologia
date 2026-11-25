@@ -115,6 +115,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/lista-espera/{id}").hasAnyRole("ADMIN", "RECEPCION")
                         // Turnos (C-19): el odontólogo no da turnos (RN-20, RN-33); 403 antes de validar el cuerpo.
                         .requestMatchers(HttpMethod.POST, "/api/turnos").hasAnyRole("ADMIN", "RECEPCION")
+                        // Cancelar (C-27): ídem; el odontólogo recibe 403 antes de validar el motivo.
+                        .requestMatchers(HttpMethod.POST, "/api/turnos/{id}/cancelar").hasAnyRole("ADMIN", "RECEPCION")
                         // Registro de notificaciones (C-25, US-020): el odontólogo no lo consulta.
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated())

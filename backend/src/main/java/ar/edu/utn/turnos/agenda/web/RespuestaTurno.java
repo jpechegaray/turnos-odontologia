@@ -16,11 +16,17 @@ record RespuestaTurno(
         String estado,
         String canal,
         String notas,
-        Instant creadoEn) {
+        Instant creadoEn,
+        boolean cancelacionTardia,
+        Instant canceladoEn,
+        String canceladoPor,
+        String motivoCancelacion) {
 
     static RespuestaTurno de(Turno turno) {
         return new RespuestaTurno(turno.id(), turno.pacienteId(), turno.profesionalId(), turno.sillonId(),
                 turno.prestacionId(), turno.intervalo().inicio(), turno.intervalo().fin(), turno.duracionMin(),
-                turno.estado().name(), turno.canal().name(), turno.notas(), turno.creadoEn());
+                turno.estado().name(), turno.canal().name(), turno.notas(), turno.creadoEn(),
+                turno.cancelacionTardia(), turno.canceladoEn(),
+                turno.canceladoPor() == null ? null : turno.canceladoPor().name(), turno.motivoCancelacion());
     }
 }

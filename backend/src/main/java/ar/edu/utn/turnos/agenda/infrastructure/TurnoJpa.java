@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.agenda.infrastructure;
 
+import ar.edu.utn.turnos.agenda.domain.ActorCancelacion;
 import ar.edu.utn.turnos.agenda.domain.CanalTurno;
 import ar.edu.utn.turnos.agenda.domain.EstadoTurno;
 import ar.edu.utn.turnos.agenda.domain.Turno;
@@ -77,6 +78,9 @@ class TurnoJpa {
     @Column(name = "cancelado_por", length = 16)
     private String canceladoPor;
 
+    @Column(name = "cancelado_por_usuario_id")
+    private Long canceladoPorUsuarioId;
+
     @Column(name = "motivo_cancelacion", length = 255)
     private String motivoCancelacion;
 
@@ -114,7 +118,8 @@ class TurnoJpa {
         fila.cancelacionTardia = turno.cancelacionTardia();
         fila.reprogramadoTarde = turno.reprogramadoTarde();
         fila.canceladoEn = turno.canceladoEn();
-        fila.canceladoPor = turno.canceladoPor();
+        fila.canceladoPor = turno.canceladoPor() == null ? null : turno.canceladoPor().name();
+        fila.canceladoPorUsuarioId = turno.canceladoPorUsuarioId();
         fila.motivoCancelacion = turno.motivoCancelacion();
         fila.notas = turno.notas();
         fila.creadoPorUsuarioId = turno.creadoPorUsuarioId();
@@ -125,7 +130,8 @@ class TurnoJpa {
 
     Turno dominio() {
         return new Turno(id, pacienteId, profesionalId, sillonId, prestacionId, new Intervalo(inicio, fin), duracionMin,
-                estado, canal, notas, cancelacionTardia, reprogramadoTarde, canceladoEn, canceladoPor,
+                estado, canal, notas, cancelacionTardia, reprogramadoTarde, canceladoEn,
+                canceladoPor == null ? null : ActorCancelacion.valueOf(canceladoPor), canceladoPorUsuarioId,
                 motivoCancelacion, creadoPorUsuarioId, creadoEn, version);
     }
 }

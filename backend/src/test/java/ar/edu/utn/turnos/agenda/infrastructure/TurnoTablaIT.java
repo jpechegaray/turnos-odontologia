@@ -86,8 +86,19 @@ class TurnoTablaIT extends PruebaIntegracionBase {
                 select count(*) from pg_constraint where conrelid = 'turno'::regclass
                   and conname in ('turno_sin_solape_profesional', 'turno_sin_solape_sillon',
                                   'fk_turno_paciente', 'fk_turno_profesional', 'fk_turno_sillon',
-                                  'fk_turno_prestacion', 'fk_turno_usuario')
-                """, Integer.class)).isEqualTo(7);
+                                  'fk_turno_prestacion', 'fk_turno_usuario', 'fk_turno_cancelado_por_usuario')
+                """, Integer.class)).isEqualTo(8);
+    }
+
+    @Test
+    @DisplayName("La base rechaza una cancelación atribuida a un usuario inexistente")
+    void fkUsuarioQueCancela() {
+        var id = turno(profesional, sillon, DIEZ, DIEZ_Y_MEDIA, "PROGRAMADO");
+
+        assertThatThrownBy(() -> jdbc.update("""
+                update turno set estado = 'CANCELADO', cancelado_por = 'USUARIO', cancelado_por_usuario_id = -1
+                where id = ?
+                """, id)).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
