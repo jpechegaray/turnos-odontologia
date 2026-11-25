@@ -1,0 +1,37 @@
+.pagina-agenda__encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.pagina-agenda__encabezado h2,
+.alta-turno h3,
+.alta-turno p { margin: 0; }
+
+.alta-turno,
+.alta-turno__grupo {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.alta-turno__campos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.alta-turno__campos > .field {
+  flex: 1 1 calc(var(--space-8) * 3);
+  min-width: 0;
+}
+
+.alta-turno__campos .input { width: 100%; }
+
+.alta-turno__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

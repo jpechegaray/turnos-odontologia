@@ -1,5 +1,6 @@
 import { useId, type ComponentProps } from "react";
-import { Icono } from "../../../shared/ui";
+import { Icono } from "./Icono";
+import "./ui.css";
 
 export type OpcionSeleccion = Readonly<{ valor: string; etiqueta: string }>;
 

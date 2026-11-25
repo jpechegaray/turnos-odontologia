@@ -1,7 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import { fechaLocal } from "../../shared/fecha/zonaHoraria";
+import { useSesion } from "../auth/sesion";
 import { Alerta, BadgeEstadoTurno, Boton, type EstadoVisualTurno } from "../../shared/ui";
 import { BarraAgenda } from "./BarraAgenda";
 import type { FichaElegida } from "./ContenidoTurno";
+import { rutaDeAgenda } from "./consulta";
+import { FormularioCrearTurno } from "./crear/FormularioCrearTurno";
 import { FichaPaciente } from "./FichaPaciente";
 import { GrillaDia } from "./GrillaDia";
 import { nombreDelDia, sumarDias } from "./grilla";
@@ -20,19 +24,43 @@ function tituloDelPeriodo(agenda: AgendaRespuesta): string {
     : `Semana del ${fechaCorta(agenda.desde, true)} al ${fechaCorta(agenda.hasta, true)}`;
 }
 
-/**
- * Agenda diaria y semanal del personal (US-013). Es de solo lectura para todos los roles: las acciones
- * sobre turnos llegan con C-45 y C-46. El primer pedido va sin fecha para que el servidor decida cuál es
- * el día de hoy en Buenos Aires (RN-14).
- */
+/** Agenda diaria y semanal del personal (US-013), con alta para ADMIN y RECEPCION (US-010). */
 export function PaginaAgenda() {
   const [consulta, actualizarConsulta] = useState<ConsultaAgenda>({ vista: "dia" });
   const [agrupacion, actualizarAgrupacion] = useState<Agrupacion>("profesional");
   const [ficha, actualizarFicha] = useState<FichaElegida>();
+  const [formularioAbierto, actualizarFormularioAbierto] = useState(false);
+  const [turnoCreado, actualizarTurnoCreado] = useState(false);
+  const idAlta = useId();
+  const idNuevo = `${idAlta}-boton`;
+  const { estado } = useSesion();
+  const puedeCrear = estado.tipo === "activa" && (estado.identidad.rol === "ADMIN" || estado.identidad.rol === "RECEPCION");
   const catalogos = useCatalogosAgenda();
   const nombres = useMemo(() => nombresDe(catalogos), [catalogos]);
   const { agenda, cargando, errorCarga, recargar } = useAgenda(consulta);
   const fechaVigente = consulta.fecha ?? agenda?.desde;
+
+  useEffect(() => {
+    if (formularioAbierto && puedeCrear) document.getElementById(idAlta)?.focus();
+  }, [formularioAbierto, idAlta, puedeCrear]);
+
+  function cerrarFormulario() {
+    actualizarFormularioAbierto(false);
+    document.getElementById(idNuevo)?.focus();
+  }
+
+  function mostrarTurnoCreado(inicio: string, profesionalId: number, sillonId: number) {
+    const siguiente: ConsultaAgenda = {
+      ...consulta,
+      fecha: fechaLocal(inicio),
+      profesionalId: consulta.profesionalId === profesionalId ? profesionalId : undefined,
+      sillonId: consulta.sillonId === sillonId ? sillonId : undefined,
+    };
+    if (rutaDeAgenda(siguiente) === rutaDeAgenda(consulta)) void recargar();
+    else actualizarConsulta(siguiente);
+    cerrarFormulario();
+    actualizarTurnoCreado(true);
+  }
 
   function cambiar(cambios: Partial<ConsultaAgenda>) {
     actualizarConsulta((actual) => ({ ...actual, ...cambios }));
@@ -45,7 +73,30 @@ export function PaginaAgenda() {
 
   return (
     <section className="pagina-agenda">
-      <h2>Agenda</h2>
+      <div className="pagina-agenda__encabezado">
+        <h2>Agenda</h2>
+        {puedeCrear && (
+          <Boton id={idNuevo} aria-expanded={formularioAbierto} aria-controls={formularioAbierto ? `${idAlta}-panel` : undefined}
+            onClick={() => {
+              if (formularioAbierto) {
+                document.getElementById(idAlta)?.focus();
+                return;
+              }
+              actualizarTurnoCreado(false);
+              actualizarFormularioAbierto(true);
+            }}>Nuevo turno</Boton>
+        )}
+      </div>
+      {turnoCreado && <p role="status">Turno creado.</p>}
+      {puedeCrear && formularioAbierto && (
+        <FormularioCrearTurno
+          tituloId={idAlta}
+          fechaInicial={fechaVigente ?? fechaLocal(Date.now())}
+          catalogos={catalogos}
+          onCerrar={cerrarFormulario}
+          onCreado={mostrarTurnoCreado}
+        />
+      )}
       <BarraAgenda
         vista={consulta.vista}
         agrupacion={agrupacion}
