@@ -325,4 +325,92 @@ class TurnoTest {
         assertThat(regla.codigo()).isEqualTo("TURNO_TRANSICION_INVALIDA");
         assertThat(regla.estado()).isEqualTo(EstadoError.CONFLICTO_409);
     }
+
+    // ---------- C-35: reprogramar ----------
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"CANCELADO", "ATENDIDO", "AUSENTE"})
+    @DisplayName("Un turno en estado final no se reprograma: 409 TURNO_TRANSICION_INVALIDA")
+    void estadoFinalNoSeReprograma(EstadoTurno origen) {
+        var turno = guardado(origen);
+        var ahora = INICIO.minus(Duration.ofHours(72));
+
+        assertThatThrownBy(() -> turno.exigirReprogramable(ahora)).satisfies(TurnoTest::esTransicionInvalida);
+        // Aunque ya haya pasado, el estado final se informa primero.
+        assertThatThrownBy(() -> turno.exigirReprogramable(INICIO.plusSeconds(3600)))
+                .satisfies(TurnoTest::esTransicionInvalida);
+    }
+
+    @Test
+    @DisplayName("Un turno que empieza justo ahora o ya empezó no se reprograma: 422 RN-05")
+    void turnoIniciadoNoSeReprograma() {
+        var turno = guardado(EstadoTurno.PROGRAMADO);
+
+        for (var ahora : new Instant[] {INICIO, INICIO.plusSeconds(60)}) {
+            assertThatThrownBy(() -> turno.reprogramar(2L, 3L, Intervalo.desde(INICIO.plusSeconds(7200), 30), ahora,
+                    PLAZO))
+                    .isInstanceOfSatisfying(ReglaNegocioException.class, error -> {
+                        assertThat(error.codigo()).isEqualTo("RN-05");
+                        assertThat(error.estado()).isEqualTo(EstadoError.NO_PROCESABLE_422);
+                    });
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoTurno.class, names = {"PROGRAMADO", "CONFIRMADO"})
+    @DisplayName("Reprogramar cambia recursos e intervalo y conserva la identidad del turno")
+    void reprogramarConservaIdentidad(EstadoTurno origen) {
+        var ahora = INICIO.minus(Duration.ofHours(72));
+        var nuevo = Intervalo.desde(INICIO.plus(Duration.ofDays(1)), 45);
+
+        var reprogramado = guardado(origen).reprogramar(20L, 30L, nuevo, ahora, PLAZO);
+
+        assertThat(reprogramado.id()).isEqualTo(70L);
+        assertThat(reprogramado.estado()).isEqualTo(origen);
+        assertThat(reprogramado.profesionalId()).isEqualTo(20L);
+        assertThat(reprogramado.sillonId()).isEqualTo(30L);
+        assertThat(reprogramado.intervalo()).isEqualTo(nuevo);
+        assertThat(reprogramado.duracionMin()).isEqualTo(45);
+        assertThat(reprogramado.pacienteId()).isEqualTo(1L);
+        assertThat(reprogramado.prestacionId()).isEqualTo(4L);
+        assertThat(reprogramado.notas()).isEqualTo("Control ficticio");
+        assertThat(reprogramado.version()).isEqualTo(3L);
+        assertThat(reprogramado.reprogramadoTarde()).isFalse();
+    }
+
+    @Test
+    @DisplayName("La reprogramación es tardía si falta menos que el plazo para el inicio original")
+    void reprogramacionTardia() {
+        var nuevo = Intervalo.desde(INICIO.plus(Duration.ofDays(3)), 30);
+        var turno = guardado(EstadoTurno.PROGRAMADO);
+
+        assertThat(turno.reprogramar(2L, 3L, nuevo, INICIO.minus(PLAZO), PLAZO).reprogramadoTarde()).isFalse();
+        assertThat(turno.reprogramar(2L, 3L, nuevo, INICIO.minus(PLAZO).plusSeconds(60), PLAZO).reprogramadoTarde())
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Una reprogramación tardía queda marcada aunque la siguiente sea a tiempo")
+    void marcaTardiaSeConserva() {
+        var tarde = guardado(EstadoTurno.PROGRAMADO)
+                .reprogramar(2L, 3L, Intervalo.desde(INICIO.plus(Duration.ofDays(5)), 30), INICIO.minusSeconds(3600),
+                        PLAZO);
+        var otraVez = tarde.reprogramar(2L, 3L, Intervalo.desde(INICIO.plus(Duration.ofDays(6)), 30),
+                INICIO.minusSeconds(3600), PLAZO);
+
+        assertThat(tarde.reprogramadoTarde()).isTrue();
+        assertThat(otraVez.reprogramadoTarde()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Mismo horario solo si coinciden profesional, sillón e intervalo")
+    void mismoHorario() {
+        var turno = guardado(EstadoTurno.PROGRAMADO);
+
+        assertThat(turno.mismoHorario(2L, 3L, Intervalo.desde(INICIO, 30))).isTrue();
+        assertThat(turno.mismoHorario(5L, 3L, Intervalo.desde(INICIO, 30))).isFalse();
+        assertThat(turno.mismoHorario(2L, 5L, Intervalo.desde(INICIO, 30))).isFalse();
+        assertThat(turno.mismoHorario(2L, 3L, Intervalo.desde(INICIO, 45))).isFalse();
+        assertThat(turno.mismoHorario(2L, 3L, Intervalo.desde(INICIO.plusSeconds(300), 30))).isFalse();
+    }
 }

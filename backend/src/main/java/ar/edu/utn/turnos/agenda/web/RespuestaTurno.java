@@ -18,6 +18,7 @@ record RespuestaTurno(
         String notas,
         Instant creadoEn,
         boolean cancelacionTardia,
+        boolean reprogramadoTarde,
         Instant canceladoEn,
         String canceladoPor,
         String motivoCancelacion) {
@@ -26,7 +27,7 @@ record RespuestaTurno(
         return new RespuestaTurno(turno.id(), turno.pacienteId(), turno.profesionalId(), turno.sillonId(),
                 turno.prestacionId(), turno.intervalo().inicio(), turno.intervalo().fin(), turno.duracionMin(),
                 turno.estado().name(), turno.canal().name(), turno.notas(), turno.creadoEn(),
-                turno.cancelacionTardia(), turno.canceladoEn(),
+                turno.cancelacionTardia(), turno.reprogramadoTarde(), turno.canceladoEn(),
                 turno.canceladoPor() == null ? null : turno.canceladoPor().name(), turno.motivoCancelacion());
     }
 }

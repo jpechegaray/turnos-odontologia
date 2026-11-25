@@ -64,7 +64,7 @@ class PlanificadorNotificacionesIT extends PruebaIntegracionBase {
     private NotificacionEnviada fallidaDeTurno(Instant ahora) {
         Instant programada = ahora.minus(Duration.ofMinutes(1));
         return repositorio.guardar(NotificacionEnviada.pendiente(
-                        TipoNotificacion.RECORDATORIO,
+                        TipoNotificacion.CANCELACION,
                         "ana@example.test",
                         10L,
                         null,
@@ -93,7 +93,7 @@ class PlanificadorNotificacionesIT extends PruebaIntegracionBase {
     void dosEjecucionesConcurrentesDelPlanificadorNoDuplicanUnEnvio() throws Exception {
         Instant ahora = reloj.instant();
         repositorio.guardar(NotificacionEnviada.pendiente(
-                TipoNotificacion.RECORDATORIO,
+                TipoNotificacion.CANCELACION,
                 "ana@example.test",
                 10L,
                 null,

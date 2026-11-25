@@ -178,3 +178,267 @@ Un turno MUST estar en uno de estos estados: `PROGRAMADO`, `CONFIRMADO`, `ATENDI
 #### Scenario: Un estado final no cambia
 - **WHEN** un turno `CANCELADO`, `ATENDIDO` o `AUSENTE` intenta pasar a cualquier otro estado
 - **THEN** la transición se rechaza con código `TURNO_TRANSICION_INVALIDA`
+
+### Requirement: Cancelación de un turno por el personal
+
+`ADMIN` y `RECEPCION` SHALL poder cancelar un turno `PROGRAMADO` o `CONFIRMADO` con `POST /api/turnos/{id}/cancelar`, enviando un `motivo` opcional de hasta 255 caracteres. El turno MUST quedar `CANCELADO` y la respuesta MUST ser `200` con el turno cancelado, incluidos los datos de la cancelación.
+
+#### Scenario: Recepción cancela un turno programado
+- **GIVEN** un turno `PROGRAMADO` que empieza dentro de 72 horas
+- **WHEN** recepción lo cancela con el motivo "El paciente avisó que no puede venir"
+- **THEN** la respuesta es `200`, el turno queda `CANCELADO` con ese motivo y la base guarda el mismo estado
+
+#### Scenario: Se puede cancelar un turno confirmado
+- **GIVEN** un turno `CONFIRMADO` que todavía no empezó
+- **WHEN** el administrador lo cancela sin enviar cuerpo
+- **THEN** la respuesta es `200`, el turno queda `CANCELADO` y el motivo queda vacío
+
+#### Scenario: Un motivo demasiado largo se rechaza
+- **GIVEN** un turno `PROGRAMADO`
+- **WHEN** recepción lo cancela con un motivo de 256 caracteres
+- **THEN** la respuesta es `400` con el campo `motivo` y el turno sigue `PROGRAMADO`
+
+#### Scenario: Un turno inexistente no se puede cancelar
+- **WHEN** recepción cancela un `id` que no corresponde a ningún turno
+- **THEN** la respuesta es `404` con el código `TURNO_INEXISTENTE`
+
+### Requirement: Solo se cancelan turnos vigentes que no empezaron
+
+El sistema MUST rechazar la cancelación de un turno en estado final (`CANCELADO`, `ATENDIDO` o `AUSENTE`) con `409 TURNO_TRANSICION_INVALIDA`. MUST rechazar la cancelación de un turno cuyo `inicio` es igual o anterior al momento actual con `422 RN-05`. En ambos casos el turno no cambia.
+
+#### Scenario: Un turno ya cancelado no se vuelve a cancelar
+- **GIVEN** un turno `CANCELADO`
+- **WHEN** recepción lo cancela
+- **THEN** la respuesta es `409` con el código `TURNO_TRANSICION_INVALIDA` y los datos de la primera cancelación no cambian
+
+#### Scenario: Un turno atendido no se puede cancelar
+- **GIVEN** un turno `ATENDIDO`
+- **WHEN** recepción lo cancela
+- **THEN** la respuesta es `409` con el código `TURNO_TRANSICION_INVALIDA`
+
+#### Scenario: Un turno que ya empezó no se puede cancelar
+- **GIVEN** un turno `PROGRAMADO` cuyo inicio es exactamente el momento actual
+- **WHEN** recepción lo cancela
+- **THEN** la respuesta es `422` con el código `RN-05` y el turno sigue `PROGRAMADO`
+
+### Requirement: Cancelación tardía según el plazo configurado
+
+El sistema SHALL marcar la cancelación como tardía cuando el tiempo que falta hasta el `inicio` es menor que el plazo `cancelacion.plazo_horas`, calculado con el reloj del sistema en `America/Argentina/Buenos_Aires`. El límite MUST ser inclusivo: a plazo exacto no es tardía. La cancelación tardía MUST permitirse y solo registrarse.
+
+#### Scenario: Cancelar a 24 horas exactas no es tardío
+- **GIVEN** un plazo de 24 horas y un turno el miércoles a las 10:00
+- **WHEN** se cancela el martes a las 10:00
+- **THEN** la cancelación no queda marcada como tardía
+
+#### Scenario: Cancelar un minuto después del plazo es tardío
+- **GIVEN** un plazo de 24 horas y un turno el miércoles a las 10:00
+- **WHEN** se cancela el martes a las 10:01
+- **THEN** la cancelación queda marcada como tardía y el turno queda `CANCELADO` igual
+
+#### Scenario: Un cambio del plazo no altera cancelaciones anteriores
+- **GIVEN** una cancelación registrada como no tardía con un plazo de 24 horas
+- **WHEN** el administrador cambia el plazo a 72 horas
+- **THEN** esa cancelación sigue registrada como no tardía
+
+### Requirement: Registro de quién y cuándo cancela
+
+Toda cancelación MUST registrar el momento de la cancelación según el reloj del sistema, el tipo de actor (`USUARIO` o `PACIENTE_TOKEN`), el usuario del personal que canceló cuando el actor es `USUARIO`, el motivo opcional y la marca de tardía (RN-19).
+
+#### Scenario: La cancelación guarda quién la hizo y cuándo
+- **GIVEN** un turno `PROGRAMADO` y un usuario de recepción con sesión
+- **WHEN** ese usuario lo cancela
+- **THEN** el turno guarda el momento actual como fecha de cancelación, el actor `USUARIO` y el id de ese usuario
+
+### Requirement: Cancelar libera el intervalo
+
+Un turno `CANCELADO` MUST dejar de ocupar su intervalo para el profesional y para el sillón (RN-06, RN-10), sea o no tardía la cancelación. Inmediatamente después de cancelar, el sistema SHALL permitir crear otro turno en el mismo intervalo.
+
+#### Scenario: Tras cancelar se puede dar otro turno en el mismo horario
+- **GIVEN** un turno `PROGRAMADO` del profesional A en el sillón 1 de 10:00 a 10:30
+- **WHEN** recepción lo cancela y después crea otro turno para el profesional A en el sillón 1 de 10:00 a 10:30
+- **THEN** la cancelación responde `200` y la creación responde `201`
+
+#### Scenario: Una cancelación tardía también libera el horario
+- **GIVEN** un turno `PROGRAMADO` que empieza dentro de 2 horas, con un plazo de 24 horas
+- **WHEN** recepción lo cancela y después crea otro turno en el mismo intervalo
+- **THEN** la cancelación queda tardía y la creación responde `201`
+
+### Requirement: Aviso de hueco liberado
+
+Cada cancelación exitosa MUST publicar exactamente un aviso de turno cancelado y exactamente un aviso de hueco liberado, con el profesional, el sillón, el intervalo y el turno de origen, para que la lista de espera pueda ofrecer el hueco (RN-06, RN-23). Una cancelación rechazada MUST NOT publicar avisos.
+
+#### Scenario: Una cancelación publica un único hueco liberado
+- **GIVEN** un turno `PROGRAMADO`
+- **WHEN** recepción lo cancela
+- **THEN** se publica un aviso de turno cancelado y un aviso de hueco liberado con el profesional, el sillón y el intervalo del turno
+
+#### Scenario: Una cancelación rechazada no publica avisos
+- **GIVEN** un turno `CANCELADO`
+- **WHEN** recepción intenta cancelarlo otra vez
+- **THEN** la respuesta es `409` y no se publica ningún aviso
+
+### Requirement: Cancelaciones simultáneas del mismo turno
+
+Si dos cancelaciones del mismo turno llegan a la vez, el sistema MUST aplicar solo una. La otra MUST responder `409` y el hueco liberado MUST publicarse una sola vez. Un conflicto de versión al modificar un turno MUST responder `409`, nunca `500`.
+
+#### Scenario: Dos cancelaciones simultáneas del mismo turno
+- **GIVEN** un turno `PROGRAMADO`
+- **WHEN** dos usuarios de recepción lo cancelan al mismo tiempo
+- **THEN** una respuesta es `200`, la otra es `409` y se publica un solo aviso de hueco liberado
+
+### Requirement: Solo el personal autorizado cancela turnos
+
+`ODONTOLOGO` MUST recibir `403` al cancelar un turno, sin validar el cuerpo ni modificar el turno (RN-20, RN-33). Sin sesión MUST responder `401`. Sin un token CSRF válido MUST responder `403`.
+
+#### Scenario: El odontólogo no puede cancelar turnos
+- **GIVEN** un usuario `ODONTOLOGO` con sesión y un turno `PROGRAMADO`
+- **WHEN** intenta cancelarlo
+- **THEN** la respuesta es `403` y el turno sigue `PROGRAMADO`
+
+#### Scenario: Sin sesión no se puede cancelar un turno
+- **WHEN** se cancela un turno sin sesión
+- **THEN** la respuesta es `401`
+
+#### Scenario: Sin CSRF válido no se puede cancelar un turno
+- **GIVEN** un usuario de recepción con sesión
+- **WHEN** cancela un turno con un token CSRF incorrecto
+- **THEN** la respuesta es `403` y el turno sigue `PROGRAMADO`
+
+### Requirement: Reprogramación de un turno por el personal
+
+`ADMIN` y `RECEPCION` SHALL poder reprogramar un turno con `POST /api/turnos/{id}/reprogramar`. El cuerpo lleva `inicio` (ISO-8601 con zona) y, como opcionales, `profesionalId`, `sillonId` y `duracionMin`. Si faltan, se conservan los del turno. La respuesta SHALL ser `200` con el **mismo** turno (mismo `id`, paciente, prestación, estado, notas y canal) en su horario nuevo (RN-18).
+
+#### Scenario: Recepción mueve un turno a otro horario
+- **GIVEN** un turno `PROGRAMADO` de 30 minutos el lunes a las 10:00, a más de 24 horas
+- **WHEN** `RECEPCION` lo reprograma al lunes a las 11:00 con CSRF válido
+- **THEN** recibe `200` con el mismo `id`, `inicio` a las 11:00, `fin` a las 11:30, estado `PROGRAMADO` y `reprogramadoTarde` falso
+
+#### Scenario: Se puede cambiar de profesional, de sillón y de duración
+- **GIVEN** un turno y otro profesional activo que realiza la prestación, con horario y un sillón libre
+- **WHEN** `ADMIN` lo reprograma con el otro profesional, el otro sillón y 45 minutos
+- **THEN** recibe `200` con los recursos y la duración nuevos
+
+#### Scenario: Un turno confirmado sigue confirmado
+- **GIVEN** un turno `CONFIRMADO`
+- **WHEN** recepción lo reprograma
+- **THEN** recibe `200` y el turno sigue `CONFIRMADO`
+
+#### Scenario: Reprogramar al mismo horario no cambia nada
+- **WHEN** recepción reprograma un turno al mismo inicio, profesional, sillón y duración
+- **THEN** recibe `200` con el turno sin cambios, la versión no cambia y no se publica ningún evento
+
+#### Scenario: Un pedido sin inicio se rechaza
+- **WHEN** recepción envía un cuerpo sin `inicio`, con una fecha mal formada o con JSON roto
+- **THEN** recibe `400` en Problem Details y el turno no cambia
+
+#### Scenario: Un turno inexistente no se puede reprogramar
+- **WHEN** recepción reprograma un `id` que no existe
+- **THEN** recibe `404` en Problem Details con `TURNO_INEXISTENTE`
+
+### Requirement: Solo se reprograman turnos vigentes que no empezaron
+
+La reprogramación MUST rechazar con `409 TURNO_TRANSICION_INVALIDA` un turno `CANCELADO`, `ATENDIDO` o `AUSENTE` y, en segundo lugar, con `422 RN-05` un turno cuyo inicio original es igual al momento actual o anterior. El turno no cambia.
+
+#### Scenario: Un turno cancelado no se puede reprogramar
+- **WHEN** recepción reprograma un turno `CANCELADO`, `ATENDIDO` o `AUSENTE`
+- **THEN** recibe `409` en Problem Details con `TURNO_TRANSICION_INVALIDA` y el turno no cambia
+
+#### Scenario: Un turno que ya empezó no se puede reprogramar
+- **GIVEN** un turno `PROGRAMADO` cuyo inicio es igual al momento actual
+- **WHEN** recepción lo reprograma a un horario futuro libre
+- **THEN** recibe `422` en Problem Details con `RN-05` y el turno no cambia
+
+### Requirement: El horario nuevo cumple las reglas del alta excluyendo al propio turno
+
+El horario nuevo SHALL validarse con las mismas reglas que el alta (RN-01 a RN-04, RN-09, RN-11, RN-13), con los mismos códigos y estados, pero **excluyendo al propio turno** de la búsqueda de solapamientos (RN-18). La restricción de exclusión de la base MUST seguir siendo la garantía final.
+
+#### Scenario: Un turno se mueve quince minutos dentro de su propio intervalo
+- **GIVEN** un turno de 10:00 a 10:30
+- **WHEN** recepción lo reprograma a las 10:15
+- **THEN** recibe `200` con el turno de 10:15 a 10:45
+
+#### Scenario: Un horario ocupado por otro turno responde conflicto
+- **GIVEN** otro turno del mismo profesional, o del mismo sillón, de 11:00 a 11:30
+- **WHEN** recepción reprograma el turno a las 11:15
+- **THEN** recibe `409` en Problem Details con `RN-01` y el turno no cambia
+
+#### Scenario: Un horario fuera de atención se rechaza
+- **WHEN** recepción reprograma el turno a un horario fuera de la atención del profesional o dentro de un bloqueo
+- **THEN** recibe `422` en Problem Details con `RN-04` y el turno no cambia
+
+#### Scenario: El horario nuevo respeta el inicio futuro, la grilla y los recursos activos
+- **WHEN** recepción reprograma a un inicio pasado, a un minuto fuera de la grilla de cinco, a un sillón inactivo o a un profesional que no realiza la prestación
+- **THEN** recibe `422` en Problem Details con el código de la regla (`RN-13`, `RN-09`, `SILLON_INACTIVO` o `RN-11`) y el turno no cambia
+
+### Requirement: Reprogramación tardía según el plazo configurado
+
+Si entre el momento actual y el **inicio original** queda menos que `cancelacion.plazo_horas`, la reprogramación SHALL permitirse y marcar `reprogramadoTarde` verdadero (RN-05, SU-07, PA-06). A plazo exacto no es tardía. Una vez marcada, la marca MUST conservarse en las reprogramaciones siguientes.
+
+#### Scenario: Reprogramar dentro del plazo queda marcado como tardío
+- **GIVEN** un plazo de 24 horas y un turno que empieza en 10 horas
+- **WHEN** recepción lo reprograma a otro día
+- **THEN** recibe `200` con `reprogramadoTarde` verdadero
+
+#### Scenario: Reprogramar a 24 horas exactas no es tardío
+- **GIVEN** un plazo de 24 horas y un turno que empieza en exactamente 24 horas
+- **WHEN** recepción lo reprograma
+- **THEN** recibe `200` con `reprogramadoTarde` falso
+
+#### Scenario: La marca de tardía se conserva
+- **GIVEN** un turno ya reprogramado tarde
+- **WHEN** recepción lo reprograma de nuevo con más de 24 horas de anticipación
+- **THEN** `reprogramadoTarde` sigue verdadero
+
+### Requirement: Reprogramar libera el horario anterior
+
+Al reprogramar, la parte del intervalo anterior que el turno deja de ocupar SHALL quedar libre para otro turno. El sistema SHALL publicar un `TurnoReprogramado`, con los recursos y los intervalos anterior y nuevo, y un `HuecoLiberado` por cada tramo del intervalo anterior que quedó libre:
+
+- con el mismo profesional, la diferencia entre los dos intervalos;
+- con otro profesional, el intervalo anterior completo.
+
+Una reprogramación rechazada o sin cambios MUST NOT publicar eventos.
+
+#### Scenario: El horario anterior se puede volver a dar
+- **GIVEN** un turno de 10:00 a 10:30 reprogramado a las 12:00
+- **WHEN** recepción da otro turno al mismo profesional y sillón de 10:00 a 10:30
+- **THEN** recibe `201`
+
+#### Scenario: Reprogramar publica el turno reprogramado y el hueco anterior
+- **WHEN** recepción reprograma un turno de 10:00 a 10:30 a las 12:00
+- **THEN** se publica un `TurnoReprogramado` con los dos intervalos y la marca de tardía, y un `HuecoLiberado` de 10:00 a 10:30 con el profesional y el sillón anteriores
+
+#### Scenario: Moverse dentro del propio intervalo libera solo lo que dejó
+- **WHEN** recepción reprograma un turno de 10:00 a 10:30 a las 10:15
+- **THEN** se publica un solo `HuecoLiberado`, de 10:00 a 10:15
+
+#### Scenario: Cambiar de profesional libera el intervalo completo
+- **WHEN** recepción reprograma un turno de 10:00 a 10:30 al mismo horario con otro profesional
+- **THEN** se publica un `HuecoLiberado` de 10:00 a 10:30 del profesional anterior
+
+#### Scenario: Una reprogramación rechazada no publica eventos
+- **WHEN** una reprogramación responde `404`, `409` o `422`
+- **THEN** no se publica `TurnoReprogramado` ni `HuecoLiberado`
+
+### Requirement: Reprogramaciones simultáneas sobre el mismo horario
+
+Si una reprogramación y un alta, o dos reprogramaciones, apuntan a la vez al mismo horario libre, SHALL ganar una y la otra MUST recibir `409 RN-01` (RN-15).
+
+#### Scenario: Una reprogramación y un alta compiten por el mismo horario
+- **WHEN** a la vez recepción reprograma un turno a las 12:00 y otra recepción da un turno nuevo al mismo profesional y sillón a las 12:00
+- **THEN** una responde con éxito y la otra `409` con `RN-01`, y en la base queda un solo turno a esa hora
+
+### Requirement: Solo el personal autorizado reprograma turnos
+
+La ruta SHALL requerir sesión del personal y CSRF válido. `ODONTOLOGO` MUST recibir `403`, aun con un cuerpo inválido (RN-20, RN-33). El paciente no reprograma con su token (RN-18).
+
+#### Scenario: El odontólogo no puede reprogramar turnos
+- **WHEN** un odontólogo reprograma un turno con CSRF válido, con un cuerpo válido o inválido
+- **THEN** recibe `403` en Problem Details y el turno no cambia
+
+#### Scenario: Sin sesión no se puede reprogramar un turno
+- **WHEN** un cliente sin sesión reprograma un turno
+- **THEN** recibe `401` en Problem Details y el turno no cambia
+
+#### Scenario: Sin CSRF válido no se puede reprogramar un turno
+- **WHEN** recepción reprograma un turno sin CSRF válido
+- **THEN** recibe `403` en Problem Details y el turno no cambia

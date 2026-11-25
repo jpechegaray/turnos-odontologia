@@ -16,4 +16,9 @@ public interface ReconstructorDatosNotificacion {
      * @return vacío si la notificación no es de este consumidor
      */
     Optional<DatosNotificacion> datosPara(NotificacionEnviada notificacion);
+
+    /** Indica que para este tipo la falta de datos vigentes debe cancelar el envío. */
+    default boolean descartarSiFaltanDatos(NotificacionEnviada notificacion) {
+        return false;
+    }
 }

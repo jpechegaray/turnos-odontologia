@@ -3,6 +3,7 @@ package ar.edu.utn.turnos.listaespera.web;
 import ar.edu.utn.turnos.listaespera.application.ServicioListaEspera;
 import ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera;
 import jakarta.validation.Valid;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +35,14 @@ class ListaEsperaController {
     List<RespuestaEntrada> listar(@RequestParam(required = false) EstadoListaEspera estado,
             @RequestParam(required = false) Long pacienteId, @RequestParam(required = false) Long prestacionId) {
         return servicio.listar(estado, pacienteId, prestacionId).stream().map(RespuestaEntrada::de).toList();
+    }
+
+    /** Entradas compatibles con un hueco del profesional (RN-22); {@code inicio} y {@code fin} en ISO-8601 con zona. */
+    @GetMapping("/compatibles")
+    List<RespuestaEntrada> compatibles(@RequestParam Long profesionalId, @RequestParam OffsetDateTime inicio,
+            @RequestParam OffsetDateTime fin) {
+        return servicio.compatibles(profesionalId, inicio.toInstant(), fin.toInstant()).stream()
+                .map(RespuestaEntrada::de).toList();
     }
 
     @GetMapping("/{id}")

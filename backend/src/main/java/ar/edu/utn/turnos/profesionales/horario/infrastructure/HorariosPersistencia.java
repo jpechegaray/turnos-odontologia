@@ -65,6 +65,15 @@ public class HorariosPersistencia implements HorarioConsulta {
                 .orElse(false);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<HorarioDatos> tramos(Long profesionalId) {
+        var filas = profesionalId == null
+                ? horarios.findAllByOrderByProfesionalIdAscDiaSemanaAscHoraInicioAscIdAsc()
+                : horarios.findByProfesionalIdOrderByDiaSemanaAscHoraInicioAscIdAsc(profesionalId);
+        return filas.stream().map(HorarioAtencion::datos).toList();
+    }
+
     /** ISO {@code HH:mm[:ss[.nnn]]}, que PostgreSQL castea a {@code time} sin zona. */
     private static String texto(LocalTime hora) {
         return hora.format(DateTimeFormatter.ISO_LOCAL_TIME);

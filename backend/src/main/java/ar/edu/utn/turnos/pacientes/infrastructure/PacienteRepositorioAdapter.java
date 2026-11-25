@@ -30,6 +30,11 @@ public class PacienteRepositorioAdapter implements PacienteRepositorio {
     }
 
     @Override
+    public List<Paciente> porIds(java.util.Collection<Long> ids) {
+        return jpaRepository.findAllById(ids).stream().map(PacienteJpa::aDominio).toList();
+    }
+
+    @Override
     public Optional<Paciente> porEmail(String email) {
         if (email == null) return Optional.empty();
         return jpaRepository.findByEmailIgnoreCase(email).map(PacienteJpa::aDominio);

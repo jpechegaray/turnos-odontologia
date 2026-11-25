@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * Planificador periódico de envíos pendientes y fallidos (Flujo 5). Se activa con
  * {@code app.notificaciones.planificador.habilitado=true} (por defecto) y corre cada
  * {@code app.notificaciones.planificador.intervalo} (5 minutos por defecto). Delega en
- * {@link ServicioNotificaciones#procesarVencidas()}, que reclama las filas vencidas con
+ * {@link PlanificadorRecordatorios#procesar()}, que encola recordatorios y delega el envío con
  * {@code FOR UPDATE SKIP LOCKED} para que dos ejecuciones concurrentes no dupliquen un envío.
  *
  * <p>{@code @EnableScheduling} vive en {@code ConfiguracionNotificaciones}, no en la clase raíz.
@@ -21,15 +21,15 @@ import org.springframework.stereotype.Component;
         matchIfMissing = true)
 public class PlanificadorNotificaciones {
 
-    private final ServicioNotificaciones servicio;
+    private final PlanificadorRecordatorios recordatorios;
 
-    public PlanificadorNotificaciones(ServicioNotificaciones servicio) {
-        this.servicio = servicio;
+    public PlanificadorNotificaciones(PlanificadorRecordatorios recordatorios) {
+        this.recordatorios = recordatorios;
     }
 
     /** Dispara un ciclo de procesamiento de notificaciones vencidas. */
     @Scheduled(fixedDelayString = "${app.notificaciones.planificador.intervalo:5m}")
     public void procesar() {
-        servicio.procesarVencidas();
+        recordatorios.procesar();
     }
 }

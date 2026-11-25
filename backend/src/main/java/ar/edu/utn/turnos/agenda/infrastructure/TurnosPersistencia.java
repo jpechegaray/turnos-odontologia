@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.agenda.infrastructure;
 
+import ar.edu.utn.turnos.agenda.application.TurnosParaToken;
 import ar.edu.utn.turnos.agenda.domain.Turno;
 import ar.edu.utn.turnos.agenda.domain.TurnoOcupado;
 import ar.edu.utn.turnos.agenda.domain.ValidadorTurno;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 /** Persistencia de turnos y traducción de la garantía de la base (RN-15) al mismo error que da la validación. */
 @Repository
-public class TurnosPersistencia {
+public class TurnosPersistencia implements TurnosParaToken {
     static final String SOLAPE_PROFESIONAL = "turno_sin_solape_profesional";
     static final String SOLAPE_SILLON = "turno_sin_solape_sillon";
     /** Espacios de claves de los locks de agenda, para no chocar con otros usos de advisory locks. */
@@ -84,6 +85,12 @@ public class TurnosPersistencia {
 
     public Optional<Turno> buscar(Long id) {
         return turnos.findById(id).map(TurnoJpa::dominio);
+    }
+
+    @Override
+    public Optional<EstadoActual> bloquearParaToken(Long turnoId) {
+        return turnos.bloquearPorId(turnoId).map(TurnoJpa::dominio)
+                .map(t -> new EstadoActual(t.intervalo().inicio(), t.estado()));
     }
 
     /** Turnos no cancelados del profesional o del sillón que solapan con el intervalo (RN-01, RN-10). */
