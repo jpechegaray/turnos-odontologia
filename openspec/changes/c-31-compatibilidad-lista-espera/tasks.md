@@ -8,11 +8,11 @@
 
 ## 1. Dominio puro
 
-- [ ] 1.1 Crear `listaespera.domain.Hueco` (design D1). Se verifica con JUnit:
+- [x] 1.1 Crear `listaespera.domain.Hueco` (design D1). Se verifica con JUnit:
   - rechaza nulos;
   - rechaza `fin <= inicio`;
   - expone la duración.
-- [ ] 1.2 Crear `PrestacionParaHueco` y `CompatibilidadListaEspera.esCompatible(...)` (design D2). Se verifica con JUnit sin Spring:
+- [x] 1.2 Crear `PrestacionParaHueco` y `CompatibilidadListaEspera.esCompatible(...)` (design D2). Se verifica con JUnit sin Spring:
   - "Una prestación de 90 minutos no cabe en un hueco de 30";
   - "Una prestación que dura exactamente el hueco es compatible";
   - "El profesional del hueco debe realizar la prestación";
@@ -25,7 +25,7 @@
   - "Una entrada sin franja acepta cualquier hora";
   - "Una entrada que no está activa no es compatible";
   - además, un turno resultante que cruza la medianoche no cae en la franja.
-- [ ] 1.3 Crear `SelectorDeAvisos.seleccionar(...)` (design D3). Se verifica con JUnit:
+- [x] 1.3 Crear `SelectorDeAvisos.seleccionar(...)` (design D3). Se verifica con JUnit:
   - "El tope de avisos elige a los más antiguos";
   - "Un paciente con dos entradas compatibles recibe un solo aviso";
   - "El paciente repetido no ocupa un lugar del tope";
