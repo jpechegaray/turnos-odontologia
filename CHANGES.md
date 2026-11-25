@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 34 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35, C-37 y C-40). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-44 y C-45. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 35 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35, C-37 y C-40; Ola 6: C-45). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-44 y C-46. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -64,7 +64,7 @@
 | C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
 | C-44 | ⬜ pendiente | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
-| C-45 | ⬜ pendiente | Cualquiera | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
+| C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ⬜ pendiente | Cualquiera | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
 | C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
 | C-48 | ⬜ pendiente | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
@@ -1431,8 +1431,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-06 abierta (política de reprogramación tardía): el texto del email puede cambiar.
 
 ### [C-45] `C-45-front-crear-turno`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 6 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #122, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 6 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `features/agenda/crear`: formulario con paciente buscable, profesional, prestación, sillón, horario sugerido por la disponibilidad y duración ajustable
   - Mapeo de 409 (solapamiento por profesional o por sillón) y de 422 (por código de regla) a mensajes claros; horas en zona BA
