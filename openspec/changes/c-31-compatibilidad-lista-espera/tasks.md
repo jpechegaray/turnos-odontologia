@@ -57,6 +57,10 @@
 
 ## 4. Verificación final
 
-- [ ] 4.1 Correr la suite completa del backend (`./mvnw verify`).
-- [ ] 4.2 Escribir `verify.md` con el veredicto y la trazabilidad entre escenarios y tests.
-- [ ] 4.3 Actualizar el estado de C-31 en `CHANGES.md`.
+- [x] 4.1 Correr la suite completa del backend (`./mvnw verify`, con Docker): todo en verde. C-31 no toca el frontend.
+- [x] 4.2 Escribir `verify.md` con el veredicto y la trazabilidad entre escenarios y tests.
+
+## Workflow follow-up
+
+- Abrir el PR de `juan-pablo-c-31` a `master` con "Closes #31", esperar el CI en verde y mergear con `--admin --merge`.
+- Después del merge: `/opsx:archive`, CHANGES.md (C-31 hecho por Juan Pablo, con PR y fecha) y verificar que el issue #31 quedó cerrado.
