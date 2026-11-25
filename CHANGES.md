@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 24 de 51 changes hechos (Olas 0, 1 y 2 completas; Ola 3 completa salvo C-25). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-27 (Juan Pablo, camino crítico), C-32 (Nico) y los "Cualquiera" C-25, C-26, C-28, C-29, C-30, C-31 y C-33. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 26 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25 y C-27). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-32 (Nico) y los "Cualquiera" C-26, C-28, C-29, C-30, C-31, C-33, C-34 y C-35. C-36 (Valentino, camino crítico) espera a C-31. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -44,9 +44,9 @@
 | C-22 | ✅ hecho | Valentino (Cualquiera) | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
 | C-23 | ✅ hecho | Santino (Cualquiera) | 3 | S | front-pacientes | C-07, C-16 |  |
 | C-24 | ✅ hecho | Lionel (Cualquiera) | 3 | S | front-usuarios-admin | C-13, C-16 |  |
-| C-25 | ⬜ pendiente | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
+| C-25 | ✅ hecho | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
 | C-26 | ⬜ pendiente | Cualquiera | 4 | M | horarios-libres-disponibilidad | C-19 |  |
-| C-27 | ⬜ pendiente | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
+| C-27 | ✅ hecho | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
 | C-28 | ⬜ pendiente | Cualquiera | 4 | M | consultar-agenda-dia-semana | C-19 |  |
 | C-29 | ⬜ pendiente | Cualquiera | 4 | S | marcar-asistencia-ausencia | C-19 |  |
 | C-30 | ⬜ pendiente | Cualquiera | 4 | M | guardas-integridad-con-turnos | C-04, C-05, C-06, C-12, C-19 |  |
@@ -1029,7 +1029,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: ADMIN gestiona usuarios desde la UI; las demás roles no ven la sección ni acceden por URL.
 
 ### [C-25] `C-25-registro-notificaciones-consulta`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Valentino (PR #102, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 3 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `GET /api/notificaciones` paginado, filtros por estado y por turno, con el último error de las fallidas; RECEPCION y ADMIN
@@ -1071,7 +1071,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-04 (varios changes en `agenda` en la misma ola; solo archivos nuevos).
 
 ### [C-27] `C-27-cancelar-turno-y-liberar-hueco`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Juan Pablo (PR #101, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Juan Pablo — **Ola**: 4 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `PoliticaCancelacion` pura: `tardia = (inicio - ahora) < plazo` con límite inclusivo y `Clock` inyectable; plazo de `ConfiguracionServicio`
