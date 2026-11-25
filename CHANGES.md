@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 33 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35 y C-37). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-40 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 34 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-31, C-32 y C-33; Ola 5: C-35, C-37 y C-40). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-36 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-29, C-30, C-34, C-44 y C-45. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -59,7 +59,7 @@
 | C-37 | ✅ hecho | Juan Pablo (Cualquiera) | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
 | C-38 | ⬜ pendiente | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
-| C-40 | ⬜ pendiente | Cualquiera | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
+| C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
 | C-41 | ⬜ pendiente | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
 | C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
@@ -136,7 +136,7 @@
 | `C-37` recordatorio-email-planificador | 5 | Cualquiera | M | MEDIUM | C-08, C-15, C-19, C-32 | C-51 |
 | `C-38` reserva-publica-disponibilidad | 5 | Lionel | M | HIGH | C-08, C-10, C-17, C-26 | C-41, C-48 |
 | `C-39` gestion-turno-por-token | 5 | Nico | M | CRITICAL | C-17, C-27, C-32 | C-49 |
-| `C-40` front-agenda-vistas | 5 | Cualquiera | M | LOW | C-09, C-16, C-28 | C-45 |
+| `C-40` front-agenda-vistas | 5 | Julián | M | LOW | C-09, C-16, C-28 | C-45 |
 | `C-41` reserva-publica-crear-reserva | 6 | Lionel | L | HIGH | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | C-48 |
 | `C-42` tomar-hueco-desde-oferta (camino crítico) | 6 | Valentino | M | HIGH | C-17, C-19, C-32, C-36 | C-49 |
 | `C-43` asignacion-manual-hueco-recepcion | 6 | Cualquiera | M | MEDIUM | C-19, C-26, C-31, C-36 | C-47 |
@@ -207,7 +207,7 @@ flowchart LR
     C37["C-37 recordatorio-email-planificador<br/>Cualquiera · M"]
     C38["C-38 reserva-publica-disponibilidad<br/>Lionel · M"]
     C39["C-39 gestion-turno-por-token<br/>Nico · M"]
-    C40["C-40 front-agenda-vistas<br/>Cualquiera · M"]
+    C40["C-40 front-agenda-vistas<br/>Julián · M"]
   end
   subgraph OLA6["Ola 6"]
     C41["C-41 reserva-publica-crear-reserva<br/>Lionel · L"]
@@ -425,7 +425,7 @@ Regla de las olas: dentro de una misma ola ningún par de changes toca los mismo
   - `C-37` recordatorio-email-planificador — **Cualquiera**
   - `C-38` reserva-publica-disponibilidad — **Lionel**
   - `C-39` gestion-turno-por-token — **Nico**
-  - `C-40` front-agenda-vistas — **Cualquiera**
+  - `C-40` front-agenda-vistas — **Julián**
 
 **GATE 6** — abre la Ola 6 ← FORK
 - Condición: C-35, C-36, C-38 y C-40 mergeados. PA-08 (texto de consentimiento) respondida antes de C-41 y C-48.
@@ -519,8 +519,8 @@ Estimación en puntos: S = 1, M = 2, L = 3. Solo cuentan los changes **con dueñ
 | Nico | Ola 1: C-03 (L); Ola 2: C-16 (S); Ola 4: C-32 (M); Ola 5: C-39 (M) | 8 puntos (4 changes) |
 | Valentino | Ola 1: C-04 (S); Ola 2: C-13 (M); Ola 5: C-36 (L); Ola 6: C-42 (M) | 8 puntos (4 changes) |
 | Lionel | Ola 2: C-10 (S); Ola 2: C-17 (S); Ola 5: C-38 (M); Ola 6: C-41 (L) | 7 puntos (4 changes) |
-| Julián | Ola 2: C-15 (M); Ola 7: C-48 (M); Ola 7: C-49 (M); Ola 8: C-50 (M) | 8 puntos (4 changes) |
-| **Cualquiera** | C-05 (S), C-06 (S), C-07 (M), C-08 (S), C-09 (M), C-11 (M), C-12 (S), C-18 (M), C-20 (S), C-21 (M), C-22 (M), C-23 (S), C-24 (S), C-25 (S), C-28 (M), C-29 (S), C-30 (M), C-33 (M), C-34 (S), C-37 (M), C-40 (M), C-43 (M), C-44 (S), C-45 (M), C-46 (M), C-47 (M) | 41 puntos (26 changes) |
+| Julián | Ola 2: C-15 (M); Ola 5: C-40 (M); Ola 7: C-48 (M); Ola 7: C-49 (M); Ola 8: C-50 (M) | 10 puntos (5 changes) |
+| **Cualquiera** | C-05 (S), C-06 (S), C-07 (M), C-08 (S), C-09 (M), C-11 (M), C-12 (S), C-18 (M), C-20 (S), C-21 (M), C-22 (M), C-23 (S), C-24 (S), C-25 (S), C-28 (M), C-29 (S), C-30 (M), C-33 (M), C-34 (S), C-37 (M), C-43 (M), C-44 (S), C-45 (M), C-46 (M), C-47 (M) | 39 puntos (25 changes) |
 
 Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada integrante termina con ~15 puntos; Juan Pablo debería tomar menos "Cualquiera" porque revisa todos los PR.
 
@@ -1330,8 +1330,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: CRITICAL: análisis y propuesta primero (acceso a datos de salud por enlace). RM-05.
 
 ### [C-40] `C-40-front-agenda-vistas`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 5 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Julián (PR #119, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Julián (era Cualquiera) — **Ola**: 5 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `features/agenda`: vistas diaria y semanal por profesional y por sillón con los estados del design system, horarios de atención, bloqueos y hora de Buenos Aires
   - Acceso a la ficha básica del paciente; ODONTOLOGO en solo lectura
