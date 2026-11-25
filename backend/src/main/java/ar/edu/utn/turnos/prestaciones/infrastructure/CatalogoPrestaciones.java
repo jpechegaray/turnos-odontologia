@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.prestaciones.infrastructure;
 
+import ar.edu.utn.turnos.agenda.application.TurnosActivosConsulta;
 import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
 import ar.edu.utn.turnos.prestaciones.application.PrestacionResumen;
 import ar.edu.utn.turnos.prestaciones.domain.DuracionPrestacion;
@@ -7,6 +8,7 @@ import ar.edu.utn.turnos.prestaciones.domain.NombrePrestacion;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,9 +27,11 @@ public class CatalogoPrestaciones implements ConsultaPrestaciones {
     static final String NO_ENCONTRADA = "PRESTACION-NO-ENCONTRADA";
 
     private final PrestacionJpaRepository repositorio;
+    private final TurnosActivosConsulta turnosActivos;
 
-    public CatalogoPrestaciones(PrestacionJpaRepository repositorio) {
+    public CatalogoPrestaciones(PrestacionJpaRepository repositorio, TurnosActivosConsulta turnosActivos) {
         this.repositorio = repositorio;
+        this.turnosActivos = turnosActivos;
     }
 
     public List<PrestacionResumen> listar(boolean soloActivas) {
@@ -66,15 +70,33 @@ public class CatalogoPrestaciones implements ConsultaPrestaciones {
         if (repositorio.existsByNombreClaveAndIdNot(nombrePrestacion.clave(), id)) {
             throw duplicada();
         }
+        if (prestacion.isActiva() && !activa) {
+            verificarSinTurnosFuturos(id);
+        }
         prestacion.modificar(nombrePrestacion, duracion, activa);
         return resumir(guardar(prestacion));
     }
 
-    /** Baja lógica (RN-37): repetirla no tiene efecto. Las guardas con turnos futuros llegan en C-30. */
+    /** Baja lógica (RN-37): repetirla no tiene efecto. */
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void darDeBaja(Long id) {
-        buscar(id).desactivar();
+        var prestacion = buscar(id);
+        if (prestacion.isActiva()) {
+            verificarSinTurnosFuturos(id);
+            prestacion.desactivar();
+        }
+    }
+
+    private void verificarSinTurnosFuturos(Long id) {
+        var conflictos = turnosActivos.futurosDePrestacion(id);
+        if (!conflictos.isEmpty()) {
+            throw new ReglaNegocioException(
+                    "RN-37",
+                    EstadoError.CONFLICTO_409,
+                    "No se puede desactivar la prestación porque tiene turnos futuros activos",
+                    Map.of("recurso", "PRESTACION", "turnos", conflictos));
+        }
     }
 
     private Prestacion buscar(Long id) {

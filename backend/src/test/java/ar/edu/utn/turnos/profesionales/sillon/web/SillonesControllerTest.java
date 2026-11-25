@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ar.edu.utn.turnos.agenda.application.TurnosActivosConsulta;
 import ar.edu.utn.turnos.profesionales.sillon.application.ServicioSillones;
 import ar.edu.utn.turnos.profesionales.sillon.application.SillonConsulta.Datos;
 import ar.edu.utn.turnos.profesionales.sillon.infrastructure.SillonesPersistencia;
@@ -31,6 +32,7 @@ class SillonesControllerTest {
 
     @Autowired private MockMvc mvc;
     @MockitoBean private SillonesPersistencia sillones;
+    @MockitoBean private TurnosActivosConsulta turnosActivos;
 
     @ParameterizedTest
     @ValueSource(strings = {"ADMIN", "RECEPCION", "ODONTOLOGO"})

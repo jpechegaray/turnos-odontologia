@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.profesionales.bloqueo.application;
 
+import ar.edu.utn.turnos.agenda.application.TurnosActivosConsulta;
 import ar.edu.utn.turnos.profesionales.bloqueo.infrastructure.BloqueosPersistencia;
 import ar.edu.utn.turnos.profesionales.profesional.application.ProfesionalConsulta;
 import ar.edu.utn.turnos.profesionales.profesional.application.ServicioProfesionales;
@@ -7,6 +8,7 @@ import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import java.util.List;
+import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,18 +21,28 @@ public class ServicioBloqueos {
     private final BloqueosPersistencia bloqueos;
     private final ProfesionalConsulta profesionales;
     private final ServicioProfesionales catalogo;
+    private final TurnosActivosConsulta turnosActivos;
 
     public ServicioBloqueos(BloqueosPersistencia bloqueos, ProfesionalConsulta profesionales,
-            ServicioProfesionales catalogo) {
+            ServicioProfesionales catalogo, TurnosActivosConsulta turnosActivos) {
         this.bloqueos = bloqueos;
         this.profesionales = profesionales;
         this.catalogo = catalogo;
+        this.turnosActivos = turnosActivos;
     }
 
     @PreAuthorize(PUEDE_GESTIONAR)
     @Transactional
     public BloqueoDatos crear(Long profesionalId, Intervalo intervalo, String motivo) {
         verificarProfesional(profesionalId);
+        var conflictos = turnosActivos.enIntervaloDeProfesional(profesionalId, intervalo);
+        if (!conflictos.isEmpty()) {
+            throw new ReglaNegocioException(
+                    "RN-17",
+                    EstadoError.CONFLICTO_409,
+                    "No se puede crear el bloqueo porque se superpone con turnos activos",
+                    Map.of("turnos", conflictos));
+        }
         return bloqueos.crear(profesionalId, intervalo, motivo);
     }
 
