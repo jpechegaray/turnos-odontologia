@@ -318,4 +318,59 @@ class TurnosCancelacionApiIT extends PruebaIntegracionBase {
         assertThat(eventos.stream(TurnoCancelado.class)).isEmpty();
         assertThat(eventos.stream(HuecoLiberado.class)).isEmpty();
     }
+
+    // --- Tarea 6.1: acceso ---
+
+    @Autowired
+    ar.edu.utn.turnos.agenda.application.CancelarTurnoService cancelarTurno;
+
+    @Test
+    @DisplayName("El odontólogo no puede cancelar turnos")
+    void elOdontologoNoPuedeCancelarTurnos() throws Exception {
+        var id = turno(Duration.ofHours(72), "PROGRAMADO");
+        var odontologo = sesionDe("ODONTOLOGO");
+
+        cancelar(id, null, odontologo).andExpect(status().isForbidden());
+        // 403 antes de validar el cuerpo: un motivo inválido no cambia la respuesta.
+        cancelar(id, "{\"motivo\":\"" + "m".repeat(256) + "\"}", odontologo).andExpect(status().isForbidden());
+
+        assertThat(estado(id)).isEqualTo("PROGRAMADO");
+        assertThat(eventos.stream(HuecoLiberado.class)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("El servicio de cancelación rechaza al odontólogo aunque se saltee el filtro HTTP")
+    void elServicioRechazaAlOdontologo() {
+        var id = turno(Duration.ofHours(72), "PROGRAMADO");
+        var odontologo = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                "odontologo-ficticio", null,
+                java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ODONTOLOGO")));
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(odontologo);
+        try {
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> cancelarTurno.cancelarPorPersonal(id, null, null))
+                    .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+        assertThat(estado(id)).isEqualTo("PROGRAMADO");
+    }
+
+    @Test
+    @DisplayName("Sin sesión no se puede cancelar un turno")
+    void sinSesionNoSePuedeCancelarUnTurno() throws Exception {
+        var id = turno(Duration.ofHours(72), "PROGRAMADO");
+
+        mockMvc.perform(cancelacion(id).with(csrfValido())).andExpect(status().isUnauthorized());
+        assertThat(estado(id)).isEqualTo("PROGRAMADO");
+    }
+
+    @Test
+    @DisplayName("Sin CSRF válido no se puede cancelar un turno")
+    void sinCsrfValidoNoSePuedeCancelarUnTurno() throws Exception {
+        var id = turno(Duration.ofHours(72), "PROGRAMADO");
+
+        mockMvc.perform(cancelacion(id).with(comoRecepcion).with(csrfConCabeceraIncorrecta()))
+                .andExpect(status().isForbidden());
+        assertThat(estado(id)).isEqualTo("PROGRAMADO");
+    }
 }

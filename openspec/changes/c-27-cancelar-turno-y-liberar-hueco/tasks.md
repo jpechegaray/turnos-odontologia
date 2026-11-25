@@ -51,7 +51,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 6. Acceso
 
-- [ ] 6.1 Agregar el matcher en `SecurityConfig` y `@PreAuthorize` en el servicio. Se verifica con:
+- [x] 6.1 Agregar el matcher en `SecurityConfig` y `@PreAuthorize` en el servicio. Se verifica con:
   - "El odontólogo no puede cancelar turnos";
   - "Sin sesión no se puede cancelar un turno";
   - "Sin CSRF válido no se puede cancelar un turno";
