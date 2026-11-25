@@ -43,6 +43,14 @@ public class TurnosPersistencia implements TurnosParaToken {
         bloquear(LOCK_SILLON, sillonId);
     }
 
+    /**
+     * Toma solo el lock del profesional (el mismo de {@link #bloquearRecursos}; es reentrante dentro de la
+     * transacción). Lo usa quien necesita ordenar por profesional antes de tomar otros locks de fila (C-42).
+     */
+    public void bloquearProfesional(Long profesionalId) {
+        bloquear(LOCK_PROFESIONAL, profesionalId);
+    }
+
     private void bloquear(int espacio, Long id) {
         // La clave de 32 bits se pliega desde el id; una colisión solo serializa de más, nunca permite un solape.
         int clave = (int) (id ^ (id >>> 32));

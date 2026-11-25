@@ -31,6 +31,13 @@ class ContenidoAvisoOferta {
                 prestacion, profesional, urlPublica + "/oferta/" + token);
     }
 
+    /** Email {@code CONFIRMACION_RESERVA} del turno tomado (C-42): enlace {@code <url pública>/turno/<token>}. */
+    DatosNotificacion confirmacion(Paciente paciente, Instant inicio, String prestacion, String profesional,
+            String tokenTurno) {
+        return new DatosNotificacion(paciente.email(), (paciente.nombre() + " " + paciente.apellido()).trim(), inicio,
+                prestacion, profesional, urlPublica + "/turno/" + tokenTurno);
+    }
+
     String nombreProfesional(Long id) {
         return profesionales.buscarPorId(id).map(p -> (p.nombre() + " " + p.apellido()).trim()).orElse(null);
     }

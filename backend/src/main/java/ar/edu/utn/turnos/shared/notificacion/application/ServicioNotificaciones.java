@@ -128,7 +128,7 @@ public class ServicioNotificaciones {
                             ? notificacion.dirigidaA(envio.destinatario()) : notificacion;
                     enviarYGuardar(registro, envio, ahora);
                 } else {
-                    repositorio.guardar(notificacion.descartada("Recordatorio descartado: turno o destinatario no vigente"));
+                    repositorio.guardar(notificacion.descartada("Notificación descartada: turno o destinatario no vigente"));
                 }
             }
         });

@@ -38,6 +38,19 @@ class TurnoTest {
         assertThat(turno.canceladoEn()).isNull();
     }
 
+    @Test
+    @DisplayName("Un turno online nuevo queda PROGRAMADO, con canal ONLINE y sin usuario creador")
+    void turnoOnlineNuevo() {
+        var turno = Turno.nuevoOnline(1L, 2L, 3L, 4L, Intervalo.desde(INICIO, 45), CREADO);
+        assertThat(turno.id()).isNull();
+        assertThat(turno.estado()).isEqualTo(EstadoTurno.PROGRAMADO);
+        assertThat(turno.canal()).isEqualTo(CanalTurno.ONLINE);
+        assertThat(turno.duracionMin()).isEqualTo(45);
+        assertThat(turno.creadoPorUsuarioId()).isNull();
+        assertThat(turno.notas()).isNull();
+        assertThat(turno.creadoEn()).isEqualTo(CREADO);
+    }
+
     @ParameterizedTest
     @EnumSource(value = EstadoTurno.class, names = {"CONFIRMADO", "CANCELADO", "ATENDIDO", "AUSENTE"})
     @DisplayName("Transiciones permitidas desde un turno programado")

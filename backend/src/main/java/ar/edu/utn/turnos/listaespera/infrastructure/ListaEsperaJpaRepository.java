@@ -1,9 +1,12 @@
 package ar.edu.utn.turnos.listaespera.infrastructure;
 
 import ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera;
+import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,4 +42,8 @@ interface ListaEsperaJpaRepository extends JpaRepository<ListaEsperaJpa, Long> {
             where e.estado = ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera.ACTIVA and e.fechaHasta < :hoy
             """)
     int vencerAnterioresA(@Param("hoy") LocalDate hoy);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select e from ListaEsperaJpa e where e.id = :id")
+    Optional<ListaEsperaJpa> bloquear(@Param("id") Long id);
 }

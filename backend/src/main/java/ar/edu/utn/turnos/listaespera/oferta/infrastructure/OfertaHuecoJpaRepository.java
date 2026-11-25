@@ -23,4 +23,20 @@ interface OfertaHuecoJpaRepository extends JpaRepository<OfertaHuecoJpa, Long> {
             where o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.ENVIADA and o.expiraEn <= :ahora
             """)
     int vencer(@Param("ahora") Instant ahora);
+
+    @Modifying
+    @Query("""
+            update OfertaHuecoJpa o set o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.TOMADA
+            where o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.ENVIADA
+              and o.profesionalId = :profesionalId and o.huecoInicio = :inicio and o.huecoFin = :fin
+            """)
+    int tomarDelHueco(@Param("profesionalId") Long profesionalId, @Param("inicio") Instant inicio,
+            @Param("fin") Instant fin);
+
+    @Modifying
+    @Query("""
+            update OfertaHuecoJpa o set o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.VENCIDA
+            where o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.ENVIADA and o.id = :id
+            """)
+    int vencerOferta(@Param("id") Long id);
 }
