@@ -2,6 +2,8 @@ package ar.edu.utn.turnos.shared.tiempo;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Intervalo semiabierto {@code [inicio, fin)}: incluye el inicio y excluye el fin. Es el único lugar
@@ -28,5 +30,23 @@ public record Intervalo(Instant inicio, Instant fin) {
     /** El otro intervalo cabe completo dentro de este (RN-16). */
     public boolean contiene(Intervalo otro) {
         return !otro.inicio.isBefore(inicio) && !otro.fin.isAfter(fin);
+    }
+
+    /**
+     * Tramos de este intervalo que no comparten instantes con {@code otro}, en orden (C-35): vacío si lo cubre,
+     * este completo si no se tocan y uno o dos tramos si se solapan en parte.
+     */
+    public List<Intervalo> menos(Intervalo otro) {
+        if (!solapaCon(otro)) {
+            return List.of(this);
+        }
+        var tramos = new ArrayList<Intervalo>(2);
+        if (inicio.isBefore(otro.inicio)) {
+            tramos.add(new Intervalo(inicio, otro.inicio));
+        }
+        if (otro.fin.isBefore(fin)) {
+            tramos.add(new Intervalo(otro.fin, fin));
+        }
+        return List.copyOf(tramos);
     }
 }

@@ -2,6 +2,7 @@ package ar.edu.utn.turnos.agenda.web;
 
 import ar.edu.utn.turnos.agenda.application.CancelarTurnoService;
 import ar.edu.utn.turnos.agenda.application.CrearTurnoService;
+import ar.edu.utn.turnos.agenda.application.ReprogramarTurnoService;
 import ar.edu.utn.turnos.seguridad.application.IdentidadPersonal;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 class TurnosController {
     private final CrearTurnoService crearTurno;
     private final CancelarTurnoService cancelarTurno;
+    private final ReprogramarTurnoService reprogramarTurno;
 
-    TurnosController(CrearTurnoService crearTurno, CancelarTurnoService cancelarTurno) {
+    TurnosController(CrearTurnoService crearTurno, CancelarTurnoService cancelarTurno,
+            ReprogramarTurnoService reprogramarTurno) {
         this.crearTurno = crearTurno;
         this.cancelarTurno = cancelarTurno;
+        this.reprogramarTurno = reprogramarTurno;
     }
 
     /** Alta de un turno por el personal (US-010): 201, 400, 409 (RN-01) o 422 (RN-04, RN-09, RN-11, RN-13). */
@@ -43,5 +47,14 @@ class TurnosController {
             @AuthenticationPrincipal IdentidadPersonal identidad) {
         var motivo = solicitud != null ? solicitud.motivo() : null;
         return RespuestaTurno.de(cancelarTurno.cancelarPorPersonal(id, motivo, identidad != null ? identidad.id() : null));
+    }
+
+    /**
+     * Reprogramación por el personal (US-011): 200, 400 (sin inicio), 404, 409 (estado final, horario ocupado o
+     * conflicto de versión) o 422 (RN-05 turno ya iniciado, RN-04, RN-09, RN-11, RN-13).
+     */
+    @PostMapping("/{id}/reprogramar")
+    RespuestaTurno reprogramar(@PathVariable Long id, @Valid @RequestBody SolicitudReprogramarTurno solicitud) {
+        return RespuestaTurno.de(reprogramarTurno.reprogramar(id, solicitud.pedido()));
     }
 }

@@ -120,6 +120,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/turnos").hasAnyRole("ADMIN", "RECEPCION")
                         // Cancelar (C-27): ídem; el odontólogo recibe 403 antes de validar el motivo.
                         .requestMatchers(HttpMethod.POST, "/api/turnos/{id}/cancelar").hasAnyRole("ADMIN", "RECEPCION")
+                        // Reprogramar (C-35): ídem; el paciente tampoco reprograma por token (RN-18).
+                        .requestMatchers(HttpMethod.POST, "/api/turnos/{id}/reprogramar").hasAnyRole("ADMIN", "RECEPCION")
                         // Registro de notificaciones (C-25, US-020): el odontólogo no lo consulta.
                         .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasAnyRole("ADMIN", "RECEPCION")
                         // Regla general de RN-33 (C-28): el odontólogo es solo lectura. Va después de las reglas

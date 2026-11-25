@@ -94,4 +94,35 @@ class IntervaloTest {
         assertThatIllegalArgumentException().isThrownBy(() -> Intervalo.desde(a("10:00"), 0));
         assertThatIllegalArgumentException().isThrownBy(() -> Intervalo.desde(a("10:00"), -5));
     }
+
+    // ---------- C-35: tramos que quedan libres ----------
+
+    @Test
+    @DisplayName("Restar un intervalo que no lo toca devuelve el intervalo completo")
+    void menosSinContacto() {
+        assertThat(de("10:00", "10:30").menos(de("12:00", "12:30"))).containsExactly(de("10:00", "10:30"));
+        // Contiguo: [10:00, 10:30) y [10:30, 11:00) no comparten instantes.
+        assertThat(de("10:00", "10:30").menos(de("10:30", "11:00"))).containsExactly(de("10:00", "10:30"));
+    }
+
+    @Test
+    @DisplayName("Restar un intervalo que lo cubre no deja tramos")
+    void menosCubierto() {
+        assertThat(de("10:00", "10:30").menos(de("10:00", "10:30"))).isEmpty();
+        assertThat(de("10:00", "10:30").menos(de("09:00", "11:00"))).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Restar un corrimiento deja el tramo de un lado")
+    void menosCorrimiento() {
+        assertThat(de("10:00", "10:30").menos(de("10:15", "10:45"))).containsExactly(de("10:00", "10:15"));
+        assertThat(de("10:00", "10:30").menos(de("09:45", "10:15"))).containsExactly(de("10:15", "10:30"));
+    }
+
+    @Test
+    @DisplayName("Restar un intervalo interior deja dos tramos")
+    void menosInterior() {
+        assertThat(de("10:00", "11:00").menos(de("10:15", "10:30")))
+                .containsExactly(de("10:00", "10:15"), de("10:30", "11:00"));
+    }
 }
