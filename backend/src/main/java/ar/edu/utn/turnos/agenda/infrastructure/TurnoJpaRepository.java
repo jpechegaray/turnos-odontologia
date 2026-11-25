@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 interface TurnoJpaRepository extends JpaRepository<TurnoJpa, Long> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from TurnoJpa t where t.id = :id")
+    Optional<TurnoJpa> bloquearPorId(@Param("id") Long id);
 
     /** {@code SELECT ... FOR UPDATE}: las modificaciones del mismo turno se ordenan (C-27, design D5). */
     @Lock(LockModeType.PESSIMISTIC_WRITE)

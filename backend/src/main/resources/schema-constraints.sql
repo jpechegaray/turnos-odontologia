@@ -185,3 +185,14 @@ BEGIN
 END
 $$
 ^^^
+-- C-32: referencia entre módulos por ID, sin acoplar entidades JPA.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_token_turno_turno' AND conrelid = 'token_turno'::regclass
+    ) THEN
+        ALTER TABLE token_turno ADD CONSTRAINT fk_token_turno_turno FOREIGN KEY (turno_id) REFERENCES turno (id);
+    END IF;
+END
+$$
+^^^
