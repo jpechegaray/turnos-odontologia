@@ -54,6 +54,24 @@ public final class DatosAgenda {
                 """, profesionalId, dia, desde, hasta);
     }
 
+    /** Bloqueo de agenda del profesional entre dos instantes ISO-8601. */
+    public static void bloqueo(JdbcTemplate jdbc, Long profesionalId, String inicioIso, String finIso) {
+        jdbc.update("""
+                insert into bloqueo (profesional_id, inicio, fin, motivo)
+                values (?, cast(? as timestamptz), cast(? as timestamptz), 'Congreso ficticio')
+                """, profesionalId, inicioIso, finIso);
+    }
+
+    /** Usuario del personal, activo, con email único; devuelve {id, email}. */
+    public static Object[] usuario(JdbcTemplate jdbc, String rol) {
+        var email = "personal-" + unico() + "@consultorio.test";
+        Long id = jdbc.queryForObject("""
+                insert into usuario (email, password_hash, nombre, rol, activo, intentos_fallidos, creado_en)
+                values (?, ?, 'Personal Ficticio', ?, true, 0, now()) returning id
+                """, Long.class, email, "$2a$10$" + "x".repeat(53), rol);
+        return new Object[] {id, email};
+    }
+
     /** Inserta un turno directamente, sin pasar por la validación de la aplicación. */
     public static Long turno(JdbcTemplate jdbc, Long paciente, Long profesional, Long sillon, Long prestacion,
             String inicioIso, String finIso, String estado) {

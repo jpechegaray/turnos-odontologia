@@ -45,12 +45,12 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 5. Servicio y API
 
-- [ ] 5.1 Implementar `CrearTurnoService`: arma los datos con los puertos, llama al validador, guarda y publica `TurnoCreado`. Agregar `POST /api/turnos` con el DTO de entrada y el de salida. Se verifica con MockMvc y PostgreSQL:
+- [x] 5.1 Implementar `CrearTurnoService`: arma los datos con los puertos, llama al validador, guarda y publica `TurnoCreado`. Agregar `POST /api/turnos` con el DTO de entrada y el de salida. Se verifica con MockMvc y PostgreSQL:
   - "Recepción crea un turno válido", con `Location`, el creador guardado y el evento publicado;
   - "Sin duración se usa la de la prestación";
   - "La duración se puede ajustar";
   - "Datos obligatorios o con formato inválido".
-- [ ] 5.2 Cubrir por la API los escenarios de recursos, tiempo y horario, verificando en cada rechazo que no se guarda nada:
+- [x] 5.2 Cubrir por la API los escenarios de recursos, tiempo y horario, verificando en cada rechazo que no se guarda nada:
   - "Un recurso inexistente se rechaza";
   - "Un recurso inactivo se rechaza";
   - "El profesional no realiza la prestación";
@@ -58,7 +58,7 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
   - "Un inicio fuera de la grilla de cinco minutos se rechaza";
   - "Una duración fuera de rango se rechaza";
   - los cinco escenarios de horario y bloqueos.
-- [ ] 5.3 Cubrir por la API los escenarios de solapamiento:
+- [x] 5.3 Cubrir por la API los escenarios de solapamiento:
   - "Un turno solapado por profesional se rechaza";
   - "Un turno solapado por sillón se rechaza";
   - "Un turno que empieza justo cuando termina otro no se solapa";
