@@ -1,0 +1,104 @@
+.reserva-publica {
+  display: grid;
+  justify-items: center;
+  padding: var(--space-4);
+}
+
+.reserva-panel {
+  box-sizing: border-box;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  inline-size: 100%;
+  max-inline-size: calc(var(--target-min) * 12);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  overflow-wrap: anywhere;
+}
+
+.reserva-panel h1 {
+  margin: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+}
+
+.reserva-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  justify-content: space-between;
+  inline-size: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.reserva-encabezado progress {
+  inline-size: 100%;
+  block-size: var(--space-2);
+  accent-color: var(--color-primary);
+}
+
+.reserva-bloque,
+.reserva-formulario {
+  display: grid;
+  gap: var(--space-3);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.reserva-bloque p,
+.reserva-resumen {
+  margin: 0;
+}
+
+.reserva-semanas,
+.reserva-horarios {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.reserva-bloque .btn {
+  white-space: normal;
+}
+
+.reserva-panel .input,
+.reserva-panel .btn {
+  box-sizing: border-box;
+}
+
+.reserva-resumen,
+.reserva-aviso {
+  padding: var(--space-3);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-md);
+}
+
+.reserva-aviso summary {
+  display: list-item;
+  align-content: center;
+  min-block-size: var(--target-min);
+  cursor: pointer;
+  font-weight: var(--weight-semibold);
+}
+
+.reserva-consentimiento {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-block-size: var(--target-min);
+  padding-block: var(--space-2);
+  cursor: pointer;
+}
+
+.reserva-consentimiento input {
+  inline-size: var(--space-5);
+  block-size: var(--space-5);
+  flex: none;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
