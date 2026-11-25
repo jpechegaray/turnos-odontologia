@@ -19,7 +19,8 @@ Toda petición del cliente SHALL dirigirse a la base de la API configurada (por 
 - **THEN** el cliente la resuelve sin cuerpo y sin error
 
 ### Requirement: Token CSRF en las escrituras
-En toda petición que no sea GET, HEAD ni OPTIONS, el cliente SHALL enviar la cabecera `X-XSRF-TOKEN` con el valor actual de la cookie `XSRF-TOKEN`, leído al momento de enviar. Si la cookie no existe, el cliente MUST pedir `GET /api/auth/csrf` antes de la escritura. Las lecturas MUST NOT enviar esa cabecera.
+
+En toda petición que no sea GET, HEAD ni OPTIONS y que esté fuera de `/public/`, el cliente SHALL enviar la cabecera `X-XSRF-TOKEN` con el valor actual de la cookie `XSRF-TOKEN`, leído al momento de enviar. Si la cookie no existe, el cliente MUST pedir `GET /api/auth/csrf` antes de la escritura. Las lecturas MUST NOT enviar esa cabecera. Las peticiones bajo el segmento `/public/` MUST NOT obtener ni adjuntar el token CSRF.
 
 #### Scenario: Una escritura envía la cabecera con el token vigente
 - **GIVEN** la cookie `XSRF-TOKEN` con un valor ficticio
@@ -34,6 +35,10 @@ En toda petición que no sea GET, HEAD ni OPTIONS, el cliente SHALL enviar la ca
 #### Scenario: Una lectura no envía la cabecera CSRF
 - **WHEN** una pantalla pide una lectura con el cliente
 - **THEN** la petición no lleva la cabecera `X-XSRF-TOKEN`
+
+#### Scenario: Una reserva pública se envía sin obtener ni adjuntar CSRF
+- **WHEN** la pantalla envía `POST /public/reservas` con el cliente
+- **THEN** la reserva usa el mismo cliente y no solicita ni envía el token CSRF aunque exista una cookie anterior
 
 ### Requirement: Errores de la API tipados
 Ante una respuesta de error, el cliente SHALL rechazar con un error de la API que indique su tipo (`no-autenticado` 401, `prohibido` 403, `no-encontrado` 404, `conflicto` 409, `no-procesable` 422, `validacion` 400, `servidor` 5xx) y conserve el estado, el `detail`, el `codigo` de la regla, la lista de campos inválidos y otras propiedades de contexto como `recurso`.

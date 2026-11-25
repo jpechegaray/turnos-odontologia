@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 42 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) y C-41 (Lionel) ya están en `master` y tienen pendiente el archivo. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 43 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46 y C-48). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) y C-41 (Lionel) ya están en `master` y tienen pendiente el archivo. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -67,7 +67,7 @@
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
 | C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
-| C-48 | ⬜ pendiente | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
+| C-48 | ✅ hecho | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
 | C-49 | ⬜ pendiente | **Julián** | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
 | C-50 | ⬜ pendiente | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
 | C-51 | ⬜ pendiente | **Juan Pablo** | 8 | M | verificacion-e2e-y-cierre-mvp | C-33, C-37, C-44, C-46, C-47, C-48, C-49 |  |
@@ -1488,7 +1488,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: Recepción anota a un paciente, ve compatibles de un hueco y asigna manualmente desde la UI.
 
 ### [C-48] `C-48-front-reserva-publica-reservar`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Juan Pablo (PR #134, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Julián — **Ola**: 7 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `features/reserva-publica` en `/reservar`: pasos de prestación, profesional, horario y datos con aceptación de datos personales; sin login ni DNI
@@ -1504,7 +1504,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `design-system/README.md` y `components.html` (reserva pública)
   - `knowledge-base/10_preguntas_abiertas.md` PA-08
 - **Criterio de salida**: Un paciente reserva de punta a punta desde el celular (390x844) y ve el enlace; un horario ocupado muestra alternativas.
-- **Riesgo o precondición**: Precondición PA-08 (texto de consentimiento).
+- **Consentimiento**: PA-08 resuelta en C-41. La reserva muestra el aviso y exige su aceptación.
 
 ### [C-49] `C-49-front-turno-por-token-y-oferta`
 - **Estado**: `[ ]` pendiente
