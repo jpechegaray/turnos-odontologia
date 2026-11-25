@@ -26,21 +26,21 @@ Aplicar TDD estricto en cada tarea: primero el test que falla, después el códi
 
 ## 4. Servicio y API
 
-- [ ] 4.1 Crear `CancelarTurnoService` y `POST /api/turnos/{id}/cancelar`, con `RespuestaTurno` ampliada (design D7). Se verifica con integración:
+- [x] 4.1 Crear `CancelarTurnoService` y `POST /api/turnos/{id}/cancelar`, con `RespuestaTurno` ampliada (design D7). Se verifica con integración:
   - "Recepción cancela un turno programado";
   - "Se puede cancelar un turno confirmado";
   - "Un motivo demasiado largo se rechaza";
   - "Un turno inexistente no se puede cancelar";
   - "La cancelación guarda quién la hizo y cuándo".
-- [ ] 4.2 Cubrir por API las reglas de estado y plazo:
+- [x] 4.2 Cubrir por API las reglas de estado y plazo:
   - "Un turno ya cancelado no se vuelve a cancelar";
   - "Un turno atendido no se puede cancelar";
   - "Un turno que ya empezó no se puede cancelar";
   - "Un cambio del plazo no altera cancelaciones anteriores".
-- [ ] 4.3 Cubrir la liberación del intervalo:
+- [x] 4.3 Cubrir la liberación del intervalo:
   - "Tras cancelar se puede dar otro turno en el mismo horario";
   - "Una cancelación tardía también libera el horario".
-- [ ] 4.4 Publicar `TurnoCancelado` y `HuecoLiberado` (design D6). Se verifica con `@RecordApplicationEvents`:
+- [x] 4.4 Publicar `TurnoCancelado` y `HuecoLiberado` (design D6). Se verifica con `@RecordApplicationEvents`:
   - "Una cancelación publica un único hueco liberado";
   - "Una cancelación rechazada no publica avisos".
 
