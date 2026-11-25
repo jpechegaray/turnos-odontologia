@@ -15,13 +15,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
+import ar.edu.utn.turnos.agenda.DatosAgenda;
 import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +44,12 @@ class CatalogoPrestacionesIT extends PruebaIntegracionBase {
 
     @Autowired
     private ConsultaPrestaciones consulta;
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    @Autowired
+    private Clock reloj;
 
     // --- Alta de prestación ---
 
@@ -189,6 +201,72 @@ class CatalogoPrestacionesIT extends PruebaIntegracionBase {
     @DisplayName("Dar de baja una prestación inexistente responde 404")
     void bajaInexistente() throws Exception {
         esperarNoEncontrada(mockMvc.perform(delete(URL + "/" + INEXISTENTE).with(csrfValido())));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Dar de baja o desactivar una prestación con turnos futuros activos devuelve 409 con la lista de conflictos")
+    void desactivarConTurnosFuturosDevuelve409() throws Exception {
+        long id = idDe(alta("Endodoncia", 60));
+        Long paciente = DatosAgenda.paciente(jdbc, true);
+        Long profesional = DatosAgenda.profesional(jdbc, true);
+        Long sillon = DatosAgenda.sillon(jdbc, true);
+        Instant base = Instant.now(reloj).plus(Duration.ofDays(2)).truncatedTo(ChronoUnit.SECONDS);
+        Instant inicio2 = base.plus(Duration.ofHours(1));
+        Instant fin2 = inicio2.plus(Duration.ofMinutes(60));
+        Instant inicio1 = base;
+        Instant fin1 = inicio1.plus(Duration.ofMinutes(60));
+        Long segundo = DatosAgenda.turno(jdbc, paciente, profesional, sillon, id, inicio2.toString(),
+                fin2.toString(), "CONFIRMADO");
+        Long primero = DatosAgenda.turno(jdbc, paciente, profesional, sillon, id, inicio1.toString(),
+                fin1.toString(), "PROGRAMADO");
+
+        mockMvc.perform(delete(URL + "/" + id).with(csrfValido()))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.codigo").value("RN-37"))
+                .andExpect(jsonPath("$.recurso").value("PRESTACION"))
+                .andExpect(jsonPath("$.turnos.length()").value(2))
+                .andExpect(jsonPath("$.turnos[0].id").value(primero))
+                .andExpect(jsonPath("$.turnos[0].inicio").value(inicio1.toString()))
+                .andExpect(jsonPath("$.turnos[0].fin").value(fin1.toString()))
+                .andExpect(jsonPath("$.turnos[0].estado").value("PROGRAMADO"))
+                .andExpect(jsonPath("$.turnos[0].pacienteId").doesNotExist())
+                .andExpect(jsonPath("$.turnos[1].id").value(segundo))
+                .andExpect(jsonPath("$.turnos[1].estado").value("CONFIRMADO"));
+
+        modificar(id, "Endodoncia", 60, false)
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.codigo").value("RN-37"))
+                .andExpect(jsonPath("$.recurso").value("PRESTACION"))
+                .andExpect(jsonPath("$.turnos.length()").value(2));
+
+        assertThat(consulta.buscarPorId(id)).hasValueSatisfying(p -> assertThat(p.activa()).isTrue());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Cancelar los turnos futuros permite dar de baja la prestación")
+    void cancelarTurnosFuturosPermiteDarDeBaja() throws Exception {
+        long id = idDe(alta("Extracción", 45));
+        Long paciente = DatosAgenda.paciente(jdbc, true);
+        Long profesional = DatosAgenda.profesional(jdbc, true);
+        Long sillon = DatosAgenda.sillon(jdbc, true);
+        Instant inicio = Instant.now(reloj).plus(Duration.ofDays(2)).truncatedTo(ChronoUnit.SECONDS);
+        Long turnoId = DatosAgenda.turno(jdbc, paciente, profesional, sillon, id, inicio.toString(),
+                inicio.plus(Duration.ofMinutes(45)).toString(), "PROGRAMADO");
+
+        mockMvc.perform(delete(URL + "/" + id).with(csrfValido()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("RN-37"));
+
+        mockMvc.perform(post("/api/turnos/{id}/cancelar", turnoId).with(csrfValido()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete(URL + "/" + id).with(csrfValido()))
+                .andExpect(status().isNoContent());
+        assertThat(consulta.buscarPorId(id)).hasValueSatisfying(p -> assertThat(p.activa()).isFalse());
     }
 
     // --- Consulta del catálogo ---

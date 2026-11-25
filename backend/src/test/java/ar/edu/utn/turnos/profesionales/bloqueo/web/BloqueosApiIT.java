@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
+import ar.edu.utn.turnos.agenda.DatosAgenda;
 import ar.edu.utn.turnos.profesionales.bloqueo.application.BloqueoConsulta;
 import ar.edu.utn.turnos.profesionales.profesional.application.ProfesionalVinculadoConsulta;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
@@ -223,6 +224,75 @@ class BloqueosApiIT extends PruebaIntegracionBase {
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
             verificarBloqueoIntacto(bloqueo);
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "RECEPCION"})
+    @DisplayName("Crear un bloqueo superpuesto con turnos activos devuelve 409 con la lista de conflictos")
+    void rechazaBloqueoSuperpuestoConTurnosActivos(String rol) throws Exception {
+        // Inserta primero el de 10:30..11:00 y luego 10:00..10:30 para comprobar orden inicio ASC, id ASC.
+        Long confirmado = insertarTurno("2030-06-10T10:30:00-03:00", "2030-06-10T11:00:00-03:00", "CONFIRMADO");
+        Long programado = insertarTurno("2030-06-10T10:00:00-03:00", "2030-06-10T10:30:00-03:00", "PROGRAMADO");
+
+        var solapado = cuerpo("2030-06-10T10:15:00-03:00", "2030-06-10T10:45:00-03:00", "Mantenimiento");
+        mockMvc.perform(alta(profesional, solapado).with(user(PERSONAL).roles(rol)))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.codigo").value("RN-17"))
+                .andExpect(jsonPath("$.turnos.length()").value(2))
+                .andExpect(jsonPath("$.turnos[0].id").value(programado))
+                .andExpect(jsonPath("$.turnos[0].inicio").value("2030-06-10T13:00:00Z"))
+                .andExpect(jsonPath("$.turnos[0].fin").value("2030-06-10T13:30:00Z"))
+                .andExpect(jsonPath("$.turnos[0].estado").value("PROGRAMADO"))
+                .andExpect(jsonPath("$.turnos[0].pacienteId").doesNotExist())
+                .andExpect(jsonPath("$.turnos[0].paciente").doesNotExist())
+                .andExpect(jsonPath("$.turnos[1].id").value(confirmado))
+                .andExpect(jsonPath("$.turnos[1].inicio").value("2030-06-10T13:30:00Z"))
+                .andExpect(jsonPath("$.turnos[1].fin").value("2030-06-10T14:00:00Z"))
+                .andExpect(jsonPath("$.turnos[1].estado").value("CONFIRMADO"));
+        assertThat(cantidadDeBloqueos(profesional)).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "RECEPCION"})
+    @DisplayName("Crear un bloqueo contiguo a turnos activos se acepta")
+    void aceptaBloqueoContiguoATurnosActivos(String rol) throws Exception {
+        insertarTurno("2030-06-10T09:30:00-03:00", "2030-06-10T10:00:00-03:00", "PROGRAMADO");
+        insertarTurno("2030-06-10T11:00:00-03:00", "2030-06-10T11:30:00-03:00", "CONFIRMADO");
+
+        mockMvc.perform(alta(profesional, ALTA).with(user(PERSONAL).roles(rol)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.inicio").value("2030-06-10T13:00:00Z"))
+                .andExpect(jsonPath("$.fin").value("2030-06-10T14:00:00Z"));
+        assertThat(cantidadDeBloqueos(profesional)).isEqualTo(1);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "RECEPCION"})
+    @DisplayName("Cancelar el turno activo permite crear el bloqueo antes rechazado")
+    void cancelarTurnoPermiteCrearBloqueo(String rol) throws Exception {
+        Long turnoId = insertarTurno("2030-06-10T10:00:00-03:00", "2030-06-10T10:30:00-03:00", "PROGRAMADO");
+
+        var bloqueoEnHorario = cuerpo("2030-06-10T10:00:00-03:00", "2030-06-10T10:30:00-03:00", "Congreso");
+        mockMvc.perform(alta(profesional, bloqueoEnHorario).with(user(PERSONAL).roles(rol)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("RN-17"));
+
+        mockMvc.perform(conCsrf(post("/api/turnos/{id}/cancelar", turnoId)).with(user(PERSONAL).roles(rol)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(alta(profesional, bloqueoEnHorario).with(user(PERSONAL).roles(rol)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.inicio").value("2030-06-10T13:00:00Z"))
+                .andExpect(jsonPath("$.fin").value("2030-06-10T13:30:00Z"));
+    }
+
+    private Long insertarTurno(String inicio, String fin, String estado) {
+        Long paciente = DatosAgenda.paciente(jdbc, true);
+        Long sillon = DatosAgenda.sillon(jdbc, true);
+        Long prestacion = DatosAgenda.prestacion(jdbc, 30, true);
+        return DatosAgenda.turno(jdbc, paciente, profesional, sillon, prestacion, inicio, fin, estado);
     }
 
     private void verificarBloqueoIntacto(Long bloqueo) {
