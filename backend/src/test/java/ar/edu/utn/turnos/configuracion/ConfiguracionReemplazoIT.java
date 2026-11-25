@@ -54,7 +54,7 @@ class ConfiguracionReemplazoIT extends PruebaIntegracionBase {
             var valor = rs.getString("valor");
             for (var parametro : ParametroConfiguracion.values()) {
                 if (parametro.clave().equals(clave)) {
-                    inicial.put(parametro, parametro == ParametroConfiguracion.NOMBRE_CONSULTORIO
+                    inicial.put(parametro, !parametro.esNumerico()
                             ? valor : Integer.valueOf(valor));
                     fechasIniciales.put(parametro, rs.getObject("actualizado_en", OffsetDateTime.class));
                 }

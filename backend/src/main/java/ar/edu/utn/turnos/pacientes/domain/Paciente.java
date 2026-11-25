@@ -16,6 +16,7 @@ public record Paciente(
         String notas,
         boolean activo,
         Instant consentimientoDatosEn,
+        String consentimientoVersion,
         Instant creadoEn) {
 
     public Paciente {
@@ -48,7 +49,17 @@ public record Paciente(
             String obraSocial,
             String nroAfiliado,
             String notas) {
-        return new Paciente(null, nombre, apellido, dni, email, telefono, obraSocial, nroAfiliado, notas, true, null, null);
+        return new Paciente(null, nombre, apellido, dni, email, telefono, obraSocial, nroAfiliado, notas, true, null, null, null);
+    }
+
+    /**
+     * Ficha creada por la reserva online (US-015, RN-26): sin DNI y con el consentimiento aceptado en
+     * {@code aceptadoEn} con la versión del texto (PA-08). El alta y el consentimiento comparten el instante.
+     */
+    public static Paciente nuevoDeReservaOnline(String nombre, String apellido, String email, String telefono,
+            String obraSocial, Instant aceptadoEn, String versionConsentimiento) {
+        return new Paciente(null, nombre, apellido, null, email, telefono, obraSocial, null, null, true, aceptadoEn,
+                versionConsentimiento, aceptadoEn);
     }
 
     public Paciente conCreacion(Instant creadoEn) {
@@ -64,6 +75,7 @@ public record Paciente(
                 this.notas,
                 this.activo,
                 this.consentimientoDatosEn,
+                this.consentimientoVersion,
                 creadoEn);
     }
 
@@ -88,6 +100,7 @@ public record Paciente(
                 notas,
                 this.activo,
                 this.consentimientoDatosEn,
+                this.consentimientoVersion,
                 this.creadoEn);
     }
 
@@ -104,6 +117,7 @@ public record Paciente(
                 this.notas,
                 false,
                 this.consentimientoDatosEn,
+                this.consentimientoVersion,
                 this.creadoEn);
     }
 

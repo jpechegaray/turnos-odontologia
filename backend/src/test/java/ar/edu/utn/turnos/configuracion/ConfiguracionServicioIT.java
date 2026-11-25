@@ -29,7 +29,8 @@ class ConfiguracionServicioIT extends PruebaIntegracionBase {
         var consumidor = new ConsumidorPrueba(servicio);
         consumidor.registrar("anterior", 20);
         assertThat(consumidor.registrada("anterior")).isTrue();
-        assertThat(leerParametros()).containsExactly(24, 24, 60, 2, 3, 10, "Consultorio Ficticio");
+        assertThat(leerParametros()).containsExactly(24, 24, 60, 2, 3, 10, "Consultorio Ficticio",
+                "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires", "contacto@consultorio-ficticio.example", 2);
 
         reemplazar.ejecutar(Map.of(
                 ParametroConfiguracion.PLAZO_CANCELACION, 12,
@@ -38,18 +39,23 @@ class ConfiguracionServicioIT extends PruebaIntegracionBase {
                 ParametroConfiguracion.ANTICIPACION_RESERVA, 2,
                 ParametroConfiguracion.TOPE_TURNOS_EMAIL, 3,
                 ParametroConfiguracion.TOPE_AVISOS, 10,
-                ParametroConfiguracion.NOMBRE_CONSULTORIO, "Consultorio de Prueba"));
+                ParametroConfiguracion.NOMBRE_CONSULTORIO, "Consultorio de Prueba",
+                ParametroConfiguracion.DOMICILIO_CONSULTORIO, "Calle Inventada 99",
+                ParametroConfiguracion.EMAIL_CONTACTO_CONSULTORIO, "turnos@consultorio-ficticio.example",
+                ParametroConfiguracion.RETENCION_ANIOS, 5));
 
         consumidor.registrar("posterior", 20);
         assertThat(consumidor.registrada("posterior")).isFalse();
-        assertThat(leerParametros()).containsExactly(12, 24, 60, 2, 3, 10, "Consultorio de Prueba");
+        assertThat(leerParametros()).containsExactly(12, 24, 60, 2, 3, 10, "Consultorio de Prueba",
+                "Calle Inventada 99", "turnos@consultorio-ficticio.example", 5);
         assertThat(consumidor.registrada("anterior")).isTrue();
     }
 
     private List<Object> leerParametros() {
         return List.of(servicio.plazoCancelacionHoras(), servicio.anticipacionRecordatorioHoras(),
                 servicio.horizonteReservaOnlineDias(), servicio.anticipacionMinimaReservaOnlineHoras(),
-                servicio.maxTurnosActivosPorEmail(), servicio.maxAvisosPorHueco(), servicio.nombreConsultorio());
+                servicio.maxTurnosActivosPorEmail(), servicio.maxAvisosPorHueco(), servicio.nombreConsultorio(),
+                servicio.domicilioConsultorio(), servicio.emailContactoConsultorio(), servicio.retencionAnios());
     }
 
     private record ConsumidorPrueba(ConfiguracionServicio servicio, Map<String, Boolean> decisiones) {

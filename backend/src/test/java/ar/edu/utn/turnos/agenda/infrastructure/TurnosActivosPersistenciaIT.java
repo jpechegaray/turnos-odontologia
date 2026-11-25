@@ -131,6 +131,29 @@ class TurnosActivosPersistenciaIT extends PruebaIntegracionBase {
                 .containsExactly(enCurso, futuroExacto, futuroEmpate);
     }
 
+    @Test
+    @DisplayName("Los turnos cancelados o pasados no cuentan para el tope")
+    void cuentaSoloFuturosActivosDeLasFichas() {
+        Long otraFicha = DatosAgenda.paciente(jdbc, true);
+        Long ajena = DatosAgenda.paciente(jdbc, true);
+        DatosAgenda.turno(jdbc, paciente, profesional, sillon, prestacion, "2030-06-10T13:00:00Z",
+                "2030-06-10T13:30:00Z", "PROGRAMADO");
+        DatosAgenda.turno(jdbc, otraFicha, profesional, sillon, prestacion, "2030-06-10T14:00:00Z",
+                "2030-06-10T14:30:00Z", "CONFIRMADO");
+        DatosAgenda.turno(jdbc, paciente, profesional, sillon, prestacion, "2030-06-10T15:00:00Z",
+                "2030-06-10T15:30:00Z", "CANCELADO");
+        DatosAgenda.turno(jdbc, paciente, profesional, sillon, prestacion, "2026-11-30T13:00:00Z",
+                "2026-11-30T13:30:00Z", "PROGRAMADO");
+        DatosAgenda.turno(jdbc, ajena, profesional, sillon, prestacion, "2030-06-10T16:00:00Z",
+                "2030-06-10T16:30:00Z", "PROGRAMADO");
+        // Empezó antes de AHORA y sigue en curso: ya no es futuro.
+        DatosAgenda.turno(jdbc, paciente, otroProfesional, otroSillon, prestacion, "2026-12-01T11:50:00Z",
+                "2026-12-01T12:20:00Z", "CONFIRMADO");
+
+        assertThat(consulta.contarFuturosActivos(java.util.List.of(paciente, otraFicha), AHORA)).isEqualTo(2);
+        assertThat(consulta.contarFuturosActivos(java.util.List.of(), AHORA)).isZero();
+    }
+
     private Long turno(Long profId, Long sillonId, Long prestacionId, Instant inicio, Instant fin, String estado) {
         return DatosAgenda.turno(jdbc, paciente, profId, sillonId, prestacionId, inicio.toString(), fin.toString(),
                 estado);

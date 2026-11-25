@@ -43,17 +43,36 @@ class PacienteTest {
     void conDatosPreservaCamposEspeciales() {
         Instant ahora = Instant.now();
         Paciente original = new Paciente(
-                10L, "Juan", "Perez", "1234", "juan@example.test", "111", "OS", "999", "Nota", true, ahora, ahora);
+                10L, "Juan", "Perez", "1234", "juan@example.test", "111", "OS", "999", "Nota", true, ahora, "2026-11-v1",
+                ahora);
 
         Paciente actualizado = original.conDatos("Carlos", "Gomez", "5678", "carlos@example.test", "222", "OS2", "888", "Nota2");
 
         assertThat(actualizado.id()).isEqualTo(10L);
         assertThat(actualizado.activo()).isTrue();
         assertThat(actualizado.consentimientoDatosEn()).isEqualTo(ahora);
+        assertThat(actualizado.consentimientoVersion()).isEqualTo("2026-11-v1");
         assertThat(actualizado.creadoEn()).isEqualTo(ahora);
         assertThat(actualizado.nombre()).isEqualTo("Carlos");
         assertThat(actualizado.apellido()).isEqualTo("Gomez");
         assertThat(actualizado.dni()).isEqualTo("5678");
+    }
+
+    @Test
+    @DisplayName("Una ficha de la reserva online nace activa, sin DNI y con el consentimiento y su versión")
+    void fichaDeReservaOnlineGuardaConsentimiento() {
+        Instant aceptado = Instant.parse("2026-12-01T13:00:00Z");
+
+        Paciente ficha = Paciente.nuevoDeReservaOnline(" Ana ", "Ficticia", "ana@example.com", "11 5555-0001",
+                "Obra Social Ficticia", aceptado, "2026-11-v1");
+
+        assertThat(ficha.id()).isNull();
+        assertThat(ficha.activo()).isTrue();
+        assertThat(ficha.dni()).isNull();
+        assertThat(ficha.nombre()).isEqualTo("Ana");
+        assertThat(ficha.consentimientoDatosEn()).isEqualTo(aceptado);
+        assertThat(ficha.consentimientoVersion()).isEqualTo("2026-11-v1");
+        assertThat(ficha.creadoEn()).isEqualTo(aceptado);
     }
 
     @Test
