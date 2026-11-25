@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 22 de 51 changes hechos (Ola 0 y Ola 1 completas; Ola 2 completa salvo C-15; Ola 3: C-20, C-21, C-22, C-23 y C-24). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-15 (Julián) y C-19 (Juan Pablo, camino crítico). Casi toda la Ola 4 espera a C-19, y C-25 espera a C-15. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 24 de 51 changes hechos (Olas 0, 1 y 2 completas; Ola 3 completa salvo C-25). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-27 (Juan Pablo, camino crítico), C-32 (Nico) y los "Cualquiera" C-25, C-26, C-28, C-29, C-30, C-31 y C-33. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -34,11 +34,11 @@
 | C-12 | ✅ hecho | Nico (Cualquiera) | 2 | S | bloqueos-de-agenda | C-06 |  |
 | C-13 | ✅ hecho | **Valentino** | 2 | M | administrar-usuarios | C-03, C-06 | CRITICAL |
 | C-14 | ✅ hecho | **Santino** | 2 | S | servicio-token-seguro | C-01 | CRITICAL |
-| C-15 | ⬜ pendiente | **Julián** | 2 | M | notificaciones-email-infraestructura | C-01, C-07, C-08 | HIGH |
+| C-15 | ✅ hecho | **Julián** | 2 | M | notificaciones-email-infraestructura | C-01, C-07, C-08 | HIGH |
 | C-16 | ✅ hecho | **Nico** | 2 | S | frontend-login-y-guards | C-03, C-09 | HIGH |
 | C-17 | ✅ hecho | **Lionel** | 2 | S | limite-de-tasa-endpoints-publicos | C-01 | HIGH |
 | C-18 | ✅ hecho | Valentino (Cualquiera) | 2 | M | lista-espera-alta-y-gestion | C-04, C-06, C-07 |  |
-| C-19 | ⬜ pendiente | **Juan Pablo** | 3 | L | crear-turno-sin-solapamientos | C-03, C-04, C-05, C-07, C-10, C-11, C-12 | OPSX evaluado, camino crítico, HIGH |
+| C-19 | ✅ hecho | **Juan Pablo** | 3 | L | crear-turno-sin-solapamientos | C-03, C-04, C-05, C-07, C-10, C-11, C-12 | OPSX evaluado, camino crítico, HIGH |
 | C-20 | ✅ hecho | Julián (Cualquiera) | 3 | S | front-prestaciones-y-configuracion | C-04, C-08, C-16 |  |
 | C-21 | ✅ hecho | Lionel (Cualquiera) | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
 | C-22 | ✅ hecho | Valentino (Cualquiera) | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
@@ -830,7 +830,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: Se ubica en `shared.token` (la KB lo nombra dentro de `reservapublica`) para que `listaespera` no dependa de `reservapublica`. Puede adelantarse a la Ola 1 porque solo depende de C-01.
 
 ### [C-15] `C-15-notificaciones-email-infraestructura`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Julián, con correcciones de la revisión (PR #97, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Julián — **Ola**: 2 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Puerto `NotificacionPort` con `SmtpNotificacionAdapter` (Spring Mail, credenciales solo en `.env`) e `InMemoryNotificacionAdapter` para tests
@@ -918,7 +918,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > C-19 es el único change de backend de la ola; las pantallas de administración se hacen en paralelo en carpetas separadas de `features/`.
 
 ### [C-19] `C-19-crear-turno-sin-solapamientos` — Change OPSX evaluado
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Juan Pablo (PR #98, 2026-11-25; archivado 2026-11-25)
 - **Change OPSX evaluado**: nombre OPSX `crear-turno-sin-solapamientos` (índice C-19). Es el único change que se lleva por el ciclo OPSX completo (explore, propose, apply, verify, archive) y se evalúa.
 - **Responsable**: Juan Pablo — **Ola**: 3 — **Tamaño**: L (8-10 h)
 - **Scope**:
