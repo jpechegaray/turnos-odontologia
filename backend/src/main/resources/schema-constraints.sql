@@ -196,3 +196,23 @@ BEGIN
 END
 $$
 ^^^
+-- C-36: la oferta de hueco referencia su entrada y el profesional del hueco (RN-38).
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_oferta_hueco_lista_espera' AND conrelid = 'oferta_hueco'::regclass
+    ) THEN
+        ALTER TABLE oferta_hueco ADD CONSTRAINT fk_oferta_hueco_lista_espera
+            FOREIGN KEY (lista_espera_id) REFERENCES lista_espera (id);
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'fk_oferta_hueco_profesional' AND conrelid = 'oferta_hueco'::regclass
+    ) THEN
+        ALTER TABLE oferta_hueco ADD CONSTRAINT fk_oferta_hueco_profesional
+            FOREIGN KEY (profesional_id) REFERENCES profesional (id);
+    END IF;
+END
+$$
+^^^

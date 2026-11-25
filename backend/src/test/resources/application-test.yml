@@ -14,3 +14,11 @@ app:
     canal: memoria
     planificador:
       habilitado: false
+  # C-36: aviso de huecos sincrónico (determinista) y vencimiento de ofertas invocado a mano con reloj fijo.
+  listaespera:
+    url-publica: https://turnos.consultorio.test
+    avisos:
+      sincronico: true
+    ofertas:
+      vencimiento:
+        habilitado: false
