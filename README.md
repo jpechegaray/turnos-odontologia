@@ -78,6 +78,14 @@ Usá el proxy `/api` de Vite para mantener el mismo origen. El backend decide lo
 
 Para probar el login local, definí `SEED_ADMIN_PASSWORD` en tu `.env` antes de arrancar el backend con el perfil `dev`. El usuario ficticio es `admin@consultorio.test`; si ya existe, el arranque no cambia su contraseña. Mantené `APP_COOKIE_SECURE=false` solo para HTTP local y `APP_CORS_ORIGIN` en el origen exacto del frontend cuando uses CORS.
 
+### Cargar la agenda de demostración
+
+Para preparar una base de desarrollo nueva, configurá `SEED_ADMIN_PASSWORD` y `SEED_STAFF_PASSWORD` en tu `.env` local. La clave del personal debe tener al menos 8 caracteres y hasta 72 bytes UTF-8. Dejá `SEED_STAFF_PASSWORD` vacía si solo necesitás el administrador inicial.
+
+Levantá PostgreSQL con `docker compose up -d` y arrancá el backend con el perfil `dev`. Podés entrar como recepción con `recepcion@consultorio.test` o como odontólogo con `odonto1@consultorio.test` o `odonto2@consultorio.test`. Estas tres cuentas usan la clave del personal que configuraste.
+
+La base vacía queda con dos profesionales, tres sillones, prestaciones, horarios hábiles, pacientes inventados y tres turnos de ejemplo. Buscá los turnos en el primer día hábil cuyo horario de las 10:00 todavía era futuro al cargar los datos, en hora de Buenos Aires. Si la base ya tiene datos operativos, el backend omite la carga. Reiniciar la aplicación conserva también los turnos y las claves ya cargados.
+
 ### Levantar el frontend
 
 Hace falta Node 22.20 o más. Desde la raíz del repo:

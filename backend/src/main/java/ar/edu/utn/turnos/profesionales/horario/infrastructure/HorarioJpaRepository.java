@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 interface HorarioJpaRepository extends JpaRepository<HorarioAtencion, Long> {
     List<HorarioAtencion> findByProfesionalIdOrderByDiaSemanaAscHoraInicioAscIdAsc(Long profesionalId);
 
+    List<HorarioAtencion> findAllByOrderByProfesionalIdAscDiaSemanaAscHoraInicioAscIdAsc();
+
     Optional<HorarioAtencion> findByIdAndProfesionalId(Long id, Long profesionalId);
 
     boolean existsByIdAndProfesionalId(Long id, Long profesionalId);

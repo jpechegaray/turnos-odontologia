@@ -1,10 +1,12 @@
 package ar.edu.utn.turnos.profesionales.profesional.application;
 
+import ar.edu.utn.turnos.agenda.application.TurnosActivosConsulta;
 import ar.edu.utn.turnos.profesionales.profesional.application.ProfesionalConsulta.Datos;
 import ar.edu.utn.turnos.profesionales.profesional.infrastructure.ProfesionalesPersistencia;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,11 +21,14 @@ public class ServicioProfesionales {
 
     private final ProfesionalesPersistencia profesionales;
     private final Optional<ProfesionalVinculadoConsulta> vinculos;
+    private final TurnosActivosConsulta turnosActivos;
 
     public ServicioProfesionales(ProfesionalesPersistencia profesionales,
-            Optional<ProfesionalVinculadoConsulta> vinculos) {
+            Optional<ProfesionalVinculadoConsulta> vinculos,
+            TurnosActivosConsulta turnosActivos) {
         this.profesionales = profesionales;
         this.vinculos = vinculos;
+        this.turnosActivos = turnosActivos;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -36,6 +41,17 @@ public class ServicioProfesionales {
     @Transactional
     public Datos actualizar(Long id, String nombre, String apellido, String matricula, String especialidad,
             boolean activo) {
+        var anterior = profesionales.buscarPorId(id).orElseThrow(ServicioProfesionales::noEncontrado);
+        if (anterior.activo() && !activo) {
+            var conflictos = turnosActivos.futurosDeProfesional(id);
+            if (!conflictos.isEmpty()) {
+                throw new ReglaNegocioException(
+                        "RN-37",
+                        EstadoError.CONFLICTO_409,
+                        "No se puede desactivar el profesional porque tiene turnos futuros activos",
+                        Map.of("recurso", "PROFESIONAL", "turnos", conflictos));
+            }
+        }
         return profesionales.actualizar(id, nombre, apellido, matricula, especialidad, activo)
                 .orElseThrow(ServicioProfesionales::noEncontrado);
     }

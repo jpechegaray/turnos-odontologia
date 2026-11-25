@@ -1,6 +1,13 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it } from "vitest";
-import { aInstanteUtc, formatearFecha, formatearHora, ZONA_CONSULTORIO } from "./zonaHoraria";
+import {
+  aInstanteUtc,
+  fechaLocal,
+  formatearFecha,
+  formatearHora,
+  minutosDelDia,
+  ZONA_CONSULTORIO,
+} from "./zonaHoraria";
 
 const zonaOriginal = process.env.TZ;
 
@@ -73,5 +80,23 @@ describe("Conversión de hora local a instante UTC", () => {
     const instante = aInstanteUtc("2026-07-15", "18:45");
     expect(formatearFecha(instante)).toBe("15/07/2026");
     expect(formatearHora(instante)).toBe("18:45");
+  });
+});
+
+describe("Fecha local y minutos del día en Buenos Aires", () => {
+  it("La fecha local de un instante UTC es la de Buenos Aires", () => {
+    enVariasZonas(() => {
+      expect(fechaLocal("2026-12-08T02:30:00Z")).toBe("2026-12-07");
+      expect(fechaLocal("2026-12-08T03:00:00Z")).toBe("2026-12-08");
+      expect(fechaLocal("2026-12-07T23:30:00-03:00")).toBe("2026-12-07");
+    });
+  });
+
+  it("Los minutos del día se cuentan desde la medianoche de Buenos Aires", () => {
+    enVariasZonas(() => {
+      expect(minutosDelDia("2026-12-08T02:30:00Z")).toBe(23 * 60 + 30);
+      expect(minutosDelDia("2026-12-08T03:00:00Z")).toBe(0);
+      expect(minutosDelDia("2026-12-07T09:15:00-03:00")).toBe(9 * 60 + 15);
+    });
   });
 });

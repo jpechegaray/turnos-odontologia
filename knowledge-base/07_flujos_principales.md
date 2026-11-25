@@ -40,7 +40,7 @@ Recepción → SPA → API(agenda.web) → CrearTurnoService → Dominio (reglas
 **Actor**: Recepción (o ADMIN).
 
 **Pasos**:
-1. SPA envía `PUT /api/turnos/{id}/reprogramar` con el nuevo horario y recursos.
+1. SPA envía `POST /api/turnos/{id}/reprogramar` con el nuevo horario y, si cambian, el profesional, el sillón y la duración.
 2. El servicio carga el turno y verifica que esté `PROGRAMADO` o `CONFIRMADO` (RN-12).
 3. El dominio revalida RN-01, RN-02, RN-04, RN-11, RN-13 **excluyendo el propio turno** (RN-18).
 4. Calcula si es reprogramación tardía: `(inicio_original - ahora) < plazo_horas` → marca `reprogramado_tarde` (RN-05, RN-18).
@@ -50,7 +50,8 @@ Recepción → SPA → API(agenda.web) → CrearTurnoService → Dominio (reglas
 8. Envía email de reprogramación al paciente (RN-31); el recordatorio se reprograma porque cambia `inicio_referencia` (RN-30).
 
 **Casos de error**:
-- Turno cancelado, atendido o ausente → `422`.
+- Turno cancelado, atendido o ausente → `409` (como la cancelación, C-27).
+- Turno que ya empezó → `422` (RN-05).
 - Edición concurrente del mismo turno (versión desactualizada) → `409`.
 - Nuevo horario ocupado → `409`.
 

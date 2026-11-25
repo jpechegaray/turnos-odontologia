@@ -70,6 +70,19 @@ class HorarioConsultaIT extends PruebaIntegracionBase {
         assertThat(consulta.contiene(profesional, candidato)).isTrue();
     }
 
+    @Test
+    @DisplayName("Los tramos se listan por profesional o de todos los profesionales")
+    void listaTramos() {
+        guardarTramo(otroProfesional, 3, "14:00", "18:00");
+
+        assertThat(consulta.tramos(profesional))
+                .extracting(h -> h.profesionalId() + "-" + h.diaSemana() + "-" + h.horaInicio() + "-" + h.horaFin())
+                .containsExactly(profesional + "-1-09:00-13:00");
+        assertThat(consulta.tramos(null))
+                .extracting(h -> h.profesionalId() + "-" + h.diaSemana() + "-" + h.horaInicio())
+                .contains(profesional + "-1-09:00", otroProfesional + "-3-14:00");
+    }
+
     private Long crearProfesional(String matricula) {
         return jdbc.queryForObject("""
                 insert into profesional (nombre, apellido, matricula, activo)

@@ -18,4 +18,15 @@ class ArquitecturaTest {
                     "org.springframework..", "jakarta.persistence..", "org.hibernate..")
             .allowEmptyShould(true)
             .as("..domain.. no depende de Spring, JPA ni Hibernate");
+
+    /**
+     * Escenario: "El paquete del token no depende de Spring, JPA ni Hibernate" (C-14, D9).
+     * Sin allowEmptyShould: si el paquete se vaciara o moviera, la regla falla en lugar de pasar vacía.
+     */
+    @ArchTest
+    static final ArchRule el_servicio_de_token_no_depende_de_frameworks = noClasses()
+            .that().resideInAPackage("..shared.token..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "org.springframework..", "jakarta.persistence..", "org.hibernate..")
+            .as("..shared.token.. no depende de Spring, JPA ni Hibernate");
 }

@@ -17,7 +17,7 @@ Este archivo reúne: (1) las inconsistencias detectadas, (2) las preguntas abier
 **Falta**: qué ocurre con una reprogramación fuera de plazo (¿se permite, se registra, se bloquea?) y si el paciente puede reprogramar. RN-07 solo da al token ver, confirmar y cancelar.
 **Impacto**: define el comportamiento de `ReprogramarTurno` y del campo `reprogramado_tarde`.
 **Resolución propuesta**: permitirla al personal y registrarla (SU-07, RN-18).
-**Estado: resuelta en parte (2026-11-20, decisión del líder)**: el paciente **no** reprograma con su token, solo cancela (RN-18, RN-19); reprograma solo recepción. Sigue pendiente de confirmar la política de la reprogramación tardía del personal (PA-06).
+**Estado: resuelta (2026-11-20 y 2026-11-25, decisiones del líder)**: el paciente **no** reprograma con su token, solo cancela (RN-18, RN-19); reprograma solo recepción. La reprogramación tardía del personal se permite y se registra con `reprogramado_tarde`, sin penalidad (PA-06, SU-07).
 
 ### IN-03 — Paciente "sin cuenta" frente a la necesidad de una ficha
 **Discovery dice**: el paciente no tiene login ni cuenta (§2), pero RN-08 y los casos de uso exigen que reserve un turno, que requiere un paciente asociado (ficha con contacto).
@@ -69,14 +69,14 @@ Este archivo reúne: (1) las inconsistencias detectadas, (2) las preguntas abier
 | PA-02 | **Resuelta (2026-11-20, decisión del líder).** La lista de espera, ¿notifica sola al paciente o la recepción elige? **Respuesta:** avisa sola por email a todos los pacientes compatibles, cada uno con un enlace con token; el primero que confirma se queda con el turno y si nadie confirma antes del inicio del hueco queda libre (RN-23, RN-24, RN-38, DD-10, SU-05; detalles en SU-14) | `discovery.md` §11 | Ninguno (resuelta) | Líder |
 | PA-03 | **Resuelta (2026-11-20, decisión del líder).** ¿El odontólogo puede dar turnos o solo los ve? **Respuesta:** es solo lectura: ve su agenda y la ficha básica de sus pacientes y no modifica nada; asistencia → recepción; horarios y bloqueos → recepción y administrador (RN-20, RN-33, SU-02, matriz en `03`) | `discovery.md` §11 | Ninguno (resuelta) | Líder |
 | PA-04 | **Resuelta (2026-11-20, decisión del líder).** ¿Una prestación puede requerir un tipo específico de sillón? **Respuesta:** no; cualquier sillón libre sirve y no se modelan tipos de sillón (RN-11, SU-03) | `discovery.md` §11 | Ninguno (resuelta) | Líder |
-| PA-06 | **Resuelta en parte (2026-11-20, decisión del líder).** ¿Qué pasa al reprogramar fuera de plazo? ¿El paciente puede reprogramar por token? **Respuesta:** el paciente **no** reprograma, solo cancela (RN-18, RN-19) y reprograma solo recepción. **Sigue abierto:** si la reprogramación tardía del personal se permite, se registra o se penaliza (hoy: se permite y se registra, SU-07) | IN-02 | `agenda-turnos` (solo la política de reprogramación tardía) | Equipo / líder |
+| PA-06 | **Resuelta (2026-11-20 y 2026-11-25, decisiones del líder).** ¿Qué pasa al reprogramar fuera de plazo? ¿El paciente puede reprogramar por token? **Respuesta:** el paciente **no** reprograma, solo cancela (RN-18, RN-19), y reprograma solo recepción. La reprogramación tardía del personal se permite y se registra (`reprogramado_tarde`, SU-07), sin penalidad; un turno que ya empezó no se reprograma (`422 RN-05`) y al reprogramar se ofrece solo el tramo del horario anterior que quedó libre (C-35) | IN-02 | Ninguno | Equipo / líder |
 | PA-07 | ¿Quién verifica personalmente las fuentes del informe y cuándo? Cada integrante debe comprobar y reemplazar las filas de ejemplo | IN-04, requisito de la cátedra | Ninguno (entrega del informe) | Líder del equipo |
 
 ### Prioridad media
 
 | ID | Pregunta | Origen | Bloquea | Decisor |
 |---|---|---|---|---|
-| PA-05 | ¿Con cuánta anticipación se manda el recordatorio (24 hs, 48 hs, configurable)? ¿Uno solo o varios? (hoy: 24 hs configurable, uno) | `discovery.md` §11 | `notificaciones` | Equipo |
+| PA-05 | **Resuelta (2026-11-25, decisión del líder).** Se envía un recordatorio por horario, con 24 hs de anticipación por defecto y configurable (C-37, SU-06). | `discovery.md` §11 | Ninguno (resuelta) | Líder |
 | PA-08 | Ley 25.326: ¿el consultorio debe inscribir la base de datos ante la AAIP y qué texto de consentimiento y política de retención se muestra al paciente? | `discovery.md` §10 | `reserva-publica` (texto de consentimiento) | Equipo / cátedra |
 | PA-09 | En la reserva online, ¿el paciente puede elegir "cualquier profesional"? ¿Cómo se asigna el sillón? (hoy: elige profesional y el sistema asigna el sillón, SU-03) | Flujo 4 | `reserva-publica` | Equipo |
 | PA-13 | ¿Qué política se aplica a los pacientes con ausencias reiteradas (AUSENTE)? ¿Se limitan sus reservas online? | RN-20 | Ninguno (futuro) | Equipo |

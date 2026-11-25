@@ -42,7 +42,7 @@ El detalle completo está en [knowledge-base/02_descripcion_general.md](knowledg
 | [09_decisiones_y_supuestos.md](knowledge-base/09_decisiones_y_supuestos.md) | Para las decisiones (DD-XX) y los supuestos (SU-XX) |
 | [10_preguntas_abiertas.md](knowledge-base/10_preguntas_abiertas.md) | Para las preguntas abiertas que hay que resolver antes de codear |
 
-> Las preguntas de prioridad alta PA-01 a PA-04 están resueltas. Sigue abierta en parte **PA-06**, sobre la política de reprogramación tardía del personal: hoy se permite y se registra (SU-07). Hay que confirmarla antes de implementar la reprogramación. El índice de la KB está en [knowledge-base/README.md](knowledge-base/README.md) y el sistema visual en [design-system/README.md](design-system/README.md).
+> Las preguntas de prioridad alta PA-01 a PA-04 están resueltas. **PA-06** también está resuelta (2026-11-25): la reprogramación tardía del personal se permite y se registra con `reprogramado_tarde` (SU-07), y la implementa C-35. El índice de la KB está en [knowledge-base/README.md](knowledge-base/README.md) y el sistema visual en [design-system/README.md](design-system/README.md).
 
 ---
 

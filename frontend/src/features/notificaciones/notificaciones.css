@@ -1,0 +1,9 @@
+/*
+ * Registro de notificaciones (C-34). Solo variables de design-system/tokens.css (regla 13).
+ */
+/* minmax(0, 1fr), como la agenda: la tabla ancha se desplaza dentro de su marco sin ensanchar la página. */
+.pagina-notificaciones { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; }
+.notificaciones__filtros { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: flex-end; margin-bottom: var(--space-4); }
+.notificaciones__filtros .field { min-width: 0; }
+.notificaciones__filtros .input { width: 100%; max-width: 100%; }
+.notificaciones__paginacion { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; justify-content: flex-end; margin-top: var(--space-3); font-size: var(--text-sm); color: var(--color-text-muted); }

@@ -54,8 +54,9 @@ public class PacienteController {
         return ResponseEntity.ok(PacienteResponse.desde(actualizado));
     }
 
+    /** El odontólogo también consulta, pero solo fichas de pacientes de sus turnos (C-28, RN-33). */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RECEPCION','ADMIN')")
+    @PreAuthorize("hasAnyRole('RECEPCION','ADMIN','ODONTOLOGO')")
     public ResponseEntity<PacienteResponse> obtener(@PathVariable Long id) {
         Paciente p = servicio.obtener(id);
         return ResponseEntity.ok(PacienteResponse.desde(p));

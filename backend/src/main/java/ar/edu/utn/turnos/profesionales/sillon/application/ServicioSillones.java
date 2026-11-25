@@ -1,10 +1,12 @@
 package ar.edu.utn.turnos.profesionales.sillon.application;
 
+import ar.edu.utn.turnos.agenda.application.TurnosActivosConsulta;
 import ar.edu.utn.turnos.profesionales.sillon.application.SillonConsulta.Datos;
 import ar.edu.utn.turnos.profesionales.sillon.infrastructure.SillonesPersistencia;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,9 +20,11 @@ public class ServicioSillones {
     private static final String PUEDE_ESCRIBIR = "hasRole('ADMIN')";
 
     private final SillonesPersistencia sillones;
+    private final TurnosActivosConsulta turnosActivos;
 
-    public ServicioSillones(SillonesPersistencia sillones) {
+    public ServicioSillones(SillonesPersistencia sillones, TurnosActivosConsulta turnosActivos) {
         this.sillones = sillones;
+        this.turnosActivos = turnosActivos;
     }
 
     @PreAuthorize(PUEDE_CONSULTAR)
@@ -55,6 +59,14 @@ public class ServicioSillones {
     }
 
     private Datos desactivar(Long id, String nombre, String descripcion) {
+        var conflictos = turnosActivos.futurosDeSillon(id);
+        if (!conflictos.isEmpty()) {
+            throw new ReglaNegocioException(
+                    "RN-37",
+                    EstadoError.CONFLICTO_409,
+                    "No se puede desactivar el sillón porque tiene turnos futuros activos",
+                    Map.of("recurso", "SILLON", "turnos", conflictos));
+        }
         return guardarCambios(id, nombre, descripcion, false);
     }
 

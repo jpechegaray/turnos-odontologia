@@ -1,5 +1,6 @@
 export { Alerta, type AlertaProps } from "./Alerta";
 export { BadgeEstadoTurno, type EstadoVisualTurno } from "./BadgeEstadoTurno";
+export { claseDeEstado } from "./estadoTurno";
 export { Boton, type BotonProps, type VarianteBoton } from "./Boton";
 export { Campo, type CampoProps } from "./Campo";
 export { Icono, type NombreIcono } from "./Icono";
