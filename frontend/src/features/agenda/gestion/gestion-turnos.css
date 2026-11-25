@@ -1,0 +1,18 @@
+.gestion-turnos,
+.gestion-turnos__formulario {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.gestion-turnos__encabezado,
+.gestion-turnos__acciones,
+.pagina-agenda__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gestion-turnos__encabezado { justify-content: space-between; }
+.gestion-turnos__encabezado h3,
+.gestion-turnos p { margin: 0; }
