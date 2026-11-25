@@ -7,6 +7,8 @@ import type { FichaElegida } from "./ContenidoTurno";
 import { rutaDeAgenda } from "./consulta";
 import { FormularioCrearTurno } from "./crear/FormularioCrearTurno";
 import { FichaPaciente } from "./FichaPaciente";
+import { accionesDeTurno, mensajeGestionada, type Gestion, type TurnoGestionado } from "./gestion/acciones";
+import { GestionTurnos } from "./gestion/GestionTurnos";
 import { GrillaDia } from "./GrillaDia";
 import { nombreDelDia, sumarDias } from "./grilla";
 import { fechaCorta, nombresDe } from "./presentacion";
@@ -30,15 +32,41 @@ export function PaginaAgenda() {
   const [agrupacion, actualizarAgrupacion] = useState<Agrupacion>("profesional");
   const [ficha, actualizarFicha] = useState<FichaElegida>();
   const [formularioAbierto, actualizarFormularioAbierto] = useState(false);
-  const [turnoCreado, actualizarTurnoCreado] = useState(false);
+  const [gestionAbierta, actualizarGestionAbierta] = useState(false);
+  const [mensaje, actualizarMensaje] = useState("");
+  const idGestion = useId();
+  const idGestionBoton = `${idGestion}-boton`;
   const idAlta = useId();
   const idNuevo = `${idAlta}-boton`;
   const { estado } = useSesion();
-  const puedeCrear = estado.tipo === "activa" && (estado.identidad.rol === "ADMIN" || estado.identidad.rol === "RECEPCION");
+  const rol = estado.tipo === "activa" ? estado.identidad.rol : undefined;
+  const puedeCrear = rol === "ADMIN" || rol === "RECEPCION";
   const catalogos = useCatalogosAgenda();
   const nombres = useMemo(() => nombresDe(catalogos), [catalogos]);
   const { agenda, cargando, errorCarga, recargar } = useAgenda(consulta);
   const fechaVigente = consulta.fecha ?? agenda?.desde;
+  const puedeGestionar = rol !== undefined && agenda?.turnos.some(
+    (turno) => accionesDeTurno(turno, rol, Date.now()).length > 0,
+  );
+
+  useEffect(() => {
+    if (gestionAbierta && puedeCrear) document.getElementById(idGestion)?.focus();
+  }, [gestionAbierta, idGestion, puedeCrear]);
+
+  function cerrarGestion() {
+    actualizarGestionAbierta(false);
+    document.getElementById(idGestionBoton)?.focus();
+  }
+
+  function actualizarTrasGestion(gestion: Gestion, turno: TurnoGestionado) {
+    cerrarGestion();
+    actualizarMensaje(mensajeGestionada(gestion, turno));
+    if (gestion.accion === "reprogramar") {
+      refrescarParaTurno(turno.inicio, turno.profesionalId, turno.sillonId);
+    } else {
+      void recargar();
+    }
+  }
 
   useEffect(() => {
     if (formularioAbierto && puedeCrear) document.getElementById(idAlta)?.focus();
@@ -49,7 +77,7 @@ export function PaginaAgenda() {
     document.getElementById(idNuevo)?.focus();
   }
 
-  function mostrarTurnoCreado(inicio: string, profesionalId: number, sillonId: number) {
+  function refrescarParaTurno(inicio: string, profesionalId: number, sillonId: number) {
     const siguiente: ConsultaAgenda = {
       ...consulta,
       fecha: fechaLocal(inicio),
@@ -58,8 +86,12 @@ export function PaginaAgenda() {
     };
     if (rutaDeAgenda(siguiente) === rutaDeAgenda(consulta)) void recargar();
     else actualizarConsulta(siguiente);
+  }
+
+  function mostrarTurnoCreado(inicio: string, profesionalId: number, sillonId: number) {
+    refrescarParaTurno(inicio, profesionalId, sillonId);
     cerrarFormulario();
-    actualizarTurnoCreado(true);
+    actualizarMensaje("Turno creado.");
   }
 
   function cambiar(cambios: Partial<ConsultaAgenda>) {
@@ -75,19 +107,38 @@ export function PaginaAgenda() {
     <section className="pagina-agenda">
       <div className="pagina-agenda__encabezado">
         <h2>Agenda</h2>
-        {puedeCrear && (
-          <Boton id={idNuevo} aria-expanded={formularioAbierto} aria-controls={formularioAbierto ? `${idAlta}-panel` : undefined}
-            onClick={() => {
-              if (formularioAbierto) {
-                document.getElementById(idAlta)?.focus();
-                return;
-              }
-              actualizarTurnoCreado(false);
-              actualizarFormularioAbierto(true);
-            }}>Nuevo turno</Boton>
-        )}
+        <div className="pagina-agenda__acciones">
+          {puedeCrear && (
+            <Boton id={idNuevo} disabled={gestionAbierta} aria-expanded={formularioAbierto} aria-controls={formularioAbierto ? `${idAlta}-panel` : undefined}
+              onClick={() => {
+                if (formularioAbierto) {
+                  document.getElementById(idAlta)?.focus();
+                  return;
+                }
+                actualizarMensaje("");
+                actualizarFormularioAbierto(true);
+              }}>Nuevo turno</Boton>
+          )}
+          {(puedeGestionar || gestionAbierta) && puedeCrear && (
+            <Boton id={idGestionBoton} variante="secundaria" disabled={formularioAbierto || cargando || errorCarga}
+              aria-expanded={gestionAbierta} aria-controls={gestionAbierta ? `${idGestion}-panel` : undefined}
+              onClick={() => {
+                if (gestionAbierta) {
+                  document.getElementById(idGestion)?.focus();
+                  return;
+                }
+                actualizarMensaje("");
+                actualizarGestionAbierta(true);
+              }}>Gestionar turnos</Boton>
+          )}
+        </div>
       </div>
-      {turnoCreado && <p role="status">Turno creado.</p>}
+      {mensaje && <p role="status">{mensaje}</p>}
+      {gestionAbierta && puedeCrear && rol && agenda && (
+        <GestionTurnos tituloId={idGestion} turnos={agenda.turnos} rol={rol} catalogos={catalogos}
+          nombres={nombres} cargandoAgenda={cargando || errorCarga} onCerrar={cerrarGestion}
+          onActualizarAgenda={() => { cerrarGestion(); void recargar(); }} onCompletado={actualizarTrasGestion} />
+      )}
       {puedeCrear && formularioAbierto && (
         <FormularioCrearTurno
           tituloId={idAlta}
