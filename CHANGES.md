@@ -43,7 +43,7 @@
 | C-21 | ✅ hecho | Lionel (Cualquiera) | 3 | M | front-profesionales-y-sillones | C-05, C-06, C-10, C-16 |  |
 | C-22 | ⬜ pendiente | Cualquiera | 3 | M | front-horarios-y-bloqueos | C-11, C-12, C-16 |  |
 | C-23 | ⬜ pendiente | Cualquiera | 3 | S | front-pacientes | C-07, C-16 |  |
-| C-24 | ⬜ pendiente | Cualquiera | 3 | S | front-usuarios-admin | C-13, C-16 |  |
+| C-24 | ✅ hecho | Lionel (Cualquiera) | 3 | S | front-usuarios-admin | C-13, C-16 |  |
 | C-25 | ⬜ pendiente | Cualquiera | 3 | S | registro-notificaciones-consulta | C-15 |  |
 | C-26 | ⬜ pendiente | Cualquiera | 4 | M | horarios-libres-disponibilidad | C-19 |  |
 | C-27 | ⬜ pendiente | **Juan Pablo** | 4 | M | cancelar-turno-y-liberar-hueco | C-08, C-19 | camino crítico |
@@ -1013,7 +1013,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: RECEPCION crea y busca pacientes desde la UI; los errores del backend se muestran en el campo correspondiente.
 
 ### [C-24] `C-24-front-usuarios-admin`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #92, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 3 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - `features/auth/usuarios`: alta, rol, desactivación y vínculo con profesional; solo ADMIN

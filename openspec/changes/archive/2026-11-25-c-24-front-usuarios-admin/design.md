@@ -91,7 +91,7 @@ Los mensajes de permiso y genérico se definen en `features/auth/usuarios/mensaj
 - Mockups: none
 - Approval: not applicable
 - Preview: not applicable
-- Visual verify: pending (se compara contra los tokens y componentes aprobados en apply/verify)
+- Visual verify: manual (2026-11-25): política `system-only`. Los tokens se verificaron con grep (sin valores fijos) y el usuario probó la pantalla en desarrollo con los tres roles; no hubo comparación automatizada contra un mockup.
 
 ## Migration Plan
 
