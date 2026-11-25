@@ -110,6 +110,9 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "RECEPCION")
                         // Gestión de usuarios (C-13): solo ADMIN, también para leer; 403 antes de validar el cuerpo.
                         .requestMatchers("/api/usuarios", "/api/usuarios/**").hasRole("ADMIN")
+                        // Lista de espera (C-18): el odontólogo solo lee; 403 antes de validar el cuerpo.
+                        .requestMatchers(HttpMethod.POST, "/api/lista-espera").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.DELETE, "/api/lista-espera/{id}").hasAnyRole("ADMIN", "RECEPCION")
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(configuracionCors(origen)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/public/**")
