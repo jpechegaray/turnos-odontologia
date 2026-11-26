@@ -53,6 +53,16 @@ describe("Menú lateral agrupado con íconos", () => {
 });
 
 describe("Navegación de la propuesta", () => {
+  it("El buscador de pacientes solo aparece en Pacientes", async () => {
+    renderEn("/");
+    const nav = await screen.findByRole("navigation", { name: "Principal" });
+    expect(screen.queryByRole("textbox", { name: /buscar paciente/i })).not.toBeInTheDocument();
+
+    await userEvent.click(within(nav).getByRole("link", { name: "Pacientes" }));
+    const buscador = await screen.findByRole("searchbox", { name: /buscar paciente/i });
+    expect(screen.getByRole("main")).toContainElement(buscador);
+  });
+
   it('El botón "Más" abre y cierra el menú completo', async () => {
     renderEn("/");
 

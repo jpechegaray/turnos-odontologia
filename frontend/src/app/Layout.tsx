@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { CerrarSesion } from "../features/auth/CerrarSesion";
 import { useSesion } from "../features/auth/sesion";
 import { ETIQUETAS_ROL } from "../features/auth/usuarios/roles";
@@ -26,11 +26,9 @@ function Enlace({ entrada, alElegir }: { entrada: EntradaMenuResuelta; alElegir:
 export function Layout({ menu }: { menu: readonly EntradaMenuResuelta[] }) {
   const { estado } = useSesion();
   const [abierto, actualizarAbierto] = useState(false);
-  const [busqueda, actualizarBusqueda] = useState("");
   const lateral = useRef<HTMLElement>(null);
   const disparador = useRef<HTMLButtonElement>();
   const { pathname } = useLocation();
-  const navegar = useNavigate();
 
   useEffect(() => { actualizarAbierto(false); }, [pathname]);
 
@@ -50,7 +48,6 @@ export function Layout({ menu }: { menu: readonly EntradaMenuResuelta[] }) {
   const grupos = agruparMenu(menu);
   const identidad = estado.tipo === "activa" ? estado.identidad : null;
   const accesos = ["/", "/agenda", "/pacientes"].flatMap((ruta) => menu.filter((entrada) => entrada.ruta === ruta));
-  const puedeBuscar = menu.some((entrada) => entrada.ruta === "/pacientes");
   const puedeCrear = identidad?.rol === "ADMIN" || identidad?.rol === "RECEPCION";
 
   return (
@@ -102,18 +99,6 @@ export function Layout({ menu }: { menu: readonly EntradaMenuResuelta[] }) {
             }}>
             <Icono nombre="menu" />
           </button>
-          {puedeBuscar && (
-            <form className="layout__buscar" role="search" aria-label="Buscar en el consultorio" onSubmit={(evento) => {
-              evento.preventDefault();
-              if (!busqueda.trim()) return;
-              navegar("/pacientes", { state: { busqueda: busqueda.trim() } });
-              actualizarBusqueda("");
-            }}>
-              <Icono nombre="buscar" />
-              <input aria-label="Buscar paciente por nombre o DNI" placeholder="Buscar paciente por nombre o DNI…"
-                value={busqueda} onChange={(evento) => actualizarBusqueda(evento.target.value)} />
-            </form>
-          )}
           <div className="layout__barra-fin">
             {pathname === "/" && <time className="layout__fecha mono" dateTime={fechaLocal(Date.now())}>
               {new Intl.DateTimeFormat("es-AR", { timeZone: "America/Argentina/Buenos_Aires", weekday: "short",

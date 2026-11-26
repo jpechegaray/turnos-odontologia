@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../shared/api/clienteApi";
 import { Alerta, Avatar, Boton, Campo, Icono, Tabla, Toast, type ColumnaTabla } from "../../shared/ui";
 import { fechaLocal, formatearFecha, formatearHora } from "../../shared/fecha/zonaHoraria";
@@ -41,7 +41,6 @@ function bajada(pacientes: readonly PacienteRespuesta[] | undefined): string {
 }
 
 export function PaginaPacientes() {
-  const { state, key } = useLocation();
   const [parametros, cambiarParametros] = useSearchParams();
   const [alta, actualizarAlta] = useState(false);
   const [texto, actualizarTexto] = useState("");
@@ -56,12 +55,6 @@ export function PaginaPacientes() {
   const [confirmandoBaja, actualizarConfirmandoBaja] = useState<number>();
   const [errorAccion, actualizarErrorAccion] = useState<string>();
   const pideAlta = parametros.get("alta") === "1";
-  useEffect(() => {
-    const origen: unknown = state;
-    if (origen && typeof origen === "object" && "busqueda" in origen && typeof origen.busqueda === "string") {
-      actualizarTexto(origen.busqueda);
-    }
-  }, [state, key]);
   useEffect(() => {
     if (!pideAlta) return;
     actualizarAlta(true);
