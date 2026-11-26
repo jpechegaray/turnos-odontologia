@@ -134,7 +134,7 @@ class RecorridoTurnoIT extends PruebaIntegracionBase {
                         .param("profesionalId", profesional.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.turnos[*].id").value(Matchers.contains(turno.intValue())));
-        var confirmaciones = enviados(email, "Confirmación de reserva");
+        var confirmaciones = enviados(email, "Confirmación de turno odontológico");
         assertThat(confirmaciones).hasSize(1);
         assertThat(correo.enviados()).hasSize(1);
 
@@ -213,7 +213,7 @@ class RecorridoTurnoIT extends PruebaIntegracionBase {
         assertThat(jdbc.queryForObject("select paciente_id from turno where id = ?", Long.class, nuevo))
                 .isEqualTo(interesado);
         assertThat(estado(nuevo)).isEqualTo("PROGRAMADO");
-        var confirmaciones = enviados(email(interesado), "Confirmación de reserva");
+        var confirmaciones = enviados(email(interesado), "Turno confirmado desde la lista de espera");
         assertThat(confirmaciones).hasSize(1);
         token(confirmaciones.get(0), ENLACE_TURNO);
         assertThat(jdbc.queryForMap("select estado, turno_asignado_id from lista_espera where id = ?", entrada))

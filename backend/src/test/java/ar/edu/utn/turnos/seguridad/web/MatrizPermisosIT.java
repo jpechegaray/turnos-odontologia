@@ -124,6 +124,7 @@ class MatrizPermisosIT extends PruebaIntegracionBase {
         MATRIZ.put("GET /api/configuracion", fila(PERSONAL));
         MATRIZ.put("PUT /api/configuracion", fila(SOLO_ADMIN));
         MATRIZ.put("GET /api/notificaciones", fila(PERSONAL));
+        MATRIZ.put("GET /api/notificaciones/{id}/vista-previa", fila(PERSONAL));
     }
 
     /**
