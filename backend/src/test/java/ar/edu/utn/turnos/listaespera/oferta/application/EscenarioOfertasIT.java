@@ -79,6 +79,8 @@ abstract class EscenarioOfertasIT extends PruebaIntegracionBase {
     void preparar() {
         correo.limpiar();
         pacienteTurno = DatosAgenda.paciente(jdbc, true);
+        // El buzón de estos escenarios mide los avisos de lista de espera.
+        jdbc.update("update pacientes set email = null where id = ?", pacienteTurno);
         profesional = DatosAgenda.profesional(jdbc, true);
         sillon = DatosAgenda.sillon(jdbc, true);
         consulta = DatosAgenda.prestacion(jdbc, 30, true);

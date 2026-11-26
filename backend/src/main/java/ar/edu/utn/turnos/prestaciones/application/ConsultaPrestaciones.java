@@ -1,5 +1,6 @@
 package ar.edu.utn.turnos.prestaciones.application;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,4 +12,7 @@ public interface ConsultaPrestaciones {
 
     /** @return la prestación, activa o no, o vacío si el id no existe */
     Optional<PrestacionResumen> buscarPorId(Long id);
+
+    /** @return las prestaciones activas, ordenadas por nombre */
+    List<PrestacionResumen> listarActivas();
 }

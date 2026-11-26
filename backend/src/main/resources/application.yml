@@ -37,6 +37,10 @@ springdoc:
     enabled: false
 
 server:
+  tomcat:
+    accesslog:
+      # Si se habilita el registro, guardar solo fecha, método, estado, tamaño y duración.
+      pattern: "%t %m %s %b %D"
   servlet:
     session:
       cookie:

@@ -7,10 +7,13 @@ import ar.edu.utn.turnos.agenda.domain.ValidadorTurno;
 import ar.edu.utn.turnos.agenda.domain.evento.TurnoCreado;
 import ar.edu.utn.turnos.agenda.infrastructure.TurnosPersistencia;
 import java.time.Clock;
+import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import java.time.Instant;
+import java.util.function.Function;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -43,11 +46,27 @@ public class CrearTurnoService {
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     @Transactional
     public Turno crear(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
+        return crearCon(solicitud, intervalo -> Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(),
+                solicitud.sillonId(), solicitud.prestacionId(), intervalo, notas, creadoPorUsuarioId, Instant.now(reloj)));
+    }
+
+    /**
+     * Alta de la reserva online (C-41, Flujo 4): las mismas reglas, bloqueos y garantía de la base que el alta del
+     * personal, con canal ONLINE y sin usuario creador. No tiene autorización propia porque la pide un paciente
+     * anónimo; por eso exige una transacción ya abierta ({@code MANDATORY}): solo la usa la reserva pública, que
+     * valida antes el consentimiento y los límites de la reserva online.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Turno crearOnline(SolicitudTurno solicitud) {
+        return crearCon(solicitud, intervalo -> Turno.nuevoOnline(solicitud.pacienteId(), solicitud.profesionalId(),
+                solicitud.sillonId(), solicitud.prestacionId(), intervalo, Instant.now(reloj)));
+    }
+
+    private Turno crearCon(SolicitudTurno solicitud, Function<Intervalo, Turno> construir) {
         // RN-15: las altas sobre el mismo profesional o sillón se ordenan; la segunda valida contra la primera.
         turnos.bloquearRecursos(solicitud.profesionalId(), solicitud.sillonId());
         var intervalo = validador.validar(solicitud, recursos.de(solicitud), consultas, null);
-        var turno = turnos.guardar(Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(), solicitud.sillonId(),
-                solicitud.prestacionId(), intervalo, notas, creadoPorUsuarioId, Instant.now(reloj)));
+        var turno = turnos.guardar(construir.apply(intervalo));
         eventos.publishEvent(TurnoCreado.de(turno));
         return turno;
     }

@@ -70,7 +70,7 @@ public class ServicioTokenTurno {
         return turnoId;
     }
 
-    private static ReglaNegocioException tokenNoEncontrado() {
+    public static ReglaNegocioException tokenNoEncontrado() {
         return new ReglaNegocioException("TOKEN_TURNO_NO_ENCONTRADO", EstadoError.NO_ENCONTRADO_404,
                 "Token de turno no encontrado");
     }

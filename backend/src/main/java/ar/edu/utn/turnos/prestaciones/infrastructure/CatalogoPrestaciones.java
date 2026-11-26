@@ -50,6 +50,11 @@ public class CatalogoPrestaciones implements ConsultaPrestaciones {
         return repositorio.findById(id).map(CatalogoPrestaciones::resumir);
     }
 
+    @Override
+    public List<PrestacionResumen> listarActivas() {
+        return listar(true);
+    }
+
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public PrestacionResumen crear(String nombre, int duracionDefaultMin) {

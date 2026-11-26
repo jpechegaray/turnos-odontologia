@@ -116,7 +116,19 @@ public class OfertasHueco {
     }
 
     /**
-     * Oferta {@code ENVIADA} y vigente para el token en claro (RN-38); la usará C-42. Token inexistente, mal formado,
+     * Oferta en cualquier estado para el token en claro (C-42): la consulta pública informa también las tomadas y
+     * vencidas. Token inexistente o mal formado dan vacío, sin distinguir la causa (RN-38).
+     */
+    @Transactional(readOnly = true)
+    public Optional<OfertaHueco> buscarPorToken(String token) {
+        if (token == null || !FORMATO_TOKEN.matcher(token).matches()) {
+            return Optional.empty();
+        }
+        return ofertas.porTokenHash(tokens.hashear(token)).filter(oferta -> tokens.coincide(token, oferta.tokenHash()));
+    }
+
+    /**
+     * Oferta {@code ENVIADA} y vigente para el token en claro (RN-38). Token inexistente, mal formado,
      * vencido o de una oferta tomada o vencida dan el mismo resultado vacío.
      */
     @Transactional(readOnly = true)

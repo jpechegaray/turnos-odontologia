@@ -15,7 +15,7 @@ export function enteroEstricto(texto: string): number | undefined {
 }
 
 /**
- * RN-36: los seis enteros dentro de su rango y `consultorio.nombre` no en blanco. Devuelve un mensaje
+ * RN-36: los siete enteros dentro de su rango y los tres textos del consultorio no en blanco. Devuelve un mensaje
  * por campo inválido; un resultado vacío significa que la configuración se puede enviar.
  */
 export function validarConfiguracion(valores: ConfiguracionTexto): ErroresConfiguracion {
@@ -38,7 +38,7 @@ export function validarConfiguracion(valores: ConfiguracionTexto): ErroresConfig
   return errores;
 }
 
-/** Arma el `PUT` de reemplazo completo con exactamente las siete claves y sus tipos nativos. */
+/** Arma el `PUT` de reemplazo completo con exactamente las diez claves y sus tipos nativos. */
 export function aSolicitud(valores: ConfiguracionTexto): ConfiguracionRespuesta {
   return {
     "cancelacion.plazo_horas": Number(valores["cancelacion.plazo_horas"].trim()),
@@ -52,6 +52,9 @@ export function aSolicitud(valores: ConfiguracionTexto): ConfiguracionRespuesta 
     ),
     "lista_espera.max_avisos_por_hueco": Number(valores["lista_espera.max_avisos_por_hueco"].trim()),
     "consultorio.nombre": valores["consultorio.nombre"].trim(),
+    "consultorio.domicilio": valores["consultorio.domicilio"].trim(),
+    "consultorio.email_contacto": valores["consultorio.email_contacto"].trim(),
+    "consultorio.retencion_anios": Number(valores["consultorio.retencion_anios"].trim()),
   };
 }
 
@@ -69,5 +72,8 @@ export function aTexto(configuracion: ConfiguracionRespuesta): ConfiguracionText
     ),
     "lista_espera.max_avisos_por_hueco": String(configuracion["lista_espera.max_avisos_por_hueco"]),
     "consultorio.nombre": configuracion["consultorio.nombre"],
+    "consultorio.domicilio": configuracion["consultorio.domicilio"],
+    "consultorio.email_contacto": configuracion["consultorio.email_contacto"],
+    "consultorio.retencion_anios": String(configuracion["consultorio.retencion_anios"]),
   };
 }

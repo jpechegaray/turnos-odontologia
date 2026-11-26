@@ -192,3 +192,9 @@ Las decisiones **DD-01 a DD-08** fueron tomadas por el equipo (no se reabren sin
 **Origen**: ya existía en el diseño anterior (`POST /api/lista-espera/{id}/asignar`); la decisión del líder no lo menciona.
 **Riesgo si es falso**: si se quiere solo el camino automático, se elimina ese endpoint y la pantalla de sugerencias.
 **Cómo validar**: confirmar con el líder.
+
+### SU-16 — Inscripción de la base ante la AAIP
+**Supuesto**: el MVP académico usa solo datos ficticios y no inscribe su base ante la AAIP. Un consultorio que adopte el sistema inscribe su base ante la AAIP antes de cargar pacientes reales.
+**Origen**: PA-08, resuelta el 2026-11-25 (`docs/propuestas/pa-08-consentimiento-datos.md`).
+**Riesgo si es falso**: un consultorio real operaría una base no inscripta (Ley 25.326, art. 21).
+**Cómo validar**: confirmar con la cátedra y, para un consultorio real, con su asesoría legal.

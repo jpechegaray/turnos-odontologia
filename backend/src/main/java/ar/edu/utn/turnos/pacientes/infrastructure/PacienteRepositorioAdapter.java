@@ -41,6 +41,13 @@ public class PacienteRepositorioAdapter implements PacienteRepositorio {
     }
 
     @Override
+    public List<Paciente> activosPorEmail(String email) {
+        if (email == null || email.isBlank()) return List.of();
+        return jpaRepository.activosPorEmail(email.trim().toLowerCase(java.util.Locale.ROOT)).stream()
+                .map(PacienteJpa::aDominio).toList();
+    }
+
+    @Override
     public boolean existePorDni(String dni) {
         if (dni == null) return false;
         return jpaRepository.existsByDniAndActivoTrue(dni);

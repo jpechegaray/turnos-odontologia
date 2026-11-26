@@ -11,7 +11,7 @@ export type DefinicionClave = Readonly<{
 }>;
 
 /**
- * Única fuente de verdad de las siete claves de configuración, sus etiquetas en español y sus rangos
+ * Única fuente de verdad de las diez claves de configuración, sus etiquetas en español y sus rangos
  * (RN-36). Los rangos coinciden con los de C-08; el backend sigue siendo la autoridad final.
  */
 export const CLAVES: readonly DefinicionClave[] = [
@@ -57,5 +57,22 @@ export const CLAVES: readonly DefinicionClave[] = [
     clave: "consultorio.nombre",
     etiqueta: "Nombre del consultorio",
     tipo: "texto",
+  },
+  {
+    clave: "consultorio.domicilio",
+    etiqueta: "Domicilio del consultorio",
+    tipo: "texto",
+  },
+  {
+    clave: "consultorio.email_contacto",
+    etiqueta: "Email de contacto del consultorio",
+    tipo: "texto",
+  },
+  {
+    clave: "consultorio.retencion_anios",
+    etiqueta: "Retención de datos (años)",
+    tipo: "entero",
+    minimo: 1,
+    maximo: 20,
   },
 ];

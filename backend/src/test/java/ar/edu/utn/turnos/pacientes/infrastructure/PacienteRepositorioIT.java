@@ -100,10 +100,31 @@ class PacienteRepositorioIT extends PruebaIntegracionBase {
         Instant consentimiento = Instant.parse("2026-02-03T04:05:06Z");
         Paciente base = Paciente.nuevo("Paciente", "Cuatro", null, "paciente4@example.test", null, null, null, null);
         Paciente conConsentimiento = new Paciente(null, base.nombre(), base.apellido(), null, base.email(), null,
-                null, null, null, true, consentimiento, Instant.parse("2026-02-03T04:05:06Z"));
+                null, null, null, true, consentimiento, "2026-11-v1", Instant.parse("2026-02-03T04:05:06Z"));
 
         Paciente guardado = repositorio.guardar(conConsentimiento);
 
-        assertThat(repositorio.porId(guardado.id()).orElseThrow().consentimientoDatosEn()).isEqualTo(consentimiento);
+        var leido = repositorio.porId(guardado.id()).orElseThrow();
+        assertThat(leido.consentimientoDatosEn()).isEqualTo(consentimiento);
+        assertThat(leido.consentimientoVersion()).isEqualTo("2026-11-v1");
+    }
+
+    @Test
+    @DisplayName("Las fichas activas de un email se buscan sin distinguir mayúsculas ni espacios y por orden de alta")
+    void activosPorEmailIgnoraMayusculasEspaciosYBajas() {
+        var primera = repositorio.guardar(Paciente.nuevo("Ana", "Uno", null, "Ana.Ficticia@Example.com", null, null,
+                null, null));
+        var baja = repositorio.guardar(Paciente.nuevo("Ana", "Baja", null, "ana.ficticia@example.com", null, null,
+                null, null).dadoDeBaja());
+        var segunda = repositorio.guardar(Paciente.nuevo("Ana", "Dos", null, "ana.ficticia@example.com", "1155550002",
+                null, null, null));
+        repositorio.guardar(Paciente.nuevo("Otra", "Persona", null, "otra@example.com", null, null, null, null));
+
+        var encontradas = repositorio.activosPorEmail("  ANA.ficticia@example.COM ");
+
+        assertThat(encontradas).extracting(Paciente::id).containsExactly(primera.id(), segunda.id())
+                .doesNotContain(baja.id());
+        assertThat(repositorio.activosPorEmail(null)).isEmpty();
+        assertThat(repositorio.activosPorEmail("nadie@example.com")).isEmpty();
     }
 }

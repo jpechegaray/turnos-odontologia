@@ -13,6 +13,12 @@ public interface PacienteRepositorio {
 
     Optional<Paciente> porEmail(String email);
 
+    /**
+     * Fichas ACTIVAS con ese email, sin distinguir mayúsculas ni espacios en los extremos, de la más antigua
+     * a la más nueva (RN-28). Un email nulo o en blanco no encuentra ninguna.
+     */
+    List<Paciente> activosPorEmail(String email);
+
     /** Indica si otra ficha ACTIVA ya tiene ese DNI; las fichas inactivas no lo reservan. */
     boolean existePorDni(String dni);
 

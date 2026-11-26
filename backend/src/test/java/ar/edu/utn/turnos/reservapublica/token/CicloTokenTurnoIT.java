@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.agenda.DatosAgenda;
 import ar.edu.utn.turnos.agenda.application.TurnosParaToken;
+import ar.edu.utn.turnos.agenda.domain.ActorCancelacion;
 import ar.edu.utn.turnos.agenda.domain.evento.TurnoCancelado;
 import ar.edu.utn.turnos.agenda.domain.evento.TurnoReprogramado;
 import ar.edu.utn.turnos.shared.error.EstadoError;
@@ -235,7 +236,7 @@ class CicloTokenTurnoIT extends PruebaIntegracionBase {
     private void publicarCancelacion(TurnoPrueba t, Instant instante) {
         turnos.bloquearParaToken(t.id()).orElseThrow();
         eventos.publishEvent(new TurnoCancelado(t.id(), t.paciente(), t.profesional(), t.sillon(),
-                intervalo(INICIO), false, instante));
+                intervalo(INICIO), false, instante, ActorCancelacion.PACIENTE_TOKEN));
     }
 
     private void reprogramar(TurnoPrueba t, Instant nuevoInicio) {
