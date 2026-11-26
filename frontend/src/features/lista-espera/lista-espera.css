@@ -1,0 +1,49 @@
+/*
+ * Lista de espera (C-47). Solo variables de design-system/tokens.css (regla 13).
+ * minmax(0, 1fr), como la agenda: las tablas anchas se desplazan dentro de su marco sin ensanchar la página.
+ */
+.pagina-lista-espera {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.lista-espera__seccion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.lista-espera__formulario {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.lista-espera__campos,
+.lista-espera__filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--target-min) * 4.5)), 1fr));
+  gap: var(--space-3) var(--space-4);
+  align-items: start;
+}
+
+.lista-espera__seccion .input {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.lista-espera__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.lista-espera__exito {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
+}

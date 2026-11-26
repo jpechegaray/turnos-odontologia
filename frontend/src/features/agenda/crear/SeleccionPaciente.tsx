@@ -4,6 +4,8 @@ import { Alerta, Boton, Campo } from "../../../shared/ui";
 import { CampoSeleccion } from "../../../shared/ui/CampoSeleccion";
 import { consultaDePacientes, FILTROS_VACIOS } from "../../pacientes/consulta";
 import type { FiltrosPacientes, PacienteRespuesta } from "../../pacientes/tipos";
+// El componente usa las clases `alta-turno__*`: se importan acá para que funcione fuera del alta de turnos (C-47).
+import "./alta-turno.css";
 
 const CRITERIOS = [
   { valor: "apellido", etiqueta: "Apellido" },
