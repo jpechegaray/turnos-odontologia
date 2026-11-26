@@ -12,9 +12,9 @@ export type CatalogosAgenda = Readonly<{
 
 const VACIOS: CatalogosAgenda = { profesionales: [], sillones: [], prestaciones: [] };
 
-/** Si un catálogo falla, queda vacío: la agenda se sigue mostrando con nombres de respaldo. */
+/** Si un catálogo falla o no es una lista, queda vacío: la agenda se sigue mostrando con nombres de respaldo. */
 function listaOVacia<T>(ruta: string): Promise<readonly T[]> {
-  return api.get<T[]>(ruta).catch(() => []);
+  return api.get<T[]>(ruta).then((lista) => (Array.isArray(lista) ? lista : []), () => []);
 }
 
 /** Nombres para columnas, filtros y turnos. Se cargan una sola vez, en paralelo. */

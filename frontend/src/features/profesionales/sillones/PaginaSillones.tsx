@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../../shared/api/clienteApi";
-import { Alerta, Boton, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
+import { Alerta, Boton, Icono, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
 import { AccionesFila } from "../AccionesFila";
 import { useEsAdministrador } from "../permisos";
 import { mensajeDeErrorSillon } from "./errores";
@@ -11,9 +11,22 @@ import { useSillones } from "./useSillones";
 const MARCA_VACIO = "—";
 
 const COLUMNAS: readonly ColumnaTabla<SillonRespuesta>[] = [
-  { clave: "nombre", titulo: "Nombre", celda: (s) => s.nombre },
+  {
+    clave: "nombre",
+    titulo: "Nombre",
+    celda: (s) => (
+      <span className="celda-persona">
+        <span className={s.activo ? "icono-caja" : "icono-caja icono-caja--inactivo"}><Icono nombre="sillones" /></span>
+        <strong>{s.nombre}</strong>
+      </span>
+    ),
+  },
   { clave: "descripcion", titulo: "Descripción", celda: (s) => s.descripcion ?? MARCA_VACIO },
-  { clave: "estado", titulo: "Estado", celda: (s) => (s.activo ? "Activo" : "Inactivo") },
+  {
+    clave: "estado",
+    titulo: "Estado",
+    celda: (s) => <span className={s.activo ? "estado" : "estado estado--inactivo"}>{s.activo ? "Activo" : "Inactivo"}</span>,
+  },
 ];
 
 /** Cuerpo del `PUT` a partir de la representación actual, con el `activo` pedido. */
@@ -66,6 +79,7 @@ export function PaginaSillones() {
         {
           clave: "acciones",
           titulo: "Acciones",
+          acciones: true,
           celda: (s) => (
             <AccionesFila
               elemento={s}
@@ -83,18 +97,16 @@ export function PaginaSillones() {
 
   return (
     <section>
-      <h2>Sillones</h2>
-      {esAdmin && (
-        <FormularioSillon
-          key={editando?.id ?? "nuevo"}
-          valorInicial={editando}
-          etiquetaEnvio={editando ? "Guardar cambios" : "Agregar sillón"}
-          onEnviar={(solicitud) => (editando ? modificar(editando, solicitud) : crear(solicitud))}
-          onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
-        />
-      )}
+      <div className="encabezado">
+        <div>
+          <h2>Sillones</h2>
+          <p className="encabezado__bajada">Consultorios y boxes donde se atiende. Un sillón inactivo no aparece en la agenda.</p>
+        </div>
+      </div>
       {aviso && <Toast mensaje={aviso} />}
       {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
+      <div className={esAdmin ? "con-formulario" : undefined}>
+      <div className="con-formulario__lista">
       {cargando ? (
         <p role="status">Cargando…</p>
       ) : errorCarga ? (
@@ -110,6 +122,18 @@ export function PaginaSillones() {
           mensajeVacio="No hay sillones cargados."
         />
       )}
+      <Alerta tipo="info" titulo="Un sillón inactivo deja de aparecer en la agenda y al crear turnos, pero conserva su historial." />
+      </div>
+      {esAdmin && (
+        <FormularioSillon
+          key={editando?.id ?? "nuevo"}
+          valorInicial={editando}
+          etiquetaEnvio={editando ? "Guardar cambios" : "Agregar sillón"}
+          onEnviar={(solicitud) => (editando ? modificar(editando, solicitud) : crear(solicitud))}
+          onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
+        />
+      )}
+      </div>
     </section>
   );
 }

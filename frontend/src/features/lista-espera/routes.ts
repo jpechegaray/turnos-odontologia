@@ -5,7 +5,7 @@ export const rutas: RutaFeature[] = [
   {
     ruta: "/lista-espera",
     componente: PaginaListaEspera,
-    menu: { etiqueta: "Lista de espera", orden: 15 },
+    menu: { etiqueta: "Lista de espera", orden: 15, grupo: "atencion", icono: "espera" },
     roles: ["ADMIN", "RECEPCION"],
   },
 ];

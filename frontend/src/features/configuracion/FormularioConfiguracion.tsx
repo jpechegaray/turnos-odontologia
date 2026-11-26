@@ -1,10 +1,24 @@
 import { useState, type FormEvent } from "react";
 import { api } from "../../shared/api/clienteApi";
 import { Alerta, Boton, Campo, Tarjeta, Toast } from "../../shared/ui";
-import { CLAVES } from "./claves";
+import { CLAVES, type DefinicionClave } from "./claves";
+import "./configuracion.css";
 import { mensajeDeError } from "./errores";
 import type { ClaveConfiguracion, ConfiguracionRespuesta, ConfiguracionTexto } from "./tipos";
 import { aSolicitud, aTexto, validarConfiguracion, type ErroresConfiguracion } from "./validacion";
+
+/** Grupos de la pantalla, por el prefijo de cada clave. */
+const GRUPOS: readonly Readonly<{ titulo: string; descripcion: string; prefijo: string }>[] = [
+  { titulo: "Consultorio", descripcion: "Datos del consultorio y cuánto tiempo se guardan los registros.", prefijo: "consultorio." },
+  { titulo: "Turnos", descripcion: "Con cuántas horas de anticipación una cancelación deja de ser tardía.", prefijo: "cancelacion." },
+  { titulo: "Recordatorios", descripcion: "Cuántas horas antes del turno se envía el recordatorio por email.", prefijo: "recordatorio." },
+  { titulo: "Reserva online", descripcion: "Límites de la reserva que hacen los pacientes desde la web.", prefijo: "reserva_online." },
+  { titulo: "Lista de espera", descripcion: "Cuántas personas reciben el aviso de un hueco libre.", prefijo: "lista_espera." },
+];
+
+function clavesDe(prefijo: string): readonly DefinicionClave[] {
+  return CLAVES.filter((def) => def.clave.startsWith(prefijo));
+}
 
 export type FormularioConfiguracionProps = Readonly<{
   valorInicial: ConfiguracionRespuesta;
@@ -48,7 +62,12 @@ export function FormularioConfiguracion({ valorInicial, soloLectura }: Formulari
   return (
     <Tarjeta titulo="Parámetros del consultorio">
       <form noValidate onSubmit={(evento) => void enviar(evento)}>
-        {CLAVES.map((def) => (
+        {GRUPOS.map((grupo) => (
+          <fieldset key={grupo.prefijo} className="config-grupo">
+            <legend className="config-grupo__titulo">{grupo.titulo}</legend>
+            <p className="config-grupo__descripcion">{grupo.descripcion}</p>
+            <div className="config-grupo__campos">
+        {clavesDe(grupo.prefijo).map((def) => (
           <Campo
             key={def.clave}
             etiqueta={def.etiqueta}
@@ -60,6 +79,9 @@ export function FormularioConfiguracion({ valorInicial, soloLectura }: Formulari
             onChange={(evento) => cambiar(def.clave, evento.target.value)}
             error={errores[def.clave]}
           />
+        ))}
+            </div>
+          </fieldset>
         ))}
         {errorRemoto && <Alerta tipo="peligro" titulo={errorRemoto} />}
         {aviso && <Toast mensaje={aviso} />}

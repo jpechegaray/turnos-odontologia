@@ -8,6 +8,7 @@ import {
   MENSAJE_ESTADO, consultarOferta, estadoTrasRechazo, tomarOferta, type OfertaPublica, type TurnoTomado,
 } from "./ofertaApi";
 import "../reserva.css";
+import { CabeceraPublica } from "../CabeceraPublica";
 
 type Estado =
   | { tipo: "cargando" }
@@ -76,6 +77,7 @@ export default function PaginaOferta() {
 
   return (
     <main className="reserva-publica">
+      <CabeceraPublica />
       <div className="reserva-panel">
         {estado.tipo === "cargando" && <p role="status">Cargando la oferta…</p>}
         {estado.tipo === "error-carga" && (

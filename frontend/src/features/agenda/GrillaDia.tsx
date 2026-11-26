@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
-import { formatearHora } from "../../shared/fecha/zonaHoraria";
-import { BadgeEstadoTurno, claseDeEstado } from "../../shared/ui";
+import { fechaLocal, formatearHora } from "../../shared/fecha/zonaHoraria";
+import { Avatar, BadgeEstadoTurno, claseDeEstado } from "../../shared/ui";
 import { ContenidoTurno, type FichaElegida } from "./ContenidoTurno";
-import { cantidadDeFilas, filasDe, MINUTOS_FILA, rangoDeGrilla, tramoEnDia, type Tramo } from "./grilla";
+import { cantidadDeFilas, minutosDelDia, filasDe, MINUTOS_FILA, rangoDeGrilla, tramoEnDia, type Tramo } from "./grilla";
 import { horaDeMinutos, rangoLegible, type Nombres } from "./presentacion";
 import type { AgendaRespuesta, Agrupacion, BloqueoAgenda, TurnoAgenda } from "./tipos";
 import type { CatalogosAgenda } from "./useCatalogosAgenda";
@@ -91,6 +91,12 @@ export function GrillaDia({ agenda, agrupacion, filtro, catalogos, nombres, onVe
   const cantidad = cantidadDeFilas(rango);
   const horas = Array.from({ length: cantidad }, (_, i) => rango.desdeMin + i * MINUTOS_FILA);
   const dimensiones = { "--agenda-columnas": columnas.length, "--agenda-filas": cantidad } as CSSProperties;
+  // Línea de "ahora": solo si el día mostrado es hoy y la hora cae dentro de la grilla.
+  const ahora = Date.now();
+  const minutoActual = fechaLocal(ahora) === fecha ? minutosDelDia(ahora) : undefined;
+  const lineaAhora = minutoActual !== undefined && minutoActual >= rango.desdeMin && minutoActual < rango.hastaMin
+    ? ({ "--agenda-ahora-filas": (minutoActual - rango.desdeMin) / MINUTOS_FILA } as CSSProperties)
+    : undefined;
 
   return (
     <div className="agenda-wrap" role="region" aria-label="Agenda del día, desplazable horizontalmente" tabIndex={0}>
@@ -98,29 +104,32 @@ export function GrillaDia({ agenda, agrupacion, filtro, catalogos, nombres, onVe
         <div className="agenda__columna agenda__columna--horas" aria-hidden="true">
           <div className="agenda__corner" />
           {horas.map((minutos, i) => (
-            <div
-              key={minutos}
-              className={`agenda__time mono${minutos % 60 === 0 ? " agenda__time--hour" : ""}`}
-              style={{ gridRow: i + 2 }}
-            >
-              {horaDeMinutos(minutos)}
+            <div key={minutos} className="agenda__time mono" style={{ gridRow: i + 2 }}>
+              {minutos % 60 === 0 ? horaDeMinutos(minutos) : ""}
             </div>
           ))}
+          {lineaAhora && minutoActual !== undefined && (
+            <b className="agenda__ahora-rotulo" style={lineaAhora}>{horaDeMinutos(minutoActual)}</b>
+          )}
         </div>
         {columnas.map((columna) => (
           <section key={columna.id} className="agenda__columna" aria-label={columna.titulo}>
             <div className="agenda__col-head">
-              <span>{columna.titulo}</span>
-              {columna.detalle && <small>{columna.detalle}</small>}
+              {porProfesional ? <Avatar nombre={columna.titulo} colorId={columna.id} /> : null}
+              <div className="agenda__col-texto">
+                <strong>{columna.titulo}</strong>
+                {columna.detalle && <small>{columna.detalle}</small>}
+              </div>
             </div>
+            {lineaAhora && <div className="agenda__ahora" style={lineaAhora} aria-hidden="true" />}
             {columna.atencion.map((tramo) => (
               <div key={`atencion-${tramo.desdeMin}`} className="agenda__atencion" aria-hidden="true" style={filas(tramo, rango)} />
             ))}
             {columna.bloqueos.map(({ dato, tramo }) => (
               <div key={`bloqueo-${dato.id}`} className="slot slot--bloqueo" style={filas(tramo, rango)}>
-                <BadgeEstadoTurno estado="BLOQUEO" />
+                {dato.motivo && <strong>{dato.motivo}</strong>}
                 <span className="slot__meta">{rangoLegible(dato.inicio, dato.fin)}</span>
-                {dato.motivo && <span className="slot__detalle">{dato.motivo}</span>}
+                <span className="slot__pie"><BadgeEstadoTurno estado="BLOQUEO" /></span>
               </div>
             ))}
             {columna.turnos.map(({ dato, tramo }) => (

@@ -3,6 +3,6 @@ export {};
 
 declare global {
   interface Window {
-    BRAND: Readonly<{ name: string; logoAlt: string }>;
+    BRAND: Readonly<{ name: string; subtitulo: string; logoAlt: string }>;
   }
 }

@@ -73,3 +73,10 @@ it.each([403, 500, "red"])("Un fallo técnico de ingreso no se presenta como cre
 it("La pantalla de login es la ruta registrada por autenticación", () => {
   expect(rutas).toContainEqual(expect.objectContaining({ ruta: "/login", componente: PaginaLogin }));
 });
+
+it("La pantalla de ingreso muestra la marca y el aviso para pacientes", async () => {
+  await montar(async () => Response.json(identidad));
+  expect(screen.getByRole("heading", { level: 1, name: "Ingresar" })).toBeInTheDocument();
+  expect(screen.getAllByText((_, nodo) => nodo?.textContent === window.BRAND.name).length).toBeGreaterThan(0);
+  expect(screen.getByText(/Para gestionar tu turno usá el enlace que te llegó por email/)).toBeInTheDocument();
+});

@@ -22,7 +22,7 @@ describe("App", () => {
   it("La App refleja un cambio del nombre en BRAND", async () => {
     const nombreProvisional = window.BRAND.name;
     const nombreFicticio = "Consultorio Ficticio de Prueba";
-    window.BRAND = { name: nombreFicticio, logoAlt: `Logo de ${nombreFicticio}` };
+    window.BRAND = { name: nombreFicticio, subtitulo: "Sistema de gestión", logoAlt: `Logo de ${nombreFicticio}` };
 
     render(<App />);
 

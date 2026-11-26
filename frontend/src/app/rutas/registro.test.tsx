@@ -70,6 +70,6 @@ describe("Menú construido desde las features", () => {
     renderEn("/ejemplo/detalle");
 
     expect(await screen.findByRole("heading", { name: "Detalle de ejemplo" })).toBeInTheDocument();
-    expect(within(screen.getByRole("navigation")).queryByRole("link", { name: /detalle/i })).not.toBeInTheDocument();
+    expect(within(screen.getByRole("navigation", { name: "Principal" })).queryByRole("link", { name: /detalle/i })).not.toBeInTheDocument();
   });
 });

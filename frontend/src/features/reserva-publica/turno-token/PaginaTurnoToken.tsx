@@ -8,6 +8,7 @@ import {
   admiteCancelar, admiteConfirmar, cancelarTurno, confirmarTurno, consultarTurno, type TurnoPorToken,
 } from "./turnoTokenApi";
 import "../reserva.css";
+import { CabeceraPublica } from "../CabeceraPublica";
 
 type Estado =
   | { tipo: "cargando" }
@@ -73,6 +74,7 @@ export default function PaginaTurnoToken() {
 
   return (
     <main className="reserva-publica">
+      <CabeceraPublica />
       <div className="reserva-panel">
         {estado.tipo === "cargando" && <p role="status">Cargando tu turno…</p>}
         {estado.tipo === "error-carga" && (

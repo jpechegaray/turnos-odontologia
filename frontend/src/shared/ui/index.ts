@@ -7,3 +7,7 @@ export { Icono, type NombreIcono } from "./Icono";
 export { Tabla, type ColumnaTabla, type TablaProps } from "./Tabla";
 export { Tarjeta, type TarjetaProps } from "./Tarjeta";
 export { Toast, type ToastProps } from "./Toast";
+export { Logo, NombreMarca } from "./Logo";
+export { Avatar } from "./Avatar";
+export { claseColor, iniciales } from "./iniciales";
+export { Segmentado, type OpcionSegmentada } from "./Segmentado";

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ErrorApi } from "../../shared/api/errorApi";
-import { Alerta, Boton, Tabla, type ColumnaTabla } from "../../shared/ui";
+import { Alerta, Avatar, Boton, Tabla, type ColumnaTabla } from "../../shared/ui";
 import { CampoSeleccion } from "../../shared/ui/CampoSeleccion";
 import { darDeBaja, listarEntradas } from "./api";
 import { MENSAJE_GENERICO } from "./mensajes";
@@ -73,22 +73,36 @@ export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: Ca
   }
 
   const columnas: readonly ColumnaTabla<EntradaRespuesta>[] = [
-    { clave: "paciente", titulo: "Paciente", celda: (e) => catalogos.nombrePaciente(e.pacienteId) },
+    {
+      clave: "paciente",
+      titulo: "Paciente",
+      celda: (e) => (
+        <span className="celda-persona">
+          <Avatar nombre={catalogos.nombrePaciente(e.pacienteId)} neutro />
+          <strong>{catalogos.nombrePaciente(e.pacienteId)}</strong>
+        </span>
+      ),
+    },
     { clave: "prestacion", titulo: "Prestación", celda: (e) => catalogos.nombrePrestacion(e.prestacionId) },
     { clave: "profesional", titulo: "Profesional", celda: (e) => catalogos.nombreProfesional(e.profesionalId) },
-    { clave: "fechas", titulo: "Fechas", celda: textoFechas },
-    { clave: "franja", titulo: "Franja", celda: textoFranja },
-    { clave: "estado", titulo: "Estado", celda: (e) => textoEstado(e.estado) },
+    { clave: "fechas", titulo: "Fechas", celda: (e) => <span className="mono">{textoFechas(e)}</span> },
+    { clave: "franja", titulo: "Franja", celda: (e) => <span className="mono">{textoFranja(e)}</span> },
+    {
+      clave: "estado",
+      titulo: "Estado",
+      celda: (e) => <span className={`badge es-${e.estado.toLowerCase()}`}>{textoEstado(e.estado)}</span>,
+    },
     {
       clave: "acciones",
       titulo: "Acciones",
+      acciones: true,
       celda: (e) => (e.estado === "ACTIVA" ? <BajaEnFila ocupado={bajando} onConfirmar={() => bajar(e)} /> : null),
     },
   ];
 
   return (
-    <Seccion titulo="Entradas">
-      <div className="lista-espera__filtros">
+    <Seccion titulo="Entradas" plana extra={
+      <div className="lista-espera__filtro">
         <CampoSeleccion
           etiqueta="Estado"
           value={estado}
@@ -102,9 +116,11 @@ export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: Ca
           }}
         />
       </div>
-      {aviso && <Alerta tipo="peligro" titulo={aviso} />}
-      {consulta.tipo === "cargando" && <p role="status">Cargando la lista de espera…</p>}
+    }>
+      {aviso && <div className="lista-espera__aviso"><Alerta tipo="peligro" titulo={aviso} /></div>}
+      {consulta.tipo === "cargando" && <p role="status" className="lista-espera__aviso">Cargando la lista de espera…</p>}
       {consulta.tipo === "error" && (
+        <div className="lista-espera__aviso">
         <Alerta tipo="peligro" titulo="No pudimos cargar la lista de espera.">
           <div>
             <Boton variante="secundaria" tamano="chico" onClick={() => cambiarRecargas((anterior) => anterior + 1)}>
@@ -112,10 +128,12 @@ export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: Ca
             </Boton>
           </div>
         </Alerta>
+        </div>
       )}
       {consulta.tipo === "lista" && (
         <Tabla
           titulo="Entradas de la lista de espera"
+          tituloOculto
           columnas={columnas}
           filas={consulta.entradas}
           claveFila={(e) => e.id}

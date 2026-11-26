@@ -57,3 +57,16 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+/* C-50: prestaciones asociadas como píldoras */
+.panel-prestaciones__lista { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.panel-prestaciones__lista li {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+.panel-prestaciones__opciones { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); margin: 0; }
+.panel-prestaciones__opciones legend { grid-column: 1 / -1; }
+.panel-prestaciones form { display: grid; gap: var(--space-4); }

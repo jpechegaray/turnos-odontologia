@@ -1,6 +1,6 @@
 import { useState, type ComponentType } from "react";
 import { api } from "../../../shared/api/clienteApi";
-import { Alerta, Boton, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
+import { Alerta, Avatar, Boton, Icono, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
 import { AccionesFila } from "../AccionesFila";
 import { useEsAdministrador } from "../permisos";
 import "../panel-agenda.css";
@@ -12,10 +12,23 @@ import { useProfesionales, type EstadoProfesionales } from "./useProfesionales";
 const MARCA_VACIO = "—";
 
 const COLUMNAS: readonly ColumnaTabla<ProfesionalRespuesta>[] = [
-  { clave: "nombre", titulo: "Apellido y nombre", celda: (p) => `${p.apellido}, ${p.nombre}` },
-  { clave: "matricula", titulo: "Matrícula", celda: (p) => p.matricula },
+  {
+    clave: "nombre",
+    titulo: "Apellido y nombre",
+    celda: (p) => (
+      <span className="celda-persona">
+        <Avatar nombre={`${p.nombre} ${p.apellido}`} colorId={p.id} neutro={!p.activo} />
+        <strong>{`${p.apellido}, ${p.nombre}`}</strong>
+      </span>
+    ),
+  },
+  { clave: "matricula", titulo: "Matrícula", celda: (p) => <span className="mono">{p.matricula}</span> },
   { clave: "especialidad", titulo: "Especialidad", celda: (p) => p.especialidad?.trim() || MARCA_VACIO },
-  { clave: "estado", titulo: "Estado", celda: (p) => (p.activo ? "Activo" : "Inactivo") },
+  {
+    clave: "estado",
+    titulo: "Estado",
+    celda: (p) => <span className={p.activo ? "estado" : "estado estado--inactivo"}>{p.activo ? "Activo" : "Inactivo"}</span>,
+  },
 ];
 
 /** Lo que recibe una pieza montada en esta página para el profesional elegido. */
@@ -41,6 +54,13 @@ export type PaginaProfesionalesProps = Readonly<{
 
 /** Panel abierto: qué pieza y para qué profesional. */
 type Seleccion = Readonly<{ etiqueta: string; profesional: ProfesionalRespuesta }>;
+
+function resumen(profesionales: readonly ProfesionalRespuesta[]): string {
+  const activos = profesionales.filter((p) => p.activo).length;
+  const inactivos = profesionales.length - activos;
+  const texto = `${activos} ${activos === 1 ? "activo" : "activos"}`;
+  return inactivos > 0 ? `${texto} · ${inactivos} ${inactivos === 1 ? "inactivo" : "inactivos"}` : texto;
+}
 
 export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps = {}) {
   const esAdmin = useEsAdministrador();
@@ -108,7 +128,7 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
   // (visibles para los tres roles) en una columna que no se llama «Acciones».
   const columnasConsulta: readonly ColumnaTabla<ProfesionalRespuesta>[] = paneles.length === 0 ? COLUMNAS : [
     ...COLUMNAS,
-    { clave: "detalle", titulo: "Detalle", celda: (p) => accionesPanel(p) },
+    { clave: "detalle", titulo: "Detalle", acciones: true, celda: (p) => <div>{accionesPanel(p)}</div> },
   ];
 
   const columnas: readonly ColumnaTabla<ProfesionalRespuesta>[] = !esAdmin ? columnasConsulta : [
@@ -116,6 +136,7 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
     {
       clave: "acciones",
       titulo: "Acciones",
+      acciones: true,
       celda: (p) => (
         <AccionesFila
           elemento={p}
@@ -169,24 +190,58 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
 
   return (
     <section>
-      <h2>Profesionales</h2>
+      <div className="encabezado">
+        <div>
+          <h2>Profesionales</h2>
+          {estado.tipo === "listo" && <p className="encabezado__bajada">{resumen(estado.profesionales)}</p>}
+        </div>
+      </div>
+      {aviso && <Toast mensaje={aviso} />}
+      {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
+      {contenido(estado)}
+      {panelAbierto && seleccionadoVigente && (
+        <section className="panel panel--plano detalle-prof" aria-label={`Detalle de ${seleccionadoVigente.apellido}, ${seleccionadoVigente.nombre}`}>
+          <div className="detalle-prof__cabeza">
+            <Avatar nombre={`${seleccionadoVigente.nombre} ${seleccionadoVigente.apellido}`} colorId={seleccionadoVigente.id} tamano="lg" />
+            <div className="detalle-prof__titulo">
+              <strong>{`${seleccionadoVigente.apellido}, ${seleccionadoVigente.nombre}`}</strong>
+              <span className="muted">
+                {[seleccionadoVigente.especialidad?.trim(), seleccionadoVigente.matricula].filter(Boolean).join(" · ")}
+              </span>
+            </div>
+            <button type="button" className="boton-icono" aria-label="Cerrar detalle" onClick={() => actualizarSeleccion(undefined)}>
+              <Icono nombre="x" />
+            </button>
+          </div>
+          <div className="pestanas" role="tablist" aria-label="Secciones del profesional">
+            {paneles.map(({ etiqueta }) => (
+              <button
+                key={etiqueta}
+                type="button"
+                role="tab"
+                aria-selected={etiqueta === panelAbierto.etiqueta}
+                onClick={() => actualizarSeleccion({ etiqueta, profesional: seleccionadoVigente })}
+              >
+                {etiqueta}
+              </button>
+            ))}
+          </div>
+          <div role="tabpanel" aria-label={panelAbierto.etiqueta}>
+            <panelAbierto.Componente
+              key={`${panelAbierto.etiqueta}-${seleccionadoVigente.id}`}
+              profesional={seleccionadoVigente}
+              refrescarLista={recargar}
+              informarError={actualizarErrorAccion}
+            />
+          </div>
+        </section>
+      )}
       {esAdmin && (
         <FormularioProfesional
           key={editando?.id ?? "nuevo"}
           valorInicial={editando}
           onEnviar={(solicitud) => (editando ? modificar(editando, solicitud) : crear(solicitud))}
           onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
-        />
-      )}
-      {aviso && <Toast mensaje={aviso} />}
-      {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
-      {contenido(estado)}
-      {panelAbierto && seleccionadoVigente && (
-        <panelAbierto.Componente
-          key={`${panelAbierto.etiqueta}-${seleccionadoVigente.id}`}
-          profesional={seleccionadoVigente}
-          refrescarLista={recargar}
-          informarError={actualizarErrorAccion}
         />
       )}
     </section>

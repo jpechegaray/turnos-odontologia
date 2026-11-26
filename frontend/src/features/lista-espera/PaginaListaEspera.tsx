@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Alerta } from "../../shared/ui";
 import { FormularioAlta } from "./FormularioAlta";
 import { ListadoEntradas } from "./ListadoEntradas";
 import { SugerenciasHueco } from "./SugerenciasHueco";
@@ -14,10 +15,20 @@ export function PaginaListaEspera() {
 
   return (
     <section className="pagina-lista-espera">
-      <h2>Lista de espera</h2>
-      <FormularioAlta catalogos={catalogos} onAnotado={() => { catalogos.recargarPacientes(); recargarListado(); }} />
+      <div className="encabezado">
+        <div>
+          <h2>Lista de espera</h2>
+          <p className="encabezado__bajada">Pacientes que esperan un hueco, de la entrada más antigua a la más nueva.</p>
+        </div>
+      </div>
       <ListadoEntradas catalogos={catalogos} version={version} />
-      <SugerenciasHueco catalogos={catalogos} onAsignado={recargarListado} />
+      <div className="lista-espera__columnas">
+        <FormularioAlta catalogos={catalogos} onAnotado={() => { catalogos.recargarPacientes(); recargarListado(); }} />
+        <SugerenciasHueco catalogos={catalogos} onAsignado={recargarListado} />
+      </div>
+      <Alerta tipo="info" titulo="Cómo funciona la lista">
+        <span>Solo se puede anotar a pacientes con email, una vez por prestación mientras la entrada esté activa. Las entradas vencen solas al pasar la fecha de fin.</span>
+      </Alerta>
     </section>
   );
 }

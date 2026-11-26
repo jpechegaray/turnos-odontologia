@@ -1,44 +1,31 @@
 /*
- * Lista de espera (C-47). Solo variables de design-system/tokens.css (regla 13).
- * minmax(0, 1fr), como la agenda: las tablas anchas se desplazan dentro de su marco sin ensanchar la página.
+ * Lista de espera (C-47, rediseñada en C-50 según exploracion-diseno/propuesta/lista-espera.html).
+ * Solo variables de design-system/tokens.css (regla 13).
  */
-.pagina-lista-espera {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
-  align-content: start;
-}
+.pagina-lista-espera { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); align-content: start; }
 
-.lista-espera__seccion {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3);
-}
+.lista-espera__seccion { min-width: 0; overflow: hidden; }
+.lista-espera__cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.lista-espera__plana { min-width: 0; }
+.lista-espera__aviso { margin: 0; padding: var(--space-4) var(--space-5); }
+.lista-espera__filtro { min-width: 200px; }
+.lista-espera__filtro .field { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--space-2); }
+.lista-espera__filtro .input { min-height: 36px; font-size: var(--text-sm); }
 
-.lista-espera__formulario {
-  display: grid;
-  gap: var(--space-3);
-}
+.lista-espera__columnas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); align-items: start; }
 
+.lista-espera__formulario { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .lista-espera__campos,
 .lista-espera__filtros {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--target-min) * 4.5)), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
   gap: var(--space-3) var(--space-4);
   align-items: start;
 }
+.lista-espera__campos > * { min-width: 0; }
+.lista-espera__seccion .input { inline-size: 100%; max-inline-size: 100%; }
 
-.lista-espera__seccion .input {
-  inline-size: 100%;
-  max-inline-size: 100%;
-  box-sizing: border-box;
-}
-
-.lista-espera__acciones {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
+.lista-espera__acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
 
 .lista-espera__exito {
   margin: 0;
@@ -46,4 +33,14 @@
   border-radius: var(--radius-md);
   background: var(--color-success-soft);
   color: var(--color-success-text);
+}
+
+/* Estados de una entrada */
+.es-activa { background: var(--turno-reservado-bg); color: var(--turno-reservado-fg); border-color: var(--turno-reservado-border); }
+.es-asignada { background: var(--turno-confirmado-bg); color: var(--turno-confirmado-fg); border-color: var(--turno-confirmado-border); }
+.es-vencida { background: var(--turno-ausente-bg); color: var(--turno-ausente-fg); border-color: var(--turno-ausente-border); }
+.es-cancelada { background: var(--turno-cancelado-bg); color: var(--turno-cancelado-fg); border-color: var(--turno-cancelado-border); }
+
+@media (max-width: 1100px) {
+  .lista-espera__columnas { grid-template-columns: minmax(0, 1fr); }
 }

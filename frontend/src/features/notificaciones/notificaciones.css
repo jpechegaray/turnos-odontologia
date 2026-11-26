@@ -1,9 +1,31 @@
 /*
- * Registro de notificaciones (C-34). Solo variables de design-system/tokens.css (regla 13).
+ * Registro de notificaciones (C-34, rediseñado en C-50 con las piezas de exploracion-diseno/propuesta).
+ * Solo variables de design-system/tokens.css (regla 13).
  */
-/* minmax(0, 1fr), como la agenda: la tabla ancha se desplaza dentro de su marco sin ensanchar la página. */
-.pagina-notificaciones { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; }
-.notificaciones__filtros { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: flex-end; margin-bottom: var(--space-4); }
-.notificaciones__filtros .field { min-width: 0; }
+.pagina-notificaciones { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); align-content: start; }
+.notificaciones { overflow: hidden; }
+.notificaciones__aviso { margin: 0; padding: var(--space-4) var(--space-5); }
+.panel > form.notificaciones__filtros, .notificaciones__filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  align-items: flex-end;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.notificaciones__filtros .field { min-width: 0; flex: 0 1 220px; }
 .notificaciones__filtros .input { width: 100%; max-width: 100%; }
-.notificaciones__paginacion { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; justify-content: flex-end; margin-top: var(--space-3); font-size: var(--text-sm); color: var(--color-text-muted); }
+.notificaciones__paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.notif-pendiente { background: var(--turno-reservado-bg); color: var(--turno-reservado-fg); border-color: var(--turno-reservado-border); }
+.notif-enviada { background: var(--turno-confirmado-bg); color: var(--turno-confirmado-fg); border-color: var(--turno-confirmado-border); }
+.notif-fallida { background: var(--color-danger-soft); color: var(--color-danger-text); border-color: var(--color-danger); }

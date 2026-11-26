@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../../shared/api/clienteApi";
-import { Alerta, Boton, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
+import { Alerta, Avatar, Boton, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
 import { cuerpoModificacion } from "./cuerpos";
 import { AccionesFila } from "./AccionesFila";
 import { requiereRecarga, traducirErrorUsuario } from "./errores";
@@ -9,12 +9,20 @@ import { opcionesProfesional } from "./opciones";
 import { ETIQUETAS_ROL } from "./roles";
 import type { ProfesionalVinculable, UsuarioAlta, UsuarioRespuesta } from "./tipos";
 import { useUsuarios } from "./useUsuarios";
+import "./usuarios.css";
 
 const MARCA_VACIO = "—";
 
 function nombreProfesional(profesionales: readonly ProfesionalVinculable[], id: number | null): string {
   const profesional = id === null ? undefined : profesionales.find((p) => p.id === id);
   return profesional ? `${profesional.apellido}, ${profesional.nombre}` : MARCA_VACIO;
+}
+
+function resumen(usuarios: readonly UsuarioRespuesta[] | undefined): string {
+  if (!usuarios) return "Solo la administración ve esta sección.";
+  const inactivos = usuarios.filter((u) => !u.activo).length;
+  const total = `${usuarios.length} ${usuarios.length === 1 ? "usuario" : "usuarios"}`;
+  return `Solo la administración ve esta sección. ${total}${inactivos > 0 ? `, ${inactivos} ${inactivos === 1 ? "inactivo" : "inactivos"}` : ""}.`;
 }
 
 export function PaginaUsuarios() {
@@ -66,14 +74,28 @@ export function PaginaUsuarios() {
   }
 
   const columnas: readonly ColumnaTabla<UsuarioRespuesta>[] = [
-    { clave: "email", titulo: "Email", celda: (u) => u.email },
+    {
+      clave: "email",
+      titulo: "Email",
+      celda: (u) => (
+        <span className="celda-persona">
+          <Avatar nombre={u.nombre} neutro />
+          <strong className="usuarios__email">{u.email}</strong>
+        </span>
+      ),
+    },
     { clave: "nombre", titulo: "Nombre", celda: (u) => u.nombre },
-    { clave: "rol", titulo: "Rol", celda: (u) => ETIQUETAS_ROL[u.rol] },
+    { clave: "rol", titulo: "Rol", celda: (u) => <span className={`rol rol--${u.rol.toLowerCase()}`}>{ETIQUETAS_ROL[u.rol]}</span> },
     { clave: "profesional", titulo: "Profesional", celda: (u) => nombreProfesional(profesionales, u.profesionalId) },
-    { clave: "estado", titulo: "Estado", celda: (u) => (u.activo ? "Activo" : "Inactivo") },
+    {
+      clave: "estado",
+      titulo: "Estado",
+      celda: (u) => <span className={u.activo ? "estado" : "estado estado--inactivo"}>{u.activo ? "Activo" : "Inactivo"}</span>,
+    },
     {
       clave: "acciones",
       titulo: "Acciones",
+      acciones: true,
       celda: (u) => (
         <AccionesFila
           usuario={u}
@@ -90,16 +112,16 @@ export function PaginaUsuarios() {
 
   return (
     <section>
-      <h2>Usuarios</h2>
-      <FormularioUsuario
-        key={editando?.id ?? "nuevo"}
-        valorInicial={editando}
-        profesionales={opcionesProfesional(profesionales, usuarios ?? [], editando?.id)}
-        onEnviar={(datos) => (editando ? modificar(editando, datos) : crear(datos))}
-        onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
-      />
+      <div className="encabezado">
+        <div>
+          <h2>Usuarios</h2>
+          <p className="encabezado__bajada">{resumen(usuarios)}</p>
+        </div>
+      </div>
       {aviso && <Toast mensaje={aviso} />}
       {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
+      <div className="con-formulario usuarios">
+      <div className="con-formulario__lista">
       {cargando ? (
         <p role="status">Cargando…</p>
       ) : errorCarga ? (
@@ -115,6 +137,15 @@ export function PaginaUsuarios() {
           mensajeVacio="No hay usuarios cargados."
         />
       )}
+      </div>
+      <FormularioUsuario
+        key={editando?.id ?? "nuevo"}
+        valorInicial={editando}
+        profesionales={opcionesProfesional(profesionales, usuarios ?? [], editando?.id)}
+        onEnviar={(datos) => (editando ? modificar(editando, datos) : crear(datos))}
+        onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
+      />
+      </div>
     </section>
   );
 }

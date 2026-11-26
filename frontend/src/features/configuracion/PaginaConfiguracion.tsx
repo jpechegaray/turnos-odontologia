@@ -9,7 +9,14 @@ export function PaginaConfiguracion() {
 
   return (
     <section>
-      <h2>Configuración</h2>
+      <div className="encabezado">
+        <div>
+          <h2>Configuración</h2>
+          <p className="encabezado__bajada">
+            {soloLectura ? "Parámetros del consultorio. Solo la administración puede cambiarlos." : "Parámetros del consultorio. Los cambios rigen desde que se guardan."}
+          </p>
+        </div>
+      </div>
       {cargando ? (
         <p role="status">Cargando…</p>
       ) : errorCarga ? (

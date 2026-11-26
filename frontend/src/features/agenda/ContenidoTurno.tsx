@@ -2,7 +2,8 @@ import { BadgeEstadoTurno } from "../../shared/ui";
 import { nombreDelPaciente, rangoLegible } from "./presentacion";
 import type { TurnoAgenda } from "./tipos";
 
-export type FichaElegida = Readonly<{ pacienteId: number; nombre: string }>;
+/** Paciente elegido en la agenda y, si se eligió desde un turno, ese turno. */
+export type FichaElegida = Readonly<{ pacienteId: number; nombre: string; turno?: TurnoAgenda }>;
 
 type Props = Readonly<{
   turno: TurnoAgenda;
@@ -26,7 +27,7 @@ export function ContenidoTurno({ turno, prestacion, detalle, onVerFicha }: Props
             type="button"
             className="slot__paciente"
             aria-label={`Ver ficha de ${paciente}`}
-            onClick={() => onVerFicha({ pacienteId: turno.pacienteId, nombre: paciente })}
+            onClick={() => onVerFicha({ pacienteId: turno.pacienteId, nombre: paciente, turno })}
           >
             {paciente}
           </button>

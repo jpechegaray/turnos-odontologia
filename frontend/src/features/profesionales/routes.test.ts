@@ -11,8 +11,8 @@ describe("agregador de rutas de profesionales", () => {
 
     const profesionales = rutas.find((r) => r.ruta === "/profesionales");
     const sillones = rutas.find((r) => r.ruta === "/sillones");
-    expect(profesionales?.menu).toEqual({ etiqueta: "Profesionales", orden: 30 });
-    expect(sillones?.menu).toEqual({ etiqueta: "Sillones", orden: 40 });
+    expect(profesionales?.menu).toEqual({ etiqueta: "Profesionales", orden: 30, grupo: "consultorio", icono: "profesionales" });
+    expect(sillones?.menu).toEqual({ etiqueta: "Sillones", orden: 40, grupo: "consultorio", icono: "sillones" });
     for (const ruta of [profesionales, sillones]) {
       expect(ruta?.roles).toEqual(expect.arrayContaining(["ADMIN", "RECEPCION", "ODONTOLOGO"]));
     }

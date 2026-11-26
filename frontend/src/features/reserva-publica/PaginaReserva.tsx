@@ -9,7 +9,10 @@ import {
   type ProfesionalPublico, type ReservaConfirmada,
 } from "./reservaApi";
 import { useConsultaReserva } from "./useConsultaReserva";
+import { CabeceraPublica, PasosReserva } from "./CabeceraPublica";
 import "./reserva.css";
+
+const NOMBRES_PASOS = ["Prestación", "Profesional", "Horario", "Tus datos"] as const;
 
 const PASOS = [
   "Elegí una prestación", "Elegí un profesional", "Elegí un horario", "Tus datos", "Turno reservado",
@@ -148,15 +151,13 @@ export default function PaginaReserva() {
 
   return (
     <main className="reserva-publica">
+      <CabeceraPublica />
       <div className="reserva-panel">
-        {paso < 4 && (
-          <header className="reserva-encabezado">
-            <span>Reservar turno</span>
-            <span>Paso {paso + 1} de 4</span>
-            <progress max={4} value={paso + 1} aria-label="Progreso de la reserva" />
-          </header>
-        )}
-        <h1 ref={titulo} tabIndex={-1}>{PASOS[paso]}</h1>
+        {paso < 4 && <PasosReserva pasos={NOMBRES_PASOS} actual={paso} />}
+        <div className="reserva-titulo">
+          <h1 ref={titulo} tabIndex={-1}>{PASOS[paso]}</h1>
+          {paso < 4 && <p className="muted">Sin crear cuenta. Te mandamos la confirmación por email.</p>}
+        </div>
         {paso > 0 && paso < 4 && (
           <Boton variante="secundaria" disabled={enviando} onClick={() => {
             cambiarAviso("");
@@ -172,7 +173,7 @@ export default function PaginaReserva() {
               prestaciones.estado.datos.length === 0
                 ? <p role="status">No hay prestaciones disponibles para reservar.</p>
                 : prestaciones.estado.datos.map((opcion) => (
-                  <Boton key={opcion.id} variante="secundaria" onClick={() => seleccionarPrestacion(opcion)}>
+                  <Boton key={opcion.id} variante="secundaria" className="opcion" onClick={() => seleccionarPrestacion(opcion)}>
                     {opcion.nombre}
                   </Boton>
                 ))
@@ -186,7 +187,7 @@ export default function PaginaReserva() {
               profesionales.estado.datos.length === 0
                 ? <p role="status">No hay profesionales disponibles para esta prestación.</p>
                 : profesionales.estado.datos.map((opcion) => (
-                  <Boton key={opcion.id} variante="secundaria" onClick={() => seleccionarProfesional(opcion)}>
+                  <Boton key={opcion.id} variante="secundaria" className="opcion" onClick={() => seleccionarProfesional(opcion)}>
                     {nombreProfesional(opcion)}
                   </Boton>
                 ))
@@ -223,7 +224,7 @@ export default function PaginaReserva() {
             )}
             <div className="reserva-horarios">
               {opcionesHorario.map((opcion) => (
-                <Boton key={opcion.inicio} variante="secundaria" onClick={() => {
+                <Boton key={opcion.inicio} variante="secundaria" className="hora" onClick={() => {
                   elegirHorario(opcion);
                   cambiarAviso("");
                   irAPaso(3);

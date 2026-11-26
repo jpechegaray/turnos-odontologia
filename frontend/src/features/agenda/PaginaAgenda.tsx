@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { fechaLocal } from "../../shared/fecha/zonaHoraria";
 import { useSesion } from "../auth/sesion";
-import { Alerta, BadgeEstadoTurno, Boton, type EstadoVisualTurno } from "../../shared/ui";
+import { Alerta, BadgeEstadoTurno, Boton, Icono, Segmentado, type EstadoVisualTurno, type OpcionSegmentada } from "../../shared/ui";
 import { BarraAgenda } from "./BarraAgenda";
 import type { FichaElegida } from "./ContenidoTurno";
 import { rutaDeAgenda } from "./consulta";
@@ -11,12 +11,27 @@ import { accionesDeTurno, mensajeGestionada, type Gestion, type TurnoGestionado 
 import { GestionTurnos } from "./gestion/GestionTurnos";
 import { GrillaDia } from "./GrillaDia";
 import { nombreDelDia, sumarDias } from "./grilla";
-import { fechaCorta, nombresDe } from "./presentacion";
-import type { AgendaRespuesta, Agrupacion, ConsultaAgenda } from "./tipos";
+import { fechaCorta, fechaLarga, nombresDe } from "./presentacion";
+import type { AgendaRespuesta, Agrupacion, ConsultaAgenda, Vista } from "./tipos";
 import { useAgenda } from "./useAgenda";
 import { useCatalogosAgenda } from "./useCatalogosAgenda";
 import { VistaSemana } from "./VistaSemana";
 import "./agenda.css";
+
+const VISTAS: readonly OpcionSegmentada<Vista>[] = [
+  { valor: "dia", etiqueta: "Día" },
+  { valor: "semana", etiqueta: "Semana" },
+];
+const AGRUPACIONES: readonly OpcionSegmentada<Agrupacion>[] = [
+  { valor: "profesional", etiqueta: "Por profesional" },
+  { valor: "sillon", etiqueta: "Por sillón" },
+];
+
+function bajadaDelPeriodo(agenda: AgendaRespuesta): string {
+  const cantidad = agenda.turnos.filter((t) => t.estado !== "CANCELADO").length;
+  const turnos = cantidad === 1 ? "1 turno" : `${cantidad} turnos`;
+  return agenda.vista === "dia" ? `${fechaLarga(agenda.desde)} · ${turnos}` : `${turnos} en la semana`;
+}
 
 const LEYENDA: readonly EstadoVisualTurno[] = ["PROGRAMADO", "CONFIRMADO", "ATENDIDO", "AUSENTE", "CANCELADO", "BLOQUEO"];
 
@@ -105,9 +120,16 @@ export function PaginaAgenda() {
 
   return (
     <section className="pagina-agenda">
-      <div className="pagina-agenda__encabezado">
-        <h2>Agenda</h2>
-        <div className="pagina-agenda__acciones">
+      <div className="encabezado">
+        <div>
+          <h2>Agenda</h2>
+          {agenda && <p className="encabezado__bajada">{bajadaDelPeriodo(agenda)}</p>}
+        </div>
+        <div className="encabezado__acciones">
+          <Segmentado titulo="Vista" opciones={VISTAS} valor={consulta.vista} onElegir={(vista) => cambiar({ vista, fecha: fechaVigente })} />
+          {consulta.vista === "dia" && (
+            <Segmentado titulo="Columnas" opciones={AGRUPACIONES} valor={agrupacion} onElegir={actualizarAgrupacion} />
+          )}
           {puedeCrear && (
             <Boton id={idNuevo} disabled={gestionAbierta} aria-expanded={formularioAbierto} aria-controls={formularioAbierto ? `${idAlta}-panel` : undefined}
               onClick={() => {
@@ -117,7 +139,7 @@ export function PaginaAgenda() {
                 }
                 actualizarMensaje("");
                 actualizarFormularioAbierto(true);
-              }}>Nuevo turno</Boton>
+              }}><Icono nombre="mas" />Nuevo turno</Boton>
           )}
           {(puedeGestionar || gestionAbierta) && puedeCrear && (
             <Boton id={idGestionBoton} variante="secundaria" disabled={formularioAbierto || cargando || errorCarga}
@@ -149,22 +171,19 @@ export function PaginaAgenda() {
         />
       )}
       <BarraAgenda
-        vista={consulta.vista}
-        agrupacion={agrupacion}
+        titulo={agenda ? tituloDelPeriodo(agenda) : undefined}
+        actualizando={cargando}
         fecha={fechaVigente}
         profesionalId={consulta.profesionalId}
         sillonId={consulta.sillonId}
         catalogos={catalogos}
         navegable={agenda !== undefined}
-        onVista={(vista) => cambiar({ vista, fecha: fechaVigente })}
-        onAgrupacion={actualizarAgrupacion}
         onDesplazar={desplazar}
         onHoy={() => cambiar({ fecha: undefined })}
         onFecha={(fecha) => cambiar({ fecha })}
         onProfesional={(profesionalId) => cambiar({ profesionalId })}
         onSillon={(sillonId) => cambiar({ sillonId })}
       />
-      {ficha && <FichaPaciente key={ficha.pacienteId} elegida={ficha} onCerrar={() => actualizarFicha(undefined)} />}
       {errorCarga ? (
         <Alerta tipo="peligro" titulo="No pudimos cargar la agenda.">
           <Boton variante="secundaria" onClick={() => void recargar()}>Reintentar</Boton>
@@ -172,8 +191,8 @@ export function PaginaAgenda() {
       ) : !agenda ? (
         cargando && <p role="status">Cargando…</p>
       ) : (
-        <>
-          <h3 className="agenda-periodo" aria-busy={cargando}>{tituloDelPeriodo(agenda)}</h3>
+        <div className={`agenda-vista${ficha ? " agenda-vista--con-ficha" : ""}`}>
+          <section className="panel panel--plano agenda-panel" aria-label={agenda.vista === "dia" ? "Turnos del día" : "Turnos de la semana"}>
           {agenda.vista === "dia" ? (
             <GrillaDia
               agenda={agenda}
@@ -191,7 +210,9 @@ export function PaginaAgenda() {
               <li key={estado}><BadgeEstadoTurno estado={estado} /></li>
             ))}
           </ul>
-        </>
+          </section>
+          {ficha && <FichaPaciente key={`${ficha.pacienteId}-${ficha.turno?.id ?? ""}`} elegida={ficha} nombres={nombres} onCerrar={() => actualizarFicha(undefined)} />}
+        </div>
       )}
     </section>
   );
