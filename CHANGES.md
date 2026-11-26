@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 43 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46 y C-48). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) ya está en `master` y tiene pendiente el archivo; C-41 (Lionel) quedó archivado. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 49 de 51 changes hechos (Olas 0 a 7 completas). Todos los changes hechos están archivados en OpenSpec, salvo C-39 (Nico), que ya está en `master` y tiene pendiente el archivo. Quedan C-50 (Julián, camino crítico) y C-51 (Juan Pablo), de la Ola 8, que ya se pueden empezar. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -66,7 +66,7 @@
 | C-44 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
-| C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
+| C-47 | ✅ hecho | Cualquiera (Valentino) | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
 | C-48 | ✅ hecho | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
 | C-49 | ✅ hecho | **Valentino** (reasignado de Julián) | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
 | C-50 | ⬜ pendiente | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
