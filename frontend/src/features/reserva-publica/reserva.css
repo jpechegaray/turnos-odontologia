@@ -102,3 +102,45 @@
   margin: 0;
   accent-color: var(--color-primary);
 }
+
+/* C-49: enlace del turno y de la oferta */
+.turno-token__datos {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.turno-token__datos dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.turno-token__datos dd {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
+
+.turno-token__pregunta {
+  display: grid;
+  gap: var(--space-3);
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.turno-token__pregunta:focus-visible,
+.reserva-panel [tabindex="-1"]:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+.turno-token__nota {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* La región que anuncia el estado de la oferta no suma espacio mientras está vacía. */
+.reserva-bloque > [role="status"]:empty {
+  display: none;
+}
