@@ -58,17 +58,17 @@
 | C-36 | ✅ hecho | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
 | C-37 | ✅ hecho | Juan Pablo (Cualquiera) | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
 | C-38 | ✅ hecho | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
-| C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
+| C-39 | ✅ hecho | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
 | C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
 | C-41 | 🔄 en revisión | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
-| C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
+| C-42 | ✅ hecho | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | 🔄 en revisión | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
 | C-44 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
 | C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
 | C-48 | ✅ hecho | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
-| C-49 | ⬜ pendiente | **Julián** | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
+| C-49 | ✅ hecho | **Valentino** (reasignado de Julián) | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
 | C-50 | ⬜ pendiente | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
 | C-51 | ⬜ pendiente | **Juan Pablo** | 8 | M | verificacion-e2e-y-cierre-mvp | C-33, C-37, C-44, C-46, C-47, C-48, C-49 |  |
 
@@ -442,7 +442,7 @@ Regla de las olas: dentro de una misma ola ningún par de changes toca los mismo
   - `C-46` front-reprogramar-cancelar-asistencia — **Cualquiera**
   - `C-47` front-lista-espera — **Cualquiera**
   - `C-48` front-reserva-publica-reservar — **Julián**
-  - `C-49` front-turno-por-token-y-oferta — **Julián**
+  - `C-49` front-turno-por-token-y-oferta — **Valentino** (reasignado de Julián)
 
 **GATE 8** — abre la Ola 8
 - Condición: Todos los fronts mergeados; el equipo acordó nombre, logo, color primario y tipografía finales; Juan Pablo disponible para aprobar la nueva `Revision` del design system.
@@ -1310,7 +1310,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-09 abierta (elegir cualquier profesional): hoy se elige profesional y el sistema asigna el sillón (SU-03). RM-05.
 
 ### [C-39] `C-39-gestion-turno-por-token`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Nico (PR #129, 2026-11-25; sin archivar)
 - **Responsable**: Nico — **Ola**: 5 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `GET /api/public/turnos/{token}`, `POST .../confirmar` y `POST .../cancelar`: el token solo permite ver, confirmar y cancelar su turno; no permite reprogramar
@@ -1374,7 +1374,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-08 resuelta (2026-11-25, `docs/propuestas/pa-08-consentimiento-datos.md`; versión del texto `2026-11-v1`, SU-16). PA-09 sigue abierta y C-41 mantiene SU-03; PA-16 abierta. RM-05.
 
 ### [C-42] `C-42-tomar-hueco-desde-oferta`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Valentino (PR #136, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Valentino — **Ola**: 6 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `GET /api/public/ofertas/{token}` (hueco, prestación y profesional) y `POST .../tomar`: crea el turno con el servicio de crear turno de `agenda` (inicio del hueco, duración por defecto, sillón del turno liberado si sigue libre o el primero libre), entrada pasa a `ASIGNADA` y oferta a `TOMADA`
@@ -1507,8 +1507,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Consentimiento**: PA-08 resuelta en C-41. La reserva muestra el aviso y exige su aceptación.
 
 ### [C-49] `C-49-front-turno-por-token-y-oferta`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Julián — **Ola**: 7 — **Tamaño**: M (4-6 h)
+- **Estado**: `[x]` hecho por Valentino (PR #138, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Valentino (reasignado de Julián) — **Ola**: 7 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `/turno/:token`: ver, confirmar y cancelar con aviso previo de cancelación tardía
   - `/oferta/:token`: ver el hueco, tomarlo y estados de hueco ya tomado o vencido
