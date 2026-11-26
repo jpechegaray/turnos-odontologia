@@ -163,7 +163,7 @@ public class TomaDeOferta {
         try {
             pacientes.porId(toma.pacienteId())
                     .filter(paciente -> paciente.email() != null && !paciente.email().isBlank())
-                    .ifPresent(paciente -> notificaciones.registrarYEnviar(TipoNotificacion.CONFIRMACION_RESERVA,
+                    .ifPresent(paciente -> notificaciones.registrarYEnviar(TipoNotificacion.CONFIRMACION_LISTA_ESPERA,
                             toma.turno().id(), null, paciente.id(), contenido.confirmacion(paciente,
                                     toma.turno().intervalo().inicio(), toma.prestacion(), toma.profesional(),
                                     toma.token())));

@@ -48,6 +48,7 @@ class ReintentoConfirmacionReservaIT extends PruebaIntegracionBase {
         prestacion = DatosAgenda.prestacion(jdbc, 30, true);
         turno = DatosAgenda.turno(jdbc, paciente, profesional, sillon, prestacion, INICIO.toString(),
                 INICIO.plusSeconds(1800).toString(), "PROGRAMADO");
+        jdbc.update("update turno set canal = 'ONLINE' where id = ?", turno);
         var email = jdbc.queryForObject("select email from pacientes where id = ?", String.class, paciente);
         correo.fallarProximos(1);
         notificaciones.registrarYEnviar(TipoNotificacion.CONFIRMACION_RESERVA, turno, null, paciente,

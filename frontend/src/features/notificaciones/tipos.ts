@@ -1,7 +1,8 @@
 /** Estado de un envío según el registro de C-25 (RN-30). */
 export type EstadoNotificacion = "PENDIENTE" | "ENVIADA" | "FALLIDA";
 
-export type TipoNotificacion = "RECORDATORIO" | "CONFIRMACION_RESERVA" | "CANCELACION" | "REPROGRAMACION" | "OFERTA_HUECO";
+export type TipoNotificacion = "RECORDATORIO" | "CONFIRMACION_RESERVA" | "CANCELACION" | "REPROGRAMACION"
+  | "OFERTA_HUECO" | "INGRESO_LISTA_ESPERA" | "CONFIRMACION_LISTA_ESPERA";
 
 /** Elemento de `GET /api/notificaciones`; los instantes vienen en UTC (ISO-8601). */
 export type NotificacionRespuesta = Readonly<{
@@ -30,7 +31,6 @@ export type PaginaNotificaciones = Readonly<{
 }>;
 
 export type FiltrosNotificaciones = Readonly<{
-  estado: "" | EstadoNotificacion;
   /** Número de turno tal como lo escribió el usuario; se valida antes de consultar. */
   turno: string;
 }>;

@@ -32,7 +32,8 @@ public record NotificacionEnviada(
         int intentos,
         String ultimoError,
         Instant programadaPara,
-        Instant enviadaEn) {
+        Instant enviadaEn,
+        Long entradaListaEsperaId) {
 
     /** Único canal soportado por el MVP (KB 04). */
     public static final String CANAL_EMAIL = "EMAIL";
@@ -76,7 +77,14 @@ public record NotificacionEnviada(
                 0,
                 null,
                 programadaPara,
+                null,
                 null);
+    }
+
+    public static NotificacionEnviada pendienteIngresoLista(Long entradaId, Long pacienteId, String destinatario,
+            Instant programadaPara) {
+        return new NotificacionEnviada(null, TipoNotificacion.INGRESO_LISTA_ESPERA, CANAL_EMAIL, destinatario,
+                null, null, pacienteId, null, EstadoNotificacion.PENDIENTE, 0, null, programadaPara, null, entradaId);
     }
 
     /** Marca el envío como exitoso: estado {@code ENVIADA}, fecha de envío y sin último error. */
@@ -94,7 +102,8 @@ public record NotificacionEnviada(
                 intentos + 1,
                 null,
                 programadaPara,
-                instante);
+                instante,
+                entradaListaEsperaId);
     }
 
     /**
@@ -115,18 +124,19 @@ public record NotificacionEnviada(
                 intentos + 1,
                 error,
                 proximoIntento,
-                enviadaEn);
+                enviadaEn,
+                entradaListaEsperaId);
     }
 
     /** Termina un pendiente obsoleto sin contabilizar un intento de envío. */
     public NotificacionEnviada descartada(String motivo) {
         return new NotificacionEnviada(id, tipo, canal, destinatario, turnoId, ofertaHuecoId, pacienteId,
-                inicioReferencia, EstadoNotificacion.FALLIDA, intentos, motivo, null, enviadaEn);
+                inicioReferencia, EstadoNotificacion.FALLIDA, intentos, motivo, null, enviadaEn, entradaListaEsperaId);
     }
 
     public NotificacionEnviada dirigidaA(String email) {
         return new NotificacionEnviada(id, tipo, canal, email, turnoId, ofertaHuecoId, pacienteId,
-                inicioReferencia, estado, intentos, ultimoError, programadaPara, enviadaEn);
+                inicioReferencia, estado, intentos, ultimoError, programadaPara, enviadaEn, entradaListaEsperaId);
     }
 
     /** Indica si todavía se permite un nuevo intento para el máximo configurado. */

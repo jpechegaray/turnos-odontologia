@@ -1,5 +1,5 @@
 import { formatearFecha, formatearHora } from "../../shared/fecha/zonaHoraria";
-import type { EstadoNotificacion, NotificacionRespuesta, PaginaNotificaciones, TipoNotificacion } from "./tipos";
+import type { NotificacionRespuesta, PaginaNotificaciones, TipoNotificacion } from "./tipos";
 
 export const MARCA_VACIO = "—";
 
@@ -11,12 +11,8 @@ export const ETIQUETAS_TIPO: Readonly<Record<TipoNotificacion, string>> = {
   CANCELACION: "Cancelación",
   REPROGRAMACION: "Reprogramación",
   OFERTA_HUECO: ETIQUETA_AVISO_HUECO,
-};
-
-export const ETIQUETAS_ESTADO: Readonly<Record<EstadoNotificacion, string>> = {
-  PENDIENTE: "Pendiente",
-  ENVIADA: "Enviada",
-  FALLIDA: "Fallida",
+  INGRESO_LISTA_ESPERA: "Ingreso a lista de espera",
+  CONFIRMACION_LISTA_ESPERA: "Turno desde lista de espera",
 };
 
 /** Fecha y hora del consultorio (Buenos Aires), o la marca de vacío. */
@@ -28,11 +24,6 @@ export function fechaHora(instante: string | null): string {
 export function turnoDe(notificacion: NotificacionRespuesta): string {
   if (notificacion.turnoId !== null) return `#${notificacion.turnoId}`;
   return notificacion.ofertaHuecoId !== null ? ETIQUETA_AVISO_HUECO : MARCA_VACIO;
-}
-
-/** El último error solo se muestra en los envíos fallidos (RN-30). */
-export function errorDe(notificacion: NotificacionRespuesta): string {
-  return notificacion.estado === "FALLIDA" && notificacion.ultimoError ? notificacion.ultimoError : MARCA_VACIO;
 }
 
 export function textoPaginacion(

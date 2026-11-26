@@ -27,6 +27,10 @@ public class OfertasHuecoPersistencia {
         return ofertas.findByTokenHash(tokenHash).map(OfertaHuecoJpa::dominio);
     }
 
+    public Optional<OfertaHueco> buscar(Long id) {
+        return ofertas.findById(id).map(OfertaHuecoJpa::dominio);
+    }
+
     /** Lee la oferta con lock de fila (reintento del aviso y, en C-42, la toma). */
     public Optional<OfertaHueco> bloquear(Long id) {
         return ofertas.bloquear(id).map(OfertaHuecoJpa::dominio);

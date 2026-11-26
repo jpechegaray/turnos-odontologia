@@ -92,13 +92,13 @@ class AsignarHuecoServiceTest {
         when(disponibilidad.consultar(PROFESIONAL_ID, PRESTACION_ID, INICIO, FIN, null))
                 .thenReturn(List.of(new HorarioDisponible(INICIO, FIN, 5L)));
         when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.empty());
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
                 .thenReturn(turno(99L, 5L));
 
         servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().duracionMin()).isNull();
         assertThat(captor.getValue().inicio()).isEqualTo(INICIO);
         assertThat(captor.getValue().sillonId()).isEqualTo(5L);
@@ -118,7 +118,7 @@ class AsignarHuecoServiceTest {
                     assertThat(error.estado()).isEqualTo(EstadoError.NO_PROCESABLE_422);
                 });
 
-        verify(crearTurno, never()).crear(any(), any(), any());
+        verify(crearTurno, never()).crearDesdeLista(any(), any(), any());
         verifyNoInteractions(disponibilidad, sillones, ofertas);
     }
 
@@ -128,7 +128,7 @@ class AsignarHuecoServiceTest {
         when(entradas.bloquear(ENTRADA_ID)).thenReturn(Optional.of(entradaActiva(PROFESIONAL_ID)));
         when(prestaciones.buscarPorId(PRESTACION_ID)).thenReturn(Optional.of(prestacion(DURACION, true)));
         when(profesionalPrestaciones.realiza(PROFESIONAL_ID, PRESTACION_ID)).thenReturn(true);
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
                 .thenReturn(turno(99L, 7L));
 
         servicio.asignar(ENTRADA_ID, solicitud(7L), USUARIO_ID);
@@ -175,13 +175,13 @@ class AsignarHuecoServiceTest {
         when(entradas.bloquear(ENTRADA_ID)).thenReturn(Optional.of(entradaActiva(PROFESIONAL_ID)));
         when(prestaciones.buscarPorId(PRESTACION_ID)).thenReturn(Optional.of(prestacion(DURACION, true)));
         when(profesionalPrestaciones.realiza(PROFESIONAL_ID, PRESTACION_ID)).thenReturn(true);
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
                 .thenReturn(turno(99L, 7L));
 
         servicio.asignar(ENTRADA_ID, solicitud(7L), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(7L);
         verifyNoInteractions(disponibilidad, sillones);
         verify(ofertas, never()).sugeridaPara(any(), any(), any());
@@ -196,13 +196,13 @@ class AsignarHuecoServiceTest {
         when(disponibilidad.consultar(PROFESIONAL_ID, PRESTACION_ID, INICIO, FIN, null))
                 .thenReturn(List.of(new HorarioDisponible(INICIO, FIN, 8L)));
         when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.of(oferta(8L)));
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
                 .thenReturn(turno(99L, 8L));
 
         servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(8L);
         verifyNoInteractions(sillones);
     }
@@ -218,12 +218,12 @@ class AsignarHuecoServiceTest {
         when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.of(oferta(8L)));
         when(sillones.buscarPorId(8L)).thenReturn(Optional.of(new SillonConsulta.Datos(8L, "Sillón 8", null, true)));
         when(ocupacion.buscar(PROFESIONAL_ID, List.of(8L), new Intervalo(INICIO, FIN))).thenReturn(List.of());
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID))).thenReturn(turno(99L, 8L));
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID))).thenReturn(turno(99L, 8L));
 
         servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(8L);
     }
 
@@ -239,12 +239,12 @@ class AsignarHuecoServiceTest {
         when(sillones.buscarPorId(8L)).thenReturn(Optional.of(new SillonConsulta.Datos(8L, "Sillón 8", null, true)));
         when(ocupacion.buscar(PROFESIONAL_ID, List.of(8L), new Intervalo(INICIO, FIN))).thenReturn(List.of(
                 new TurnoOcupado(50L, 2L, 8L, new Intervalo(INICIO, FIN), EstadoTurno.PROGRAMADO)));
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID))).thenReturn(turno(99L, 4L));
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID))).thenReturn(turno(99L, 4L));
 
         servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(4L);
     }
 
@@ -257,13 +257,13 @@ class AsignarHuecoServiceTest {
         when(disponibilidad.consultar(PROFESIONAL_ID, PRESTACION_ID, INICIO, FIN, null))
                 .thenReturn(List.of(new HorarioDisponible(INICIO, FIN, 6L), new HorarioDisponible(INICIO, FIN, 4L)));
         when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.empty());
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
                 .thenReturn(turno(99L, 4L));
 
         servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(4L);
         verifyNoInteractions(sillones);
     }
@@ -278,13 +278,13 @@ class AsignarHuecoServiceTest {
                 .thenReturn(List.of(new HorarioDisponible(INICIO.plusSeconds(1800), FIN.plusSeconds(1800), 4L)));
         when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.empty());
         when(sillones.listarActivos()).thenReturn(List.of(new SillonConsulta.Datos(9L, "Sillón 1", null, true)));
-        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
+        when(crearTurno.crearDesdeLista(any(SolicitudTurno.class), any(), eq(USUARIO_ID)))
                 .thenReturn(turno(99L, 9L));
 
         servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
 
         var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
-        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        verify(crearTurno).crearDesdeLista(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(9L);
     }
 
@@ -304,7 +304,7 @@ class AsignarHuecoServiceTest {
                     assertThat(error.estado()).isEqualTo(EstadoError.NO_PROCESABLE_422);
                 });
 
-        verify(crearTurno, never()).crear(any(), any(), any());
+        verify(crearTurno, never()).crearDesdeLista(any(), any(), any());
     }
 
     private static EntradaListaEspera entradaActiva(Long profesionalId) {

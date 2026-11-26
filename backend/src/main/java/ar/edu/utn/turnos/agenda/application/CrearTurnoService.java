@@ -6,6 +6,7 @@ import ar.edu.utn.turnos.agenda.domain.Turno;
 import ar.edu.utn.turnos.agenda.domain.ValidadorTurno;
 import ar.edu.utn.turnos.agenda.domain.evento.TurnoCreado;
 import ar.edu.utn.turnos.agenda.infrastructure.TurnosPersistencia;
+import ar.edu.utn.turnos.shared.notificacion.application.EventosAvisoAlta;
 import java.time.Clock;
 import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import java.time.Instant;
@@ -46,8 +47,20 @@ public class CrearTurnoService {
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     @Transactional
     public Turno crear(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
-        return crearCon(solicitud, intervalo -> Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(),
+        return crearPersonal(solicitud, notas, creadoPorUsuarioId, false);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Turno crearDesdeLista(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
+        return crearPersonal(solicitud, notas, creadoPorUsuarioId, true);
+    }
+
+    private Turno crearPersonal(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId, boolean desdeLista) {
+        var turno = crearCon(solicitud, intervalo -> Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(),
                 solicitud.sillonId(), solicitud.prestacionId(), intervalo, notas, creadoPorUsuarioId, Instant.now(reloj)));
+        eventos.publishEvent(new EventosAvisoAlta.TurnoAgendado(turno.id(), desdeLista));
+        return turno;
     }
 
     /**

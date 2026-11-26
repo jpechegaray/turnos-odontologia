@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, expect, it, vi } from "vitest";
@@ -80,6 +80,7 @@ async function filaCon(texto: string) {
 }
 
 afterEach(() => {
+  localStorage.clear();
   vi.unstubAllGlobals();
 });
 
@@ -115,6 +116,75 @@ it("El odontólogo no ve la pantalla de notificaciones", async () => {
 
 // --- Listado ---
 
+it("Se pueden seleccionar varios avisos y cambiar su lectura", async () => {
+  const usuario = userEvent.setup();
+  montar("RECEPCION", responderCon(pagina([BASE, { ...BASE, id: 2, destinatario: "otro@example.test" }])));
+  const registro = await tabla();
+  expect(within(registro).getAllByText("No leída")).toHaveLength(2);
+  const primera = (await filaCon(BASE.destinatario)).getByRole("checkbox");
+  await usuario.click(primera);
+  expect(primera).toBeChecked();
+  await usuario.click(screen.getByRole("checkbox", { name: "Seleccionar todos los avisos de esta página" }));
+  await usuario.click(screen.getByRole("button", { name: "Marcar como leído" }));
+  expect(within(registro).getAllByText("Leída")).toHaveLength(2);
+
+  await usuario.click(screen.getByRole("checkbox", { name: "Seleccionar todos los avisos de esta página" }));
+  await usuario.click(screen.getByRole("button", { name: "Marcar como no leído" }));
+  expect(within(registro).getAllByText("No leída")).toHaveLength(2);
+});
+
+it("La lectura se conserva al volver a abrir la bandeja", async () => {
+  const usuario = userEvent.setup();
+  const respuesta = responderCon(pagina([BASE]));
+  montar("RECEPCION", respuesta);
+  await usuario.click((await filaCon(BASE.destinatario)).getByRole("checkbox"));
+  await usuario.click(screen.getByRole("button", { name: "Marcar como leído" }));
+  cleanup();
+  montar("RECEPCION", respuesta);
+  expect((await filaCon(BASE.destinatario)).getByText("Leída")).toBeInTheDocument();
+});
+
+it("Una sola notificación seleccionada abre el detalle común", async () => {
+  const usuario = userEvent.setup();
+  const oferta = { ...BASE, id: 2, tipo: "OFERTA_HUECO" as const, turnoId: null, ofertaHuecoId: 7, destinatario: "oferta@example.test" };
+  montar("RECEPCION", responderCon(pagina([BASE, oferta])));
+  const registro = await tabla();
+  expect(within(registro).queryByRole("columnheader", { name: /fecha de referencia|intentos/i })).not.toBeInTheDocument();
+  const abrir = screen.getByRole("button", { name: "Abrir notificación" });
+  expect(abrir).toBeDisabled();
+  const casilla = (await filaCon(BASE.destinatario)).getByRole("checkbox");
+  const otraCasilla = (await filaCon(oferta.destinatario)).getByRole("checkbox");
+  await usuario.click(casilla);
+  await usuario.click(otraCasilla);
+  expect(abrir).toBeDisabled();
+  await usuario.click(otraCasilla);
+  await usuario.click(abrir);
+  const detalle = screen.getByRole("region", { name: "Detalle de notificación" });
+  expect(within(detalle).getByRole("heading", { name: "Recordatorio" })).toHaveFocus();
+  expect(within(detalle).getByText(BASE.destinatario)).toBeInTheDocument();
+  expect(within(detalle).getByText("Fecha de envío")).toBeInTheDocument();
+  await usuario.click(within(detalle).getByRole("button", { name: "Volver a la bandeja" }));
+  expect(abrir).toHaveFocus();
+  expect((await filaCon(BASE.destinatario)).getByText("Leída")).toBeInTheDocument();
+  await usuario.click((await filaCon(oferta.destinatario)).getByRole("button", { name: "Aviso de hueco" }));
+  const otroDetalle = screen.getByRole("region", { name: "Detalle de notificación" });
+  expect(within(otroDetalle).getByRole("heading", { name: "Aviso de hueco" })).toBeInTheDocument();
+  expect(within(otroDetalle).getByText(oferta.destinatario)).toBeInTheDocument();
+  expect(within(otroDetalle).getByText("Fecha de envío")).toBeInTheDocument();
+});
+
+it("El detalle presenta la vista previa del correo", async () => {
+  const usuario = userEvent.setup();
+  montar("RECEPCION", responderCon((url) => url.endsWith("/1/vista-previa")
+    ? Response.json({ asunto: "Recordatorio de turno", cuerpo: "Hola Luna.\nProfesional: Ana Ficticia\nPrestación: Limpieza" })
+    : Response.json(pagina([{ ...BASE, destinatario: "luna.demo-lista@example.test" }]))));
+  const fila = await filaCon("luna.demo-lista@example.test");
+  await usuario.click(fila.getByRole("button", { name: "Recordatorio" }));
+  const vista = screen.getByRole("region", { name: "Vista previa del correo" });
+  expect(await within(vista).findByText("Recordatorio de turno")).toBeInTheDocument();
+  expect(within(vista).getByText(/Profesional: Ana Ficticia/)).toBeInTheDocument();
+});
+
 it("Al abrir la pantalla se lista la primera página del registro", async () => {
   const fetch = montar(
     "RECEPCION",
@@ -134,11 +204,7 @@ it("Al abrir la pantalla se lista la primera página del registro", async () => 
     "b@example.test",
     "a@example.test",
   ]);
-  expect(filas.map((fila) => within(fila).getAllByRole("cell")[1].textContent)).toEqual([
-    "Pendiente",
-    "Enviada",
-    "Fallida",
-  ]);
+  expect(filas.map((fila) => within(fila).getByText("No leída"))).toHaveLength(3);
 });
 
 it("Los datos del envío se muestran en español y en hora de Buenos Aires", async () => {
@@ -146,8 +212,6 @@ it("Los datos del envío se muestran en español y en hora de Buenos Aires", asy
 
   const fila = await filaCon("#42");
   expect(fila.getByText("Recordatorio")).toBeInTheDocument();
-  expect(fila.getByText("04/12/2026 10:00")).toBeInTheDocument();
-  expect(fila.getByText("1")).toBeInTheDocument();
   expect(fila.getByText("03/12/2026 10:05")).toBeInTheDocument();
 });
 
@@ -161,66 +225,32 @@ it("Un aviso de hueco sin turno se identifica como tal", async () => {
 it("Un envío pendiente muestra la marca de vacío en la fecha de envío", async () => {
   montar("RECEPCION", responderCon(pagina([{ ...BASE, estado: "PENDIENTE", enviadaEn: null }])));
 
-  const fila = await filaCon("Pendiente");
-  const celdas = fila.getAllByRole("cell");
-  expect(celdas[6]).toHaveTextContent("—");
+  const fila = await filaCon(BASE.destinatario);
+  expect(fila.getByLabelText("Sin fecha de envío")).toHaveTextContent("—");
 });
 
-it("Un envío fallido muestra su último error", async () => {
-  montar(
-    "RECEPCION",
-    responderCon(
-      pagina([
-        {
-          ...BASE,
-          estado: "FALLIDA",
-          intentos: 3,
-          enviadaEn: null,
-          ultimoError: "No se pudo enviar la notificación por email",
-        },
-      ]),
-    ),
-  );
-
-  const fila = await filaCon("Fallida");
-  expect(fila.getByText("3")).toBeInTheDocument();
-  expect(fila.getByText("No se pudo enviar la notificación por email")).toBeInTheDocument();
-});
-
-it("Un envío enviado no muestra error", async () => {
-  montar("RECEPCION", responderCon(pagina([{ ...BASE, ultimoError: "no debería verse" }])));
-
-  const fila = await filaCon("Enviada");
-  expect(fila.getAllByRole("cell")[7]).toHaveTextContent("—");
-  expect(fila.queryByText("no debería verse")).not.toBeInTheDocument();
+it("La bandeja oculta el estado de envío y el error técnico", async () => {
+  montar("RECEPCION", responderCon(pagina([{
+    ...BASE, estado: "FALLIDA", enviadaEn: null, ultimoError: "Error técnico ficticio",
+  }])));
+  const fila = await filaCon(BASE.destinatario);
+  expect(fila.getByText("No leída")).toBeInTheDocument();
+  expect(fila.queryByText("Fallida")).not.toBeInTheDocument();
+  expect(fila.queryByText("Error técnico ficticio")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Estado")).not.toBeInTheDocument();
 });
 
 // --- Filtros ---
-
-it("Filtrar por estado envía solo ese filtro", async () => {
+it("Filtrar por turno envía solo el número de turno", async () => {
   const usuario = userEvent.setup();
   const fetch = montar("RECEPCION", responderCon(pagina([BASE])));
   await tabla();
 
-  await usuario.selectOptions(screen.getByLabelText("Estado"), "Fallida");
-  await usuario.click(screen.getByRole("button", { name: "Buscar" }));
-
-  await vi.waitFor(() =>
-    expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?estado=FALLIDA&pagina=0&tamanio=20"),
-  );
-});
-
-it("Los filtros de estado y turno se combinan", async () => {
-  const usuario = userEvent.setup();
-  const fetch = montar("RECEPCION", responderCon(pagina([BASE])));
-  await tabla();
-
-  await usuario.selectOptions(screen.getByLabelText("Estado"), "Enviada");
   await usuario.type(screen.getByLabelText("Turno"), " 42 ");
   await usuario.click(screen.getByRole("button", { name: "Buscar" }));
 
   await vi.waitFor(() =>
-    expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?estado=ENVIADA&turnoId=42&pagina=0&tamanio=20"),
+    expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?turnoId=42&pagina=0&tamanio=20"),
   );
 });
 
@@ -252,11 +282,11 @@ it("Buscar vuelve a la primera página", async () => {
   await usuario.click(screen.getByRole("button", { name: "Siguiente" }));
   await screen.findByText("Página 2 de 3 · 45 envíos");
 
-  await usuario.selectOptions(screen.getByLabelText("Estado"), "Pendiente");
+  await usuario.type(screen.getByLabelText("Turno"), "42");
   await usuario.click(screen.getByRole("button", { name: "Buscar" }));
 
   await vi.waitFor(() =>
-    expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?estado=PENDIENTE&pagina=0&tamanio=20"),
+    expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?turnoId=42&pagina=0&tamanio=20"),
   );
 });
 
@@ -264,11 +294,11 @@ it("Una búsqueda sin coincidencias muestra un mensaje", async () => {
   const usuario = userEvent.setup();
   montar(
     "RECEPCION",
-    responderCon((url) => Response.json(url.includes("estado=") ? pagina([]) : pagina([BASE]))),
+    responderCon((url) => Response.json(url.includes("turnoId=") ? pagina([]) : pagina([BASE]))),
   );
   await tabla();
 
-  await usuario.selectOptions(screen.getByLabelText("Estado"), "Fallida");
+  await usuario.type(screen.getByLabelText("Turno"), "42");
   await usuario.click(screen.getByRole("button", { name: "Buscar" }));
 
   expect(await screen.findByText(MENSAJE_SIN_COINCIDENCIAS)).toBeInTheDocument();
@@ -293,14 +323,14 @@ it("Siguiente consulta la página contigua con los filtros vigentes", async () =
     }),
   );
   await tabla();
-  await usuario.selectOptions(screen.getByLabelText("Estado"), "Fallida");
+  await usuario.type(screen.getByLabelText("Turno"), "42");
   await usuario.click(screen.getByRole("button", { name: "Buscar" }));
   await screen.findByText("Página 1 de 2 · 25 envíos");
 
   await usuario.click(screen.getByRole("button", { name: "Siguiente" }));
 
   expect(await screen.findByText("Página 2 de 2 · 25 envíos")).toBeInTheDocument();
-  expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?estado=FALLIDA&pagina=1&tamanio=20");
+  expect(consultas(fetch).at(-1)).toBe("/api/notificaciones?turnoId=42&pagina=1&tamanio=20");
   expect(screen.getByRole("button", { name: "Siguiente" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Anterior" })).toBeEnabled();
 });

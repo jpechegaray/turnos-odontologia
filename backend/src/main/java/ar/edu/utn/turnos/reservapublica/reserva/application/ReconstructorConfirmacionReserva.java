@@ -1,6 +1,7 @@
 package ar.edu.utn.turnos.reservapublica.reserva.application;
 
 import ar.edu.utn.turnos.agenda.application.TurnosParaRecordatorio;
+import ar.edu.utn.turnos.agenda.domain.CanalTurno;
 import ar.edu.utn.turnos.agenda.domain.EstadoTurno;
 import ar.edu.utn.turnos.pacientes.application.PacienteConsulta;
 import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
@@ -46,7 +47,8 @@ class ReconstructorConfirmacionReserva implements ReconstructorDatosNotificacion
 
     @Override
     public boolean descartarSiFaltanDatos(NotificacionEnviada notificacion) {
-        return notificacion.tipo() == TipoNotificacion.CONFIRMACION_RESERVA;
+        return notificacion.tipo() == TipoNotificacion.CONFIRMACION_RESERVA
+                || notificacion.tipo() == TipoNotificacion.CONFIRMACION_LISTA_ESPERA;
     }
 
     @Override
@@ -56,7 +58,8 @@ class ReconstructorConfirmacionReserva implements ReconstructorDatosNotificacion
         }
         var turno = turnos.bloquear(aviso.turnoId()).orElse(null);
         if (turno == null || (turno.estado() != EstadoTurno.PROGRAMADO && turno.estado() != EstadoTurno.CONFIRMADO)
-                || !turno.intervalo().inicio().isAfter(reloj.instant())) {
+                || !turno.intervalo().inicio().isAfter(reloj.instant())
+                || !turno.intervalo().inicio().equals(aviso.inicioReferencia())) {
             return Optional.empty();
         }
         var paciente = pacientes.porId(turno.pacienteId()).orElse(null);
@@ -66,6 +69,10 @@ class ReconstructorConfirmacionReserva implements ReconstructorDatosNotificacion
         var prestacion = prestaciones.buscarPorId(turno.prestacionId()).map(PrestacionResumen::nombre).orElse(null);
         var profesional = profesionales.buscarPorId(turno.profesionalId())
                 .map(p -> p.nombre() + " " + p.apellido()).orElse(null);
+        if (turno.canal() == CanalTurno.INTERNO) {
+            return Optional.of(new DatosNotificacion(paciente.email(), paciente.nombre(), turno.intervalo().inicio(),
+                    prestacion, profesional, null));
+        }
         return tokens.emitirSiVigente(turno.id()).map(token -> new DatosNotificacion(paciente.email(),
                 paciente.nombre(), turno.intervalo().inicio(), prestacion, profesional,
                 urlPublica + "/turno/" + token.claro()));
