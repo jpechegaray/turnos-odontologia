@@ -78,10 +78,8 @@ function escrituraA(fetch: FetchSimulado, metodo: string) {
     }));
 }
 
-/** Usa la acción «Horarios» de la fila de Pérez y devuelve el panel abierto. */
+/** El explorador muestra los horarios del primer profesional al abrirse. */
 async function abrirPanel(): Promise<HTMLElement> {
-  const fila = await screen.findByRole("row", { name: /Pérez/ });
-  await userEvent.click(within(fila).getByRole("button", { name: "Horarios" }));
   return screen.findByRole("region", { name: "Horarios de Pérez, Ana" });
 }
 

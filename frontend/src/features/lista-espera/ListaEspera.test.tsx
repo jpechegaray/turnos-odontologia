@@ -91,7 +91,13 @@ function seccion(nombre: string) {
   return within(screen.getByRole("region", { name: nombre }));
 }
 
+function abrirAccion(nombre: "Anotar paciente" | "Asignar hueco") {
+  const boton = screen.getByRole("button", { name: nombre });
+  if (boton.getAttribute("aria-expanded") === "false") fireEvent.click(boton);
+}
+
 async function elegirPaciente() {
+  abrirAccion("Anotar paciente");
   const alta = seccion("Anotar paciente");
   fireEvent.change(alta.getByLabelText("Dato del paciente"), { target: { value: "Ficticia" } });
   fireEvent.click(alta.getByRole("button", { name: "Buscar paciente" }));
@@ -106,10 +112,12 @@ function completarAlta(valores: Partial<Record<"Prestación" | "Profesional pref
 }
 
 function enviarAlta() {
+  abrirAccion("Anotar paciente");
   fireEvent.click(seccion("Anotar paciente").getByRole("button", { name: "Anotar en la lista" }));
 }
 
 function completarHueco(valores: Partial<Record<"Profesional del hueco" | "Fecha del hueco" | "Hora de inicio" | "Hora de fin", string>>) {
+  abrirAccion("Asignar hueco");
   const hueco = seccion("Asignar un hueco");
   for (const [etiqueta, value] of Object.entries(valores)) {
     fireEvent.change(hueco.getByLabelText(etiqueta), { target: { value } });
@@ -170,7 +178,7 @@ it("El odontólogo no accede a la lista de espera", async () => {
 
 it("El listado muestra las entradas activas con nombres", async () => {
   const tabla = await pantallaLista();
-  expect(pedidos("GET", "/api/lista-espera?estado=ACTIVA")).not.toHaveLength(0);
+  expect(pedidos("GET", "/api/lista-espera")).not.toHaveLength(0);
   const fila = within(within(tabla).getByText("Sol Ficticia").closest("tr") as HTMLElement);
   expect(fila.getByText("Consulta")).toBeInTheDocument();
   expect(fila.getByText("Ana Ficticia")).toBeInTheDocument();
@@ -185,15 +193,15 @@ it("El listado muestra las entradas activas con nombres", async () => {
 it("Cambiar el filtro de estado consulta ese estado", async () => {
   entradas = [...entradas, entrada({ id: 12, pacienteId: 6, estado: "ASIGNADA", turnoAsignadoId: 7 })];
   const tabla = await pantallaLista();
-  fireEvent.change(seccion("Entradas").getByLabelText("Estado"), { target: { value: "ASIGNADA" } });
+  fireEvent.click(seccion("Entradas").getByRole("button", { name: /^Asignadas/ }));
   expect(await within(tabla).findByText("Asignada")).toBeInTheDocument();
-  expect(pedidos("GET", "/api/lista-espera?estado=ASIGNADA")).toHaveLength(1);
+  expect(pedidos("GET", "/api/lista-espera")).toHaveLength(1);
   expect(within(tabla).queryByText("Sol Ficticia")).not.toBeInTheDocument();
 });
 
 it("Un estado sin entradas lo informa", async () => {
   const tabla = await pantallaLista();
-  fireEvent.change(seccion("Entradas").getByLabelText("Estado"), { target: { value: "VENCIDA" } });
+  fireEvent.click(seccion("Entradas").getByRole("button", { name: /^Vencidas/ }));
   expect(await within(tabla).findByText("No hay entradas en este estado.")).toBeInTheDocument();
 });
 
@@ -226,16 +234,37 @@ it("Dar de baja una entrada que ya no está activa recarga el listado", async ()
     return problema(409, "ENTRADA_NO_ACTIVA");
   });
   const tabla = await pantallaLista();
-  const consultasPrevias = pedidos("GET", "/api/lista-espera?estado=ACTIVA").length;
+  const consultasPrevias = pedidos("GET", "/api/lista-espera").length;
   const fila = within(within(tabla).getByText("Sol Ficticia").closest("tr") as HTMLElement);
   fireEvent.click(fila.getByRole("button", { name: "Dar de baja" }));
   fireEvent.click(fila.getByRole("button", { name: "Confirmar baja" }));
   expect(await screen.findByText("La entrada ya no estaba activa. Actualizamos el listado.")).toBeInTheDocument();
   await waitFor(() => expect(within(tabla).queryByText("Sol Ficticia")).not.toBeInTheDocument());
-  expect(pedidos("GET", "/api/lista-espera?estado=ACTIVA").length).toBeGreaterThan(consultasPrevias);
+  expect(pedidos("GET", "/api/lista-espera").length).toBeGreaterThan(consultasPrevias);
 });
 
 // --- Alta ---
+
+it("Los botones de lista de espera abren su formulario", async () => {
+  await pantallaLista();
+  const anotar = screen.getByRole("button", { name: "Anotar paciente" });
+  const asignar = screen.getByRole("button", { name: "Asignar hueco" });
+  expect(screen.queryByRole("region", { name: "Anotar paciente" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: "Asignar un hueco" })).not.toBeInTheDocument();
+
+  fireEvent.click(anotar);
+  expect(anotar).toHaveAttribute("aria-expanded", "true");
+  expect(seccion("Anotar paciente").getByLabelText("Dato del paciente")).toBeVisible();
+
+  fireEvent.click(asignar);
+  expect(asignar).toHaveAttribute("aria-expanded", "true");
+  expect(seccion("Asignar un hueco").getByLabelText("Fecha del hueco")).toBeVisible();
+  expect(screen.queryByRole("region", { name: "Anotar paciente" })).not.toBeInTheDocument();
+
+  fireEvent.click(asignar);
+  expect(asignar).toHaveAttribute("aria-expanded", "false");
+  expect(screen.queryByRole("region", { name: "Asignar un hueco" })).not.toBeInTheDocument();
+});
 
 it("Un alta válida agrega la entrada al listado", async () => {
   entradas = [];

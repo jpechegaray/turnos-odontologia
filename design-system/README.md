@@ -20,7 +20,7 @@ Fundación visual del sistema de turnos para consultorios odontológicos. Los to
 
 | Archivo | Para qué |
 |---|---|
-| `tokens.css` | Color, tipografía, espaciado, radios, sombras, foco, motion. Modo oscuro por `prefers-color-scheme`. |
+| `tokens.css` | Color, tipografía, espaciado, radios, sombras, foco y movimiento. La aplicación fija el tema claro con `data-theme="light"`. |
 | `brand.js` | Constante con el nombre y binding a `[data-brand-name]`. |
 | `brand.md` | Nombre, tono, reglas de logo e imágenes. |
 | `assets/logo.svg` | Logo placeholder rotulado "LOGO PROVISIONAL". |

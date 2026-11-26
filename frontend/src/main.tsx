@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "@fontsource-variable/public-sans/wght.css";
 import "../../design-system/tokens.css";
 import "../../design-system/brand.js";
 import "./index.css";

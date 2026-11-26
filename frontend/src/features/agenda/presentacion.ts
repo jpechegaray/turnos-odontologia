@@ -43,3 +43,11 @@ export function horaDeMinutos(minutos: number): string {
   const dos = (n: number) => String(n).padStart(2, "0");
   return `${dos(Math.floor(minutos / 60))}:${dos(minutos % 60)}`;
 }
+
+/** "Lunes 7 de diciembre de 2026" a partir de una fecha civil aaaa-mm-dd. */
+export function fechaLarga(fecha: string): string {
+  const [anio, mes, dia] = fecha.split("-").map(Number);
+  const texto = new Intl.DateTimeFormat("es-AR", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+    .format(new Date(Date.UTC(anio, mes - 1, dia)));
+  return texto.charAt(0).toUpperCase() + texto.slice(1).replace(",", "");
+}

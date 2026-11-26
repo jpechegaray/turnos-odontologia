@@ -14,7 +14,7 @@ describe("Estilos de la agenda", () => {
     const limpio = sinComentarios(agenda);
     const definidas = declaradas(tokens);
     // Las que llegan en línea desde los componentes.
-    const enLinea = new Set(["--agenda-columnas", "--agenda-filas"]);
+    const enLinea = new Set(["--agenda-columnas", "--agenda-filas", "--agenda-ahora-filas"]);
     const indefinidas = [...limpio.matchAll(/var\((--[\w-]+)/g)]
       .map(([, variable]) => variable)
       .filter((variable) => !definidas.has(variable) && !enLinea.has(variable));

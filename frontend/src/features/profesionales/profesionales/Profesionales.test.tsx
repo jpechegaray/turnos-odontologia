@@ -12,6 +12,9 @@ import { PaginaProfesionales, type PaginaProfesionalesProps, type PanelProfesion
 type FetchSimulado = ReturnType<typeof simularSesionActiva>["fetch"];
 
 const registro = construirRegistro({ profesionales: { rutas } });
+const registroCatalogo = construirRegistro({
+  profesionales: { rutas: rutas.map((ruta) => ({ ...ruta, componente: PaginaProfesionales })) },
+});
 
 const PEREZ = { id: 1, nombre: "Ana", apellido: "Pérez", matricula: "MN-1001", especialidad: "Ortodoncia", activo: true };
 const GOMEZ = { id: 2, nombre: "Luis", apellido: "Gómez", matricula: "MN-1002", especialidad: null, activo: false };
@@ -20,7 +23,7 @@ function montar(rol: Rol, responder: ResponderSimulado): FetchSimulado {
   const { fetch } = simularSesionActiva(rol, responder);
   render(
     <MemoryRouter initialEntries={["/profesionales"]}>
-      <AppRutas registro={registro} />
+      <AppRutas registro={registroCatalogo} />
     </MemoryRouter>,
   );
   return fetch;
@@ -498,7 +501,7 @@ const registroConPaneles = construirRegistro({
   },
 });
 
-it("Cada fila ofrece Prestaciones, Horarios y Bloqueos y abre un solo panel a la vez", async () => {
+it("El explorador muestra Datos, Horarios, Bloqueos y Prestaciones para el profesional elegido", async () => {
   for (const rol of ["ADMIN", "RECEPCION"] as const) {
     simularSesionActiva(rol, responderLista([PEREZ]));
     const montado = render(
@@ -507,22 +510,18 @@ it("Cada fila ofrece Prestaciones, Horarios y Bloqueos y abre un solo panel a la
       </MemoryRouter>,
     );
 
-    const fila = await screen.findByRole("row", { name: /Pérez/ });
-    const etiquetas = within(fila)
-      .getAllByRole("button")
-      .map((b) => b.textContent)
-      .filter((t) => ["Prestaciones", "Horarios", "Bloqueos"].includes(t ?? ""));
-    expect(etiquetas).toEqual(["Prestaciones", "Horarios", "Bloqueos"]);
-
-    await userEvent.click(within(fila).getByRole("button", { name: "Horarios" }));
+    const lista = await screen.findByRole("region", { name: "Listado de profesionales" });
+    expect(within(lista).getByRole("button", { name: /Pérez/ })).toHaveAttribute("aria-current", "true");
+    const pestanas = screen.getByRole("tablist", { name: "Secciones del profesional" });
+    expect(within(pestanas).getAllByRole("tab").map((tab) => tab.textContent))
+      .toEqual(["Datos", "Horarios", "Bloqueos", "Prestaciones"]);
     expect(await screen.findByRole("region", { name: "Horarios de Pérez" })).toBeInTheDocument();
-    expect(within(fila).getByRole("button", { name: "Horarios" })).toHaveAttribute("aria-pressed", "true");
-    expect(within(fila).getByRole("button", { name: "Bloqueos" })).toHaveAttribute("aria-pressed", "false");
+    expect(within(pestanas).getByRole("tab", { name: "Horarios" })).toHaveAttribute("aria-selected", "true");
 
-    await userEvent.click(within(fila).getByRole("button", { name: "Bloqueos" }));
+    await userEvent.click(within(pestanas).getByRole("tab", { name: "Bloqueos" }));
     expect(await screen.findByRole("region", { name: "Bloqueos de Pérez" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Horarios de Pérez" })).not.toBeInTheDocument();
-    expect(within(fila).getByRole("button", { name: "Bloqueos" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(pestanas).getByRole("tab", { name: "Bloqueos" })).toHaveAttribute("aria-selected", "true");
 
     montado.unmount();
     vi.unstubAllGlobals();

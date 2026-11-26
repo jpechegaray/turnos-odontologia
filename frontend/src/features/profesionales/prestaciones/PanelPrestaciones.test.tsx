@@ -68,10 +68,9 @@ function cuerposDeReemplazo(fetch: FetchSimulado): unknown[] {
     .map(([, init]) => JSON.parse(String((init as RequestInit).body)) as unknown);
 }
 
-/** Usa la acción «Prestaciones» de la fila de Pérez y devuelve el panel abierto. */
+/** Abre la pestaña de prestaciones del profesional seleccionado. */
 async function abrirPanel(): Promise<HTMLElement> {
-  const fila = await screen.findByRole("row", { name: /Pérez/ });
-  await userEvent.click(within(fila).getByRole("button", { name: "Prestaciones" }));
+  await userEvent.click(await screen.findByRole("tab", { name: "Prestaciones" }));
   return screen.findByRole("region", { name: "Prestaciones de Pérez, Ana" });
 }
 
@@ -152,7 +151,7 @@ it("El odontólogo consulta sus propias prestaciones sin controles de edición",
   const fetch = montar("ODONTOLOGO", { asociadas: () => Response.json([CONSULTA]) });
 
   const panel = await abrirPanel();
-  expect(screen.getAllByRole("row")).toHaveLength(2);
+  expect(within(screen.getByRole("region", { name: "Listado de profesionales" })).getAllByRole("listitem")).toHaveLength(1);
   expect(await buscarItem(panel, "Consulta")).toBeInTheDocument();
   sinControlesDeEdicion(panel);
   expect(consultasA(fetch, URL_CATALOGO)).toHaveLength(0);

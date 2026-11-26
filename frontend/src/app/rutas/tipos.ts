@@ -1,12 +1,26 @@
 import type { ComponentType } from "react";
+import type { NombreIcono } from "../../shared/ui/Icono";
 
 /** Roles del personal (RN-33). */
 export type Rol = "ODONTOLOGO" | "RECEPCION" | "ADMIN";
+
+/** Secciones del menú lateral, en el orden en que se muestran. */
+export const GRUPOS_MENU = [
+  { id: "atencion", titulo: "Atención" },
+  { id: "consultorio", titulo: "Consultorio" },
+  { id: "administracion", titulo: "Administración" },
+] as const;
+
+export type GrupoMenu = (typeof GRUPOS_MENU)[number]["id"];
 
 export type EntradaMenu = Readonly<{
   etiqueta: string;
   /** Menor primero; a igual orden, alfabético por etiqueta. */
   orden: number;
+  /** Sin grupo, la entrada va en Atención. */
+  grupo?: GrupoMenu;
+  /** Ícono decorativo de la entrada; sin ícono se usa uno genérico. */
+  icono?: NombreIcono;
 }>;
 
 /**

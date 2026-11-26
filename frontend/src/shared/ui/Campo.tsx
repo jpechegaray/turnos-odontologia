@@ -6,10 +6,12 @@ export type CampoProps = Omit<ComponentProps<"input">, "id"> & {
   etiqueta: string;
   ayuda?: string;
   error?: string;
+  /** La etiqueta queda solo para lectores de pantalla (campos de búsqueda con placeholder). */
+  etiquetaOculta?: boolean;
 };
 
 /** Campo de texto con etiqueta, ayuda y error conectados por aria (WCAG 1.3.1 y 3.3.1). */
-export function Campo({ etiqueta, ayuda, error, className, ...props }: CampoProps) {
+export function Campo({ etiqueta, ayuda, error, etiquetaOculta = false, className, ...props }: CampoProps) {
   const id = useId();
   const idAyuda = `${id}-ayuda`;
   const idError = `${id}-error`;
@@ -17,7 +19,7 @@ export function Campo({ etiqueta, ayuda, error, className, ...props }: CampoProp
 
   return (
     <div className="field">
-      <label htmlFor={id}>{etiqueta}</label>
+      <label htmlFor={id} className={etiquetaOculta ? "sr-only" : undefined}>{etiqueta}</label>
       <input
         id={id}
         className={["input", className].filter(Boolean).join(" ")}

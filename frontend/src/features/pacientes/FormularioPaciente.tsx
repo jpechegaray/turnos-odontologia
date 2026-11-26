@@ -144,6 +144,7 @@ export function FormularioPaciente({
   return (
     <Tarjeta titulo={valorInicial ? "Editar paciente" : "Nuevo paciente"}>
       <form aria-label="Datos del paciente" noValidate onSubmit={(evento) => void enviar(evento)}>
+        <div className="form-grilla">
         {CAMPOS.map(({ campo, etiqueta, maxLength }) => (
           <Campo
             key={campo}
@@ -155,6 +156,7 @@ export function FormularioPaciente({
             error={errorDe(campo)}
           />
         ))}
+        </div>
         <AreaNotas
           value={valores.notas}
           maxLength={LARGO_MAXIMO_NOTAS}
@@ -162,8 +164,10 @@ export function FormularioPaciente({
           onChange={(valor) => cambiar("notas", valor)}
         />
         {remotos.alerta ? <Alerta tipo="peligro" titulo={remotos.alerta} /> : null}
-        <Boton type="submit" disabled={pendiente}>{etiquetaEnvio}</Boton>
-        {onCancelar ? <Boton variante="secundaria" onClick={onCancelar}>Cancelar</Boton> : null}
+        <div className="form-acciones">
+          {onCancelar ? <Boton variante="secundaria" onClick={onCancelar}>Cancelar</Boton> : null}
+          <Boton type="submit" disabled={pendiente}>{etiquetaEnvio}</Boton>
+        </div>
       </form>
     </Tarjeta>
   );

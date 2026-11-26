@@ -1,0 +1,73 @@
+/* Inicio del personal. Solo variables de tokens.css (regla 13). */
+
+.inicio { display: grid; gap: var(--space-6); }
+.inicio p { margin: 0; }
+.inicio__encabezado h2 { margin-bottom: var(--space-1); }
+.inicio__error { display: grid; gap: var(--space-3); justify-items: start; }
+
+/* Cifras del día */
+.cifras { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+.cifra { display: grid; gap: var(--space-2); align-content: start; }
+.cifra__titulo { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.cifra__icono {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.cifra__valor { font-size: var(--text-3xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); font-variant-numeric: tabular-nums; }
+.cifra__detalle { color: var(--color-text-muted); font-size: var(--text-xs); }
+
+/* Próximos turnos */
+.inicio .proximos { padding: 0; overflow: hidden; }
+.proximos__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.proximos__cabecera h3 { margin: 0; font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.layout__contenido .proximos__cabecera a { color: var(--color-primary); font-size: var(--text-sm); font-weight: var(--weight-semibold); text-decoration: none; }
+.proximos__vacio { padding: var(--space-5); }
+.proximos__lista { margin: 0; padding: 0; list-style: none; }
+.proximo {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+.proximo:first-child { border-top: 0; }
+.proximo__hora { display: grid; font-weight: var(--weight-bold); }
+.proximo__hora small { color: var(--color-text-muted); font-size: var(--text-xs); font-weight: var(--weight-regular); }
+.proximo__paciente { font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
+.proximo__detalle { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); overflow-wrap: anywhere; }
+.inicio__columnas { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.inicio__lateral { display: grid; gap: var(--space-4); }
+.inicio__lateral-panel { display: grid; gap: var(--space-3); }
+.inicio__lateral-panel h3 { margin: 0; font-size: var(--text-base); }
+.inicio__ocupacion { display: grid; gap: var(--space-1); }
+.inicio__ocupacion > div { display: flex; justify-content: space-between; gap: var(--space-2); }
+.inicio__ocupacion progress { width: 100%; height: var(--space-2); accent-color: var(--color-primary); }
+.inicio .inicio__atajo {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-2);
+  min-height: var(--target-min); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3); color: var(--color-text); text-decoration: none;
+}
+.inicio .inicio__atajo:hover { background: var(--color-primary-softer); }
+
+@media (max-width: 1100px) {
+  .cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .inicio__columnas { grid-template-columns: minmax(0, 1fr); }
+  .proximo { grid-template-columns: 56px minmax(0, 1fr); padding: var(--space-3) var(--space-4); }
+  .proximo .badge { grid-column: 2; justify-self: start; }
+}

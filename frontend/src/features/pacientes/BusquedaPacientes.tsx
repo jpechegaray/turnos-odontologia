@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Boton, Campo } from "../../shared/ui";
+import { Boton, Campo, Icono } from "../../shared/ui";
 import { FILTROS_VACIOS } from "./consulta";
 import type { FiltrosPacientes } from "./tipos";
 
@@ -16,34 +16,40 @@ export function BusquedaPacientes({ onBuscar }: BusquedaPacientesProps) {
   }
 
   return (
-    <form role="search" aria-label="Buscar pacientes" onSubmit={enviar}>
+    <form role="search" aria-label="Buscar pacientes" className="filtros" onSubmit={enviar}>
       <Campo
         etiqueta="Apellido"
+        etiquetaOculta
+        placeholder="Apellido"
         name="apellido"
         value={filtros.apellido}
         onChange={(evento) => actualizarFiltros({ ...filtros, apellido: evento.target.value })}
       />
       <Campo
         etiqueta="Nombre"
+        etiquetaOculta
+        placeholder="Nombre"
         name="nombre"
         value={filtros.nombre}
         onChange={(evento) => actualizarFiltros({ ...filtros, nombre: evento.target.value })}
       />
       <Campo
         etiqueta="DNI"
+        etiquetaOculta
+        placeholder="DNI exacto"
         name="dni"
-        ayuda="Coincidencia exacta."
         value={filtros.dni}
         onChange={(evento) => actualizarFiltros({ ...filtros, dni: evento.target.value })}
       />
       <Campo
         etiqueta="Email"
+        etiquetaOculta
+        placeholder="Email exacto"
         name="email"
-        ayuda="Coincidencia exacta."
         value={filtros.email}
         onChange={(evento) => actualizarFiltros({ ...filtros, email: evento.target.value })}
       />
-      <Boton type="submit">Buscar</Boton>
+      <Boton type="submit" variante="secundaria"><Icono nombre="buscar" />Buscar</Boton>
     </form>
   );
 }

@@ -26,7 +26,7 @@ export const rutas: RutaFeature[] = [
   {
     ruta: "/profesionales",
     componente: PantallaProfesionales,
-    menu: { etiqueta: "Profesionales", orden: 30 },
+    menu: { etiqueta: "Profesionales", orden: 30, grupo: "consultorio", icono: "profesionales" },
     roles: ["ADMIN", "RECEPCION", "ODONTOLOGO"],
   },
 ];

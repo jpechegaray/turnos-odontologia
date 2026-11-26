@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from "react";
-import { Boton, Campo } from "../../shared/ui";
+import { Boton, Campo, Icono } from "../../shared/ui";
 import { FILTROS_VACIOS, turnoValido } from "./consulta";
 import { ETIQUETAS_ESTADO } from "./presentacion";
 import { MENSAJE_TURNO_INVALIDO } from "./textos";
@@ -53,7 +53,7 @@ export function FiltrosNotificaciones({ onBuscar }: FiltrosNotificacionesProps) 
         value={filtros.turno}
         onChange={(evento) => actualizarFiltros({ ...filtros, turno: evento.target.value })}
       />
-      <Boton type="submit">Buscar</Boton>
+      <Boton type="submit" variante="secundaria"><Icono nombre="buscar" />Buscar</Boton>
     </form>
   );
 }

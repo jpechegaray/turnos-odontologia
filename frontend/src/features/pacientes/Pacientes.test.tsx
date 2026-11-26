@@ -119,11 +119,11 @@ it("Al abrir la pantalla se listan las fichas activas", async () => {
   expect(
     within(filaAna)
       .getAllByRole("cell")
-      .slice(0, 6)
+      .slice(0, 4)
       .map((celda) => celda.textContent),
-  ).toEqual(["Ficticia", "Ana", "30111222", "ana.ficticia@example.test", "1100000000", "Obra Social Ficticia"]);
+  ).toEqual(["Ficticia, Ana", "30111222", "1100000000ana.ficticia@example.test", "—"]);
   const filaBruno = screen.getByRole("row", { name: /Inventado/ });
-  expect(within(filaBruno).getAllByRole("cell")[1]).toHaveTextContent("Bruno");
+  expect(within(filaBruno).getAllByRole("cell")[0]).toHaveTextContent("Bruno");
   expect(consultasPacientes(fetch).map(([url]) => url)).toEqual(["/api/pacientes"]);
   expect(escrituras(fetch)).toHaveLength(0);
 });
@@ -136,10 +136,10 @@ it("Un dato ausente de la ficha se muestra con una marca de vacío", async () =>
 
   const fila = await screen.findByRole("row", { name: /Inventado/ });
   const celdas = within(fila).getAllByRole("cell");
+  expect(celdas[1]).toHaveTextContent("—");
   expect(celdas[2]).toHaveTextContent("—");
   expect(celdas[3]).toHaveTextContent("—");
-  expect(celdas[5]).toHaveTextContent("—");
-  expect(celdas[4]).toHaveTextContent("1100000001");
+  expect(celdas[2]).toHaveTextContent("1100000001");
 });
 
 it("Un fallo al consultar pacientes permite reintentar", async () => {
@@ -155,11 +155,12 @@ it("Un fallo al consultar pacientes permite reintentar", async () => {
   expect(alerta).toHaveTextContent("No pudimos cargar los pacientes.");
   expect(screen.queryByRole("table")).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
-  expect(await screen.findByRole("cell", { name: "Ficticia" })).toBeInTheDocument();
+  expect(await screen.findByRole("cell", { name: /Ficticia/ })).toBeInTheDocument();
   expect(consultasPacientes(fetch)).toHaveLength(2);
 });
 
 async function buscar(filtros: Readonly<Partial<Record<"Apellido" | "Nombre" | "DNI" | "Email", string>>>) {
+  await userEvent.click(await screen.findByText("Búsqueda avanzada"));
   const formulario = await screen.findByRole("search", { name: "Buscar pacientes" });
   for (const [etiqueta, valor] of Object.entries(filtros)) {
     await userEvent.type(within(formulario).getByLabelText(etiqueta), valor);
@@ -178,8 +179,8 @@ it("La búsqueda por apellido envía solo ese filtro", async () => {
 
   await buscar({ Apellido: "Gómez" });
 
-  expect(await screen.findByRole("cell", { name: "Gómez" })).toBeInTheDocument();
-  expect(screen.queryByRole("cell", { name: "Inventado" })).not.toBeInTheDocument();
+  expect(await screen.findByRole("cell", { name: /Gómez/ })).toBeInTheDocument();
+  expect(screen.queryByRole("cell", { name: /Inventado/ })).not.toBeInTheDocument();
   expect(consultasPacientes(fetch).map(([url]) => url)).toEqual(["/api/pacientes", "/api/pacientes?apellido=G%C3%B3mez"]);
 });
 
@@ -191,7 +192,7 @@ it("Los filtros de búsqueda se combinan", async () => {
 
   await buscar({ Nombre: "Ana", Email: "ana.ficticia@example.test" });
 
-  await screen.findByRole("cell", { name: "Ficticia" });
+  await screen.findByRole("cell", { name: /Ficticia/ });
   const consultas = consultasPacientes(fetch).map(([url]) => String(url));
   expect(consultas).toHaveLength(2);
   const parametros = new URL(consultas[1] ?? "", "http://localhost").searchParams;
@@ -222,6 +223,9 @@ it("Una búsqueda sin coincidencias muestra un mensaje", async () => {
 type EtiquetaFicha = "Nombre" | "Apellido" | "DNI" | "Email" | "Teléfono" | "Obra social" | "Número de afiliado" | "Notas";
 
 async function formularioFicha() {
+  if (!screen.queryByRole("form", { name: "Datos del paciente" })) {
+    await userEvent.click(await screen.findByRole("button", { name: "Registrar paciente" }));
+  }
   return screen.findByRole("form", { name: "Datos del paciente" });
 }
 
@@ -311,7 +315,7 @@ it("Recepción da de alta un paciente y la lista se refresca", async () => {
     nroAfiliado: "A-100",
     notas: "Paciente de prueba",
   });
-  expect(await screen.findByRole("cell", { name: "Ficticia" })).toBeInTheDocument();
+  expect(await screen.findByRole("cell", { name: /Ficticia/ })).toBeInTheDocument();
   expect(consultasPacientes(fetch)).toHaveLength(2);
   const formulario = await formularioFicha();
   for (const etiqueta of ["Nombre", "Apellido", "DNI", "Email", "Teléfono", "Obra social", "Número de afiliado", "Notas"]) {
@@ -500,13 +504,13 @@ it("Recepción edita una ficha y la lista se refresca", async () => {
     nroAfiliado: "A-100",
     notas: "Paciente de prueba",
   });
-  expect(await screen.findByRole("cell", { name: "1155550000" })).toBeInTheDocument();
+  expect(await screen.findByRole("cell", { name: /1155550000/ })).toBeInTheDocument();
   expect(consultasPacientes(fetch).map(([url]) => url)).toEqual([
     "/api/pacientes",
     "/api/pacientes?apellido=Ficticia",
     "/api/pacientes?apellido=Ficticia",
   ]);
-  expect(screen.getByRole("heading", { name: "Nuevo paciente" })).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Editar paciente" })).not.toBeInTheDocument();
 });
 
 it("Cancelar la edición vuelve al formulario de alta", async () => {
@@ -570,8 +574,8 @@ it("El administrador da de baja una ficha y deja de aparecer en la lista", async
   expect(bajas).toHaveLength(1);
   expect(bajas[0]?.[0]).toBe("/api/pacientes/1");
   expect((bajas[0]?.[1] as RequestInit).method).toBe("DELETE");
-  await vi.waitFor(() => expect(screen.queryByRole("cell", { name: "Ficticia" })).not.toBeInTheDocument());
-  expect(screen.getByRole("cell", { name: "Inventado" })).toBeInTheDocument();
+  await vi.waitFor(() => expect(screen.queryByRole("cell", { name: /Ficticia/ })).not.toBeInTheDocument());
+  expect(screen.getByRole("cell", { name: /Inventado/ })).toBeInTheDocument();
   expect(consultasPacientes(fetch)).toHaveLength(2);
 });
 

@@ -47,7 +47,9 @@ export function useListadoPanel<T>({ ruta, traducirError, refrescarLista, inform
       if (!silenciosa) actualizarEstado({ tipo: "cargando" });
       try {
         const elementos = await api.get<T[]>(ruta);
-        if (actual === solicitud.current) actualizarEstado({ tipo: "listo", elementos });
+        if (actual === solicitud.current) {
+          actualizarEstado(Array.isArray(elementos) ? { tipo: "listo", elementos } : { tipo: "error" });
+        }
       } catch {
         if (actual === solicitud.current) actualizarEstado({ tipo: "error" });
       }

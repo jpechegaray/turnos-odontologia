@@ -1,78 +1,115 @@
-/* Design tokens - Turnos Odontologia (provisional). Revision 1.
-   Sin fuentes remotas. Contraste de texto >= 4.5:1 (WCAG AA) por par fg/bg. */
+/* Design tokens - OdontologIA. Revision 2 (Approval: pending).
+   Paleta verde bosque (#1B3A2F) y crema (#F5F1E8). Tipografia Public Sans autoalojada (paquete npm
+   @fontsource-variable/public-sans, sin fuentes remotas). Contraste de texto >= 4.5:1 (WCAG AA) por par fg/bg;
+   lo verifica frontend/src/app/identidadVisual.test.ts. */
 :root {
   color-scheme: light dark;
 
-  /* Primario (marca provisional) */
-  --color-primary: #0B5F8A;          /* texto blanco encima: 6.9:1 */
-  --color-primary-hover: #084B6E;
-  --color-primary-active: #063D5A;
+  /* Primario: verde bosque */
+  --color-primary: #1B3A2F;          /* texto blanco encima: 12.4:1 */
+  --color-primary-hover: #2A5444;    /* blanco encima: 8.6:1 */
+  --color-primary-active: #12281F;
   --color-on-primary: #FFFFFF;
-  --color-primary-soft: #E2EFF6;     /* texto primary encima: 5.9:1 */
-  --color-link: #0B5F8A;
+  --color-primary-soft: #E4ECE3;     /* salvia; primario encima: 10.3:1 */
+  --color-primary-softer: #EFF3EC;   /* hover de filas y fondos de seccion */
+  --color-link: #1B3A2F;
 
-  /* Superficies */
-  --color-bg: #F4F6F8;
-  --color-surface: #FFFFFF;
-  --color-surface-muted: #EDF1F4;
-  --color-surface-raised: #FFFFFF;
-  --color-overlay: rgba(20, 30, 40, 0.5);
+  /* Superficies: fondo crema, tarjetas blanco calido */
+  --color-bg: #F5F1E8;
+  --color-surface: #FFFDF8;
+  --color-surface-muted: #EFEADF;
+  --color-surface-raised: #FFFDF8;
+  --color-overlay: rgba(27, 32, 28, 0.45);
 
   /* Texto */
-  --color-text: #1B2733;             /* sobre surface: 14.6:1 */
-  --color-text-muted: #4B5A68;       /* sobre surface: 7.0:1; sobre bg: 6.4:1 */
-  --color-text-disabled: #6B7783;    /* solo controles deshabilitados (exentos de AA) */
+  --color-text: #1F2A24;             /* sobre crema: 13.2:1 */
+  --color-text-muted: #5B6459;       /* sobre crema: 5.5:1 */
+  --color-text-disabled: #8A8C80;    /* solo controles deshabilitados (exentos de AA) */
 
   /* Bordes */
-  --color-border: #C8D1D9;
-  --color-border-strong: #8793A0;    /* bordes de inputs (3:1 no textual) */
+  --color-border: #E2DACA;
+  --color-border-strong: #8C8471;    /* bordes de inputs (3:1 no textual) */
 
   /* Semanticos */
-  --color-danger: #B42318;           /* blanco encima: 6.5:1 */
+  --color-danger: #B42318;           /* blanco encima: 6.6:1 */
   --color-danger-hover: #912018;
   --color-danger-soft: #FDECEA;
   --color-danger-text: #9B1C1C;
-  --color-success-soft: #E0F2E6;
+  --color-success-soft: #E2F4EA;
   --color-success-text: #14612E;
-  --color-warning-soft: #FCEFD0;
+  --color-warning-soft: #FCF0D4;
   --color-warning-text: #7A4B00;
-  --color-info-soft: #E3EEF8;
-  --color-info-text: #144B7A;
+  --color-info-soft: #E8EEE9;        /* info en salvia */
+  --color-info-text: #24453A;
 
-  /* Estados de turno: fondo / texto / borde. Siempre con icono + texto, nunca solo color. */
-  --turno-reservado-bg: #E3EEF8;   --turno-reservado-fg: #144B7A;   --turno-reservado-border: #7FA8CF;
-  --turno-confirmado-bg: #E0F2E6;  --turno-confirmado-fg: #14612E;  --turno-confirmado-border: #6FB488;
-  --turno-atendido-bg: #E4E9EE;    --turno-atendido-fg: #2F3E4C;    --turno-atendido-border: #8E9CAA;
-  --turno-ausente-bg: #FCEFD0;     --turno-ausente-fg: #7A4B00;     --turno-ausente-border: #D9A441;
-  --turno-cancelado-bg: #F1F1F1;   --turno-cancelado-fg: #565B61;   --turno-cancelado-border: #B5B8BB;
-  --turno-tardia-bg: #FADFDD;      --turno-tardia-fg: #9B1C1C;      --turno-tardia-border: #DB7A75;
-  --agenda-bloqueo-bg: #E9ECEF;    --agenda-bloqueo-fg: #3D4A57;    --agenda-bloqueo-border: #8793A0;
-  --agenda-libre-border: #8793A0;  --agenda-libre-fg: #4B5A68;      --agenda-libre-hover: #E2EFF6;
-  --agenda-linea: #DDE3E8;
-  --agenda-linea-hora: #BAC4CD;
+  /* Estados de turno: fondo / texto / borde. Siempre con icono + texto, nunca solo color.
+     El borde tambien es la franja izquierda de 4px en la agenda. */
+  --turno-reservado-bg: #E6EEFA;   --turno-reservado-fg: #1E4B8A;   --turno-reservado-border: #5B86C5;
+  --turno-confirmado-bg: #E2F4EA;  --turno-confirmado-fg: #14612E;  --turno-confirmado-border: #3E9B63;
+  --turno-atendido-bg: #EAE8E0;    --turno-atendido-fg: #33403A;    --turno-atendido-border: #8C8471;
+  --turno-ausente-bg: #FCF0D4;     --turno-ausente-fg: #7A4B00;     --turno-ausente-border: #D19A2E;
+  --turno-cancelado-bg: #F0EDE6;   --turno-cancelado-fg: #5B5A54;   --turno-cancelado-border: #BDB6A6;
+  --turno-tardia-bg: #FADFDD;      --turno-tardia-fg: #9B1C1C;      --turno-tardia-border: #D9645E;
+  --agenda-bloqueo-bg: #ECE7DA;    --agenda-bloqueo-fg: #3D4A40;    --agenda-bloqueo-border: #A9A08C;
+  --agenda-libre-border: #8C8471;  --agenda-libre-fg: #5B6459;      --agenda-libre-hover: #E4ECE3;
+  --agenda-linea: #ECE6D9;
+  --agenda-linea-hora: #D3CAB6;
+  --agenda-ahora: #B5470F;           /* linea de "ahora" (3:1 no textual) */
 
-  /* Tipografia (stack de sistema) */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  /* Identificacion de profesionales (avatar y encabezado de columna). Nunca como unico dato:
+     siempre junto al nombre. Cada par fg/bg >= 7:1. */
+  --prof-1-bg: #E4ECE3; --prof-1-fg: #1B3A2F;
+  --prof-2-bg: #E6ECF5; --prof-2-fg: #24406B;
+  --prof-3-bg: #F3E8EE; --prof-3-fg: #6E2A4C;
+  --prof-4-bg: #F8EAD9; --prof-4-fg: #7A3E0E;
+  --prof-5-bg: #EDEBDA; --prof-5-fg: #4F4A12;
+
+  /* Marca: "IA" del wordmark y destello del logo */
+  --marca-acento: #44725A;           /* sobre crema: 4.9:1 */
+  --marca-destello: #6A9B80;         /* grafico, no texto */
+  --nav-marca-acento: #9CCBB2;       /* sobre el menu: 6.9:1 */
+
+  /* Navegacion lateral del personal (verde bosque). Contrastes: texto 11.0:1, atenuado 7.0:1,
+     rotulo 5.9:1, activo blanco sobre #2C5545 8.4:1. */
+  --nav-ancho: 248px;
+  --nav-bg: #1B3A2F;
+  --nav-fg: #F5F1E8;
+  --nav-fg-atenuado: #B7C6BA;
+  --nav-rotulo: #A5B8AA;
+  --nav-borde: #2F5143;
+  --nav-hover-bg: #24493B;
+  --nav-activo-bg: #2C5545;
+  --nav-activo-fg: #FFFFFF;
+  --nav-activo-marca: #F5F1E8;
+  --nav-contador-bg: #F5F1E8;
+  --nav-contador-fg: #1B3A2F;
+  --nav-foco: #F5F1E8;
+
+  /* Tipografia: Public Sans autoalojada; respaldo en el stack de sistema */
+  --font-sans: "Public Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
   --text-xs: 0.75rem;   --text-sm: 0.875rem;  --text-base: 1rem;
   --text-lg: 1.125rem;  --text-xl: 1.375rem;  --text-2xl: 1.75rem;
+  --text-3xl: 2.125rem;              /* cifras de resumen en Inicio */
   --leading-tight: 1.25; --leading-normal: 1.5;
   --weight-regular: 400; --weight-medium: 500; --weight-semibold: 600; --weight-bold: 700;
+  --tracking-titulo: -0.01em;
+  --tracking-rotulo: 0.04em;         /* rotulos en mayuscula pequena */
 
   /* Espaciado (base 4px) */
   --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;
   --space-5: 1.5rem;  --space-6: 2rem;    --space-7: 3rem;    --space-8: 4rem;
 
   /* Radios */
-  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-pill: 999px;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-pill: 999px;
 
-  /* Sombras (tintadas al fondo azul-gris) */
-  --shadow-sm: 0 1px 2px rgba(27, 39, 51, 0.08);
-  --shadow-md: 0 4px 12px -2px rgba(27, 39, 51, 0.12);
-  --shadow-lg: 0 12px 28px -8px rgba(27, 39, 51, 0.2);
+  /* Sombras tintadas al tono calido del fondo */
+  --shadow-sm: 0 1px 2px rgba(40, 34, 20, 0.06), 0 1px 1px rgba(40, 34, 20, 0.04);
+  --shadow-md: 0 6px 16px -4px rgba(40, 34, 20, 0.12);
+  --shadow-lg: 0 16px 36px -10px rgba(40, 34, 20, 0.2);
 
   /* Foco visible */
-  --focus-color: #0B5F8A;
+  --focus-color: #2F6B52;
   --focus-ring: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--focus-color);
   --focus-outline: 3px solid var(--focus-color);
   --focus-offset: 2px;
@@ -83,70 +120,127 @@
 
   /* Motion */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);  /* paneles laterales */
   --dur-fast: 120ms; --dur-base: 180ms; --dur-slow: 240ms;
 }
 
-/* Modo oscuro opcional: sigue al sistema; se fuerza con data-theme="light" | "dark" */
+:root[data-theme="light"] { color-scheme: light; }
+
+/* Modo oscuro opcional: sigue al sistema; se fuerza con data-theme="light" | "dark".
+   Los dos bloques tienen que ser iguales (lo verifica identidadVisual.test.ts). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-primary: #5BB0DC;        /* texto oscuro encima: 7.4:1 */
-    --color-primary-hover: #7CC2E6;
-    --color-primary-active: #9ACFEC;
-    --color-on-primary: #0A1A24;
-    --color-primary-soft: #14303F;
-    --color-link: #7CC2E6;
-    --color-bg: #11171C;
-    --color-surface: #1A222A;
-    --color-surface-muted: #222C35;
-    --color-surface-raised: #202A33;
+    --color-primary: #9CCBB2;        /* texto oscuro encima: 9.4:1 */
+    --color-primary-hover: #B5DBC6;
+    --color-primary-active: #CDE7D8;
+    --color-on-primary: #0F1F18;
+    --color-primary-soft: #203A2E;
+    --color-primary-softer: #1C2C25;
+    --color-link: #B5DBC6;
+    --color-bg: #121A16;
+    --color-surface: #1A2520;
+    --color-surface-muted: #213029;
+    --color-surface-raised: #1F2C26;
     --color-overlay: rgba(0, 0, 0, 0.6);
-    --color-text: #E8EDF1;
-    --color-text-muted: #A9B6C2;
-    --color-text-disabled: #7C8995;
-    --color-border: #34414D;
-    --color-border-strong: #6B7B8A;
-    --color-danger: #F2766B;
-    --color-danger-hover: #F59A91;
-    --color-danger-soft: #3A1E1C;
-    --color-danger-text: #FFB4AC;
+    --color-text: #E8EDE6;
+    --color-text-muted: #A9B5AA;
+    --color-text-disabled: #7C887E;
+    --color-border: #2F4037;
+    --color-border-strong: #6C7E72;
+    --color-danger: #F2766B; --color-danger-hover: #F59A91; --color-danger-soft: #3A1E1C; --color-danger-text: #FFB4AC;
     --color-success-soft: #17301F;  --color-success-text: #9BDCB0;
     --color-warning-soft: #36290E;  --color-warning-text: #F0C675;
-    --color-info-soft: #162A3C;     --color-info-text: #9CC8EE;
+    --color-info-soft: #1E2E27;     --color-info-text: #B5DBC6;
     --turno-reservado-bg: #162A3C;  --turno-reservado-fg: #A8CFF2;  --turno-reservado-border: #4F7CA6;
     --turno-confirmado-bg: #17301F; --turno-confirmado-fg: #9BDCB0; --turno-confirmado-border: #4C8A62;
-    --turno-atendido-bg: #27313B;   --turno-atendido-fg: #C3CDD6;   --turno-atendido-border: #6B7B8A;
+    --turno-atendido-bg: #25302A;   --turno-atendido-fg: #C9D2C9;   --turno-atendido-border: #6C7E72;
     --turno-ausente-bg: #36290E;    --turno-ausente-fg: #F0C675;    --turno-ausente-border: #A77A22;
-    --turno-cancelado-bg: #262A2E;  --turno-cancelado-fg: #A9B0B6;  --turno-cancelado-border: #5A6168;
+    --turno-cancelado-bg: #24292A;  --turno-cancelado-fg: #AEB3AC;  --turno-cancelado-border: #5E655F;
     --turno-tardia-bg: #3A1E1C;     --turno-tardia-fg: #FFB4AC;     --turno-tardia-border: #B25A54;
-    --agenda-bloqueo-bg: #262E36;   --agenda-bloqueo-fg: #C3CDD6;   --agenda-bloqueo-border: #6B7B8A;
-    --agenda-libre-border: #6B7B8A; --agenda-libre-fg: #A9B6C2;     --agenda-libre-hover: #14303F;
-    --agenda-linea: #2B3640;        --agenda-linea-hora: #3F4E5B;
+    --agenda-bloqueo-bg: #222E28;   --agenda-bloqueo-fg: #C9D2C9;   --agenda-bloqueo-border: #6C7E72;
+    --agenda-libre-border: #6C7E72; --agenda-libre-fg: #A9B5AA;     --agenda-libre-hover: #203A2E;
+    --agenda-linea: #24342C;        --agenda-linea-hora: #36493F;   --agenda-ahora: #FB923C;
+    --prof-1-bg: #203A2E; --prof-1-fg: #B5DBC6;
+    --prof-2-bg: #1B2748; --prof-2-fg: #B7C7F5;
+    --prof-3-bg: #2E1D38; --prof-3-fg: #E2B8F2;
+    --prof-4-bg: #3A2516; --prof-4-fg: #F7C29C;
+    --prof-5-bg: #2C2B16; --prof-5-fg: #E3DC9C;
+    --marca-acento: #9CCBB2;
+    --marca-destello: #9CCBB2;
+    --nav-marca-acento: #9CCBB2;
+    --nav-bg: #15201B;
+    --nav-fg: #E8EDE6;
+    --nav-fg-atenuado: #A9B5AA;
+    --nav-rotulo: #94A596;
+    --nav-borde: #24342C;
+    --nav-hover-bg: #1C2C25;
+    --nav-activo-bg: #203A2E;
+    --nav-activo-fg: #B5DBC6;
+    --nav-activo-marca: #9CCBB2;
+    --nav-contador-bg: #9CCBB2;
+    --nav-contador-fg: #0F1F18;
+    --nav-foco: #B5DBC6;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
-    --focus-color: #7CC2E6;
+    --shadow-md: 0 6px 16px -4px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 16px 36px -10px rgba(0, 0, 0, 0.6);
+    --focus-color: #B5DBC6;
   }
 }
 :root[data-theme="dark"] {
-  --color-primary: #5BB0DC; --color-primary-hover: #7CC2E6; --color-primary-active: #9ACFEC;
-  --color-on-primary: #0A1A24; --color-primary-soft: #14303F; --color-link: #7CC2E6;
-  --color-bg: #11171C; --color-surface: #1A222A; --color-surface-muted: #222C35; --color-surface-raised: #202A33;
-  --color-text: #E8EDF1; --color-text-muted: #A9B6C2; --color-text-disabled: #7C8995;
-  --color-border: #34414D; --color-border-strong: #6B7B8A;
+  --color-primary: #9CCBB2;        /* texto oscuro encima: 9.4:1 */
+  --color-primary-hover: #B5DBC6;
+  --color-primary-active: #CDE7D8;
+  --color-on-primary: #0F1F18;
+  --color-primary-soft: #203A2E;
+  --color-primary-softer: #1C2C25;
+  --color-link: #B5DBC6;
+  --color-bg: #121A16;
+  --color-surface: #1A2520;
+  --color-surface-muted: #213029;
+  --color-surface-raised: #1F2C26;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --color-text: #E8EDE6;
+  --color-text-muted: #A9B5AA;
+  --color-text-disabled: #7C887E;
+  --color-border: #2F4037;
+  --color-border-strong: #6C7E72;
   --color-danger: #F2766B; --color-danger-hover: #F59A91; --color-danger-soft: #3A1E1C; --color-danger-text: #FFB4AC;
-  --color-success-soft: #17301F; --color-success-text: #9BDCB0;
-  --color-warning-soft: #36290E; --color-warning-text: #F0C675;
-  --color-info-soft: #162A3C; --color-info-text: #9CC8EE;
-  --turno-reservado-bg: #162A3C; --turno-reservado-fg: #A8CFF2; --turno-reservado-border: #4F7CA6;
+  --color-success-soft: #17301F;  --color-success-text: #9BDCB0;
+  --color-warning-soft: #36290E;  --color-warning-text: #F0C675;
+  --color-info-soft: #1E2E27;     --color-info-text: #B5DBC6;
+  --turno-reservado-bg: #162A3C;  --turno-reservado-fg: #A8CFF2;  --turno-reservado-border: #4F7CA6;
   --turno-confirmado-bg: #17301F; --turno-confirmado-fg: #9BDCB0; --turno-confirmado-border: #4C8A62;
-  --turno-atendido-bg: #27313B; --turno-atendido-fg: #C3CDD6; --turno-atendido-border: #6B7B8A;
-  --turno-ausente-bg: #36290E; --turno-ausente-fg: #F0C675; --turno-ausente-border: #A77A22;
-  --turno-cancelado-bg: #262A2E; --turno-cancelado-fg: #A9B0B6; --turno-cancelado-border: #5A6168;
-  --turno-tardia-bg: #3A1E1C; --turno-tardia-fg: #FFB4AC; --turno-tardia-border: #B25A54;
-  --agenda-bloqueo-bg: #262E36; --agenda-bloqueo-fg: #C3CDD6; --agenda-bloqueo-border: #6B7B8A;
-  --agenda-libre-border: #6B7B8A; --agenda-libre-fg: #A9B6C2; --agenda-libre-hover: #14303F;
-  --agenda-linea: #2B3640; --agenda-linea-hora: #3F4E5B;
-  --focus-color: #7CC2E6;
+  --turno-atendido-bg: #25302A;   --turno-atendido-fg: #C9D2C9;   --turno-atendido-border: #6C7E72;
+  --turno-ausente-bg: #36290E;    --turno-ausente-fg: #F0C675;    --turno-ausente-border: #A77A22;
+  --turno-cancelado-bg: #24292A;  --turno-cancelado-fg: #AEB3AC;  --turno-cancelado-border: #5E655F;
+  --turno-tardia-bg: #3A1E1C;     --turno-tardia-fg: #FFB4AC;     --turno-tardia-border: #B25A54;
+  --agenda-bloqueo-bg: #222E28;   --agenda-bloqueo-fg: #C9D2C9;   --agenda-bloqueo-border: #6C7E72;
+  --agenda-libre-border: #6C7E72; --agenda-libre-fg: #A9B5AA;     --agenda-libre-hover: #203A2E;
+  --agenda-linea: #24342C;        --agenda-linea-hora: #36493F;   --agenda-ahora: #FB923C;
+  --prof-1-bg: #203A2E; --prof-1-fg: #B5DBC6;
+  --prof-2-bg: #1B2748; --prof-2-fg: #B7C7F5;
+  --prof-3-bg: #2E1D38; --prof-3-fg: #E2B8F2;
+  --prof-4-bg: #3A2516; --prof-4-fg: #F7C29C;
+  --prof-5-bg: #2C2B16; --prof-5-fg: #E3DC9C;
+  --marca-acento: #9CCBB2;
+  --marca-destello: #9CCBB2;
+  --nav-marca-acento: #9CCBB2;
+  --nav-bg: #15201B;
+  --nav-fg: #E8EDE6;
+  --nav-fg-atenuado: #A9B5AA;
+  --nav-rotulo: #94A596;
+  --nav-borde: #24342C;
+  --nav-hover-bg: #1C2C25;
+  --nav-activo-bg: #203A2E;
+  --nav-activo-fg: #B5DBC6;
+  --nav-activo-marca: #9CCBB2;
+  --nav-contador-bg: #9CCBB2;
+  --nav-contador-fg: #0F1F18;
+  --nav-foco: #B5DBC6;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px -4px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 36px -10px rgba(0, 0, 0, 0.6);
+  --focus-color: #B5DBC6;
 }
 
 /* Movimiento reducido: se eliminan transiciones y animaciones de movimiento */

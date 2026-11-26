@@ -34,6 +34,7 @@ async function irAHorarios() {
 async function irADatos() {
   await irAHorarios();
   fireEvent.click(await screen.findByRole("button", { name: /10:00/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
   await screen.findByRole("heading", { name: "Tus datos" });
 }
 
@@ -166,6 +167,7 @@ it("Un horario ocupado muestra alternativas y conserva el formulario", async () 
   await formularioListo();
   confirmar();
   fireEvent.click(await screen.findByRole("button", { name: /11:00/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
   expect(screen.getByLabelText("Email")).toHaveValue("sol@example.test");
   confirmar();
   await screen.findByRole("link", { name: "Gestionar mi turno" });
@@ -179,6 +181,7 @@ it("Un conflicto sin alternativas permite volver a buscar", async () => {
   confirmar();
   fireEvent.click(await screen.findByRole("button", { name: "Buscar otros horarios" }));
   fireEvent.click(await screen.findByRole("button", { name: /10:00/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
   expect(screen.getByLabelText("Email")).toHaveValue("sol@example.test");
 });
 

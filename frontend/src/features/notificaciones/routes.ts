@@ -5,7 +5,7 @@ export const rutas: RutaFeature[] = [
   {
     ruta: "/notificaciones",
     componente: PaginaNotificaciones,
-    menu: { etiqueta: "Notificaciones", orden: 80 },
+    menu: { etiqueta: "Notificaciones", orden: 80, grupo: "administracion", icono: "notificaciones" },
     roles: ["ADMIN", "RECEPCION"],
   },
 ];

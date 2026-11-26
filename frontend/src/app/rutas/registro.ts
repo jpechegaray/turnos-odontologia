@@ -23,7 +23,7 @@ export function construirRegistro(modulos: Readonly<Record<string, ModuloRutas>>
   const rutas = [...porRuta.values()].map(({ ruta }) => ruta);
   const menu: EntradaMenuResuelta[] = rutas
     .filter((r): r is RutaFeature & { menu: NonNullable<RutaFeature["menu"]> } => r.menu !== undefined)
-    .map((r) => ({ ruta: r.ruta, etiqueta: r.menu.etiqueta, orden: r.menu.orden }))
+    .map((r) => ({ ruta: r.ruta, ...r.menu }))
     .sort((a, b) => a.orden - b.orden || a.etiqueta.localeCompare(b.etiqueta, "es"));
 
   return { rutas, menu };

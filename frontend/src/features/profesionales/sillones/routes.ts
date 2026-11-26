@@ -5,7 +5,7 @@ export const rutas: RutaFeature[] = [
   {
     ruta: "/sillones",
     componente: PaginaSillones,
-    menu: { etiqueta: "Sillones", orden: 40 },
+    menu: { etiqueta: "Sillones", orden: 40, grupo: "consultorio", icono: "sillones" },
     roles: ["ADMIN", "RECEPCION", "ODONTOLOGO"],
   },
 ];

@@ -144,3 +144,100 @@
 .reserva-bloque > [role="status"]:empty {
   display: none;
 }
+
+/* C-50: identidad final, según exploracion-diseno/propuesta/reserva.html */
+.reserva-publica {
+  justify-items: stretch;
+  align-content: start;
+  gap: var(--space-6);
+  min-block-size: 100vh;
+  padding: 0 0 var(--space-8);
+  background: var(--color-bg);
+}
+.reserva-publica > .reserva-panel { justify-self: center; inline-size: calc(100% - var(--space-4) * 2); max-inline-size: calc(var(--target-min) * 16); padding: var(--space-6); }
+
+.cabecera-publica { border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
+.cabecera-publica__contenido {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-inline-size: calc(var(--target-min) * 23);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-4);
+}
+.cabecera-publica__logo { display: inline-flex; inline-size: 36px; block-size: 36px; }
+.cabecera-publica__logo > * { inline-size: 100%; block-size: 100%; }
+.cabecera-publica__marca { display: grid; }
+.cabecera-publica__marca strong { font-size: var(--text-sm); }
+.cabecera-publica__marca small { color: var(--color-text-muted); font-size: var(--text-xs); }
+
+.pasos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pasos li { display: grid; gap: var(--space-2); font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--color-text-muted); }
+.pasos li::before { content: ""; block-size: 4px; border-radius: var(--radius-pill); background: var(--color-surface-muted); }
+.pasos li[data-estado="hecho"]::before, .pasos li[aria-current="step"]::before { background: var(--color-primary); }
+.pasos li[aria-current="step"] { color: var(--color-text); }
+
+.reserva-titulo { display: grid; gap: var(--space-1); }
+.reserva-titulo p { margin: 0; font-size: var(--text-sm); }
+
+/* Prestaciones y profesionales: tarjetas a lo ancho. */
+.reserva-bloque .btn.opcion {
+  justify-content: flex-start;
+  inline-size: 100%;
+  min-block-size: calc(var(--target-min) + var(--space-3));
+  padding-inline: var(--space-4);
+  text-align: left;
+  font-weight: var(--weight-semibold);
+}
+
+/* Horarios: botones mono como en la propuesta. */
+.reserva-horarios { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.reserva-bloque .btn.hora {
+  min-block-size: var(--target-min);
+  border-color: var(--color-border-strong);
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .reserva-publica { gap: var(--space-4); }
+  .reserva-publica > .reserva-panel { padding: var(--space-5) var(--space-4); }
+  .reserva-panel h1 { font-size: var(--text-xl); }
+  .pasos li { font-size: 0.6875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+.reserva-publica > .reserva-panel--agenda {
+  max-inline-size: calc(var(--target-min) * 23); background: transparent; border: 0; box-shadow: none;
+}
+.reserva-distribucion {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  align-items: start; gap: var(--space-5);
+}
+.reserva-elegido {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-3);
+  border: 1px solid var(--color-border); background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-3);
+}
+.reserva-elegido small { display: block; color: var(--color-text-muted); }
+.reserva-dias { display: flex; gap: var(--space-2); overflow-x: auto; padding: var(--space-1); }
+.reserva-dias .btn { flex: none; min-block-size: calc(var(--target-min) + var(--space-4)); }
+.reserva-distribucion .reserva-horarios { grid-template-columns: repeat(auto-fill, minmax(calc(var(--target-min) * 1.6), 1fr)); }
+.reserva-distribucion [aria-pressed="true"] { background: var(--color-primary-soft); box-shadow: inset 0 0 0 1px var(--color-primary); }
+.reserva-franja h2, .reserva-eleccion h2 { margin: 0 0 var(--space-3); font-size: var(--text-base); }
+.reserva-eleccion dl { display: grid; gap: var(--space-3); margin: 0 0 var(--space-4); }
+.reserva-eleccion dt { color: var(--color-text-muted); font-size: var(--text-sm); }
+.reserva-eleccion dd { margin: 0; font-weight: var(--weight-semibold); }
+@media (max-width: 900px) {
+  .reserva-distribucion { grid-template-columns: minmax(0, 1fr); }
+  .reserva-eleccion { position: sticky; bottom: 0; z-index: 1; }
+  .reserva-eleccion h2, .reserva-eleccion dl > div:not(:last-child) { display: none; }
+}

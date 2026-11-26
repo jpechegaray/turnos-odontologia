@@ -1,4 +1,4 @@
-import { aInstanteUtc, aMilisegundos, type Instante } from "../../shared/fecha/zonaHoraria";
+import { aInstanteUtc, aMilisegundos, fechaLocal as fechaLocalDe, type Instante } from "../../shared/fecha/zonaHoraria";
 
 /** Cada fila de la grilla diaria representa 15 minutos (`--agenda-row-h` en tokens.css). */
 export const MINUTOS_FILA = 15;
@@ -70,4 +70,10 @@ export function filasDe(tramo: Tramo, rango: Tramo): Readonly<{ desde: number; h
   const desde = PRIMERA_FILA + Math.floor((tramo.desdeMin - rango.desdeMin) / MINUTOS_FILA);
   const hasta = PRIMERA_FILA + Math.ceil((tramo.hastaMin - rango.desdeMin) / MINUTOS_FILA);
   return { desde, hasta: Math.max(hasta, desde + 1) };
+}
+
+/** Minutos desde la medianoche de Buenos Aires de un instante. */
+export function minutosDelDia(instante: number): number {
+  const comienzo = aInstanteUtc(fechaLocalDe(instante), "00:00").getTime();
+  return Math.floor((instante - comienzo) / MILIS_MINUTO);
 }

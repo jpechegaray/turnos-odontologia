@@ -1,8 +1,9 @@
 import { api } from "../../shared/api/clienteApi";
 import type { EntradaRespuesta, EstadoEntrada, HuecoConsultado, SolicitudAltaEntrada } from "./tipos";
 
-export function listarEntradas(estado: EstadoEntrada) {
-  return api.get<EntradaRespuesta[]>(`/lista-espera?${new URLSearchParams({ estado })}`);
+export function listarEntradas(estado?: EstadoEntrada) {
+  const filtro = estado ? `?${new URLSearchParams({ estado })}` : "";
+  return api.get<EntradaRespuesta[]>(`/lista-espera${filtro}`);
 }
 
 export function crearEntrada(solicitud: SolicitudAltaEntrada) {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../../shared/api/clienteApi";
-import { Alerta, Boton, Tabla, Toast, type ColumnaTabla } from "../../shared/ui";
+import { Alerta, Boton, Icono, Tabla, Toast, type ColumnaTabla } from "../../shared/ui";
 import { AccionesFila } from "./AccionesFila";
 import { mensajeDeError } from "./errores";
 import { FormularioPrestacion } from "./FormularioPrestacion";
@@ -9,9 +9,22 @@ import type { PrestacionRespuesta, PrestacionSolicitud } from "./tipos";
 import { useCatalogoPrestaciones } from "./useCatalogoPrestaciones";
 
 const COLUMNAS: readonly ColumnaTabla<PrestacionRespuesta>[] = [
-  { clave: "nombre", titulo: "Nombre", celda: (p) => p.nombre },
+  {
+    clave: "nombre",
+    titulo: "Nombre",
+    celda: (p) => (
+      <span className="celda-persona">
+        <span className={p.activa ? "icono-caja" : "icono-caja icono-caja--inactivo"}><Icono nombre="prestaciones" /></span>
+        <strong>{p.nombre}</strong>
+      </span>
+    ),
+  },
   { clave: "duracion", titulo: "Duración (min)", numerica: true, celda: (p) => p.duracionDefaultMin },
-  { clave: "estado", titulo: "Estado", celda: (p) => (p.activa ? "Activa" : "Inactiva") },
+  {
+    clave: "estado",
+    titulo: "Estado",
+    celda: (p) => <span className={p.activa ? "estado" : "estado estado--inactivo"}>{p.activa ? "Activa" : "Inactiva"}</span>,
+  },
 ];
 
 export function PaginaPrestaciones() {
@@ -78,6 +91,7 @@ export function PaginaPrestaciones() {
         {
           clave: "acciones",
           titulo: "Acciones",
+          acciones: true,
           celda: (p) => (
             <AccionesFila
               prestacion={p}
@@ -95,18 +109,16 @@ export function PaginaPrestaciones() {
 
   return (
     <section>
-      <h2>Prestaciones</h2>
-      {esAdmin && (
-        <FormularioPrestacion
-          key={editando?.id ?? "nueva"}
-          valorInicial={editando}
-          etiquetaEnvio={editando ? "Guardar cambios" : "Agregar prestación"}
-          onEnviar={(solicitud) => (editando ? modificar(editando, solicitud) : crear(solicitud))}
-          onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
-        />
-      )}
+      <div className="encabezado">
+        <div>
+          <h2>Prestaciones</h2>
+          <p className="encabezado__bajada">Tratamientos que ofrece el consultorio, con su duración por defecto.</p>
+        </div>
+      </div>
       {aviso && <Toast mensaje={aviso} />}
       {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
+      <div className={esAdmin ? "con-formulario" : undefined}>
+      <div className="con-formulario__lista">
       {cargando ? (
         <p role="status">Cargando…</p>
       ) : errorCarga ? (
@@ -122,6 +134,17 @@ export function PaginaPrestaciones() {
           mensajeVacio="No hay prestaciones cargadas."
         />
       )}
+      </div>
+      {esAdmin && (
+        <FormularioPrestacion
+          key={editando?.id ?? "nueva"}
+          valorInicial={editando}
+          etiquetaEnvio={editando ? "Guardar cambios" : "Agregar prestación"}
+          onEnviar={(solicitud) => (editando ? modificar(editando, solicitud) : crear(solicitud))}
+          onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
+        />
+      )}
+      </div>
     </section>
   );
 }

@@ -22,7 +22,7 @@ afterEach(() => { vi.unstubAllGlobals(); });
 
 it.each(["ADMIN", "RECEPCION", "ODONTOLOGO"] as const)("El menú y el acceso directo respetan el mismo permiso", async (rol) => {
   montar("/escritura", rol);
-  const menu = await screen.findByRole("navigation");
+  const menu = await screen.findByRole("navigation", { name: "Principal" });
   const enlaces = within(menu).getAllByRole("link").map((enlace) => enlace.textContent);
   if (rol === "ADMIN") {
     expect(enlaces).toEqual(["Agenda", "Gestión"]);

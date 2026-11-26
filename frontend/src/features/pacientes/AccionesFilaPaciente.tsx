@@ -1,4 +1,4 @@
-import { Boton } from "../../shared/ui";
+import { Boton, Icono } from "../../shared/ui";
 import { useEsAdministrador } from "./permisos";
 import type { PacienteRespuesta } from "./tipos";
 
@@ -33,7 +33,7 @@ export function AccionesFilaPaciente({
 
   return (
     <div>
-      <Boton variante="secundaria" tamano="chico" onClick={() => onEditar(paciente)}>Editar</Boton>
+      <Boton variante="secundaria" tamano="chico" onClick={() => onEditar(paciente)}><Icono nombre="editar" />Editar</Boton>
       {esAdmin ? (
         <Boton variante="peligro-atenuado" tamano="chico" onClick={() => onSolicitarBaja(paciente)}>
           Dar de baja
