@@ -57,8 +57,8 @@ public record Turno(
     }
 
     /**
-     * Turno dado por un flujo público (toma de una oferta de hueco, C-42; reserva online, C-41): nace PROGRAMADO,
-     * con canal ONLINE, sin notas y sin usuario creador.
+     * Turno de la reserva online (Flujo 4, US-015): nace PROGRAMADO, con canal ONLINE, sin notas y sin usuario
+     * creador, porque lo pide el paciente y no el personal.
      */
     public static Turno nuevoOnline(Long pacienteId, Long profesionalId, Long sillonId, Long prestacionId,
             Intervalo intervalo, Instant creadoEn) {

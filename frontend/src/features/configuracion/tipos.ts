@@ -6,6 +6,9 @@ export type ConfiguracionRespuesta = Readonly<{
   "reserva_online.max_turnos_activos_por_email": number;
   "lista_espera.max_avisos_por_hueco": number;
   "consultorio.nombre": string;
+  "consultorio.domicilio": string;
+  "consultorio.email_contacto": string;
+  "consultorio.retencion_anios": number;
 }>;
 
 export type ClaveConfiguracion = keyof ConfiguracionRespuesta;

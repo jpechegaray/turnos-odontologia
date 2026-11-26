@@ -7,6 +7,7 @@ import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.agenda.DatosAgenda;
 import ar.edu.utn.turnos.agenda.domain.CanalTurno;
 import ar.edu.utn.turnos.agenda.domain.EstadoTurno;
+import ar.edu.utn.turnos.agenda.domain.SolicitudTurno;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
 import ar.edu.utn.turnos.shared.tiempo.RelojFijoConfig;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.IllegalTransactionStateException;
 
 /**
  * Alta interna de un turno online con sillón asignado por el sistema (C-42, spec agenda-turnos). Reloj fijo: martes
@@ -35,6 +37,9 @@ class CrearTurnoOnlineIT extends PruebaIntegracionBase {
 
     @Autowired
     CrearTurnoOnlineService altaOnline;
+
+    @Autowired
+    CrearTurnoService agenda;
 
     Long paciente;
     Long otroPaciente;
@@ -141,5 +146,14 @@ class CrearTurnoOnlineIT extends PruebaIntegracionBase {
                     assertThat(error.codigo()).isEqualTo("RN-01");
                     assertThat(error.propiedades()).containsEntry("recurso", "PROFESIONAL");
                 });
+    }
+
+    @Test
+    @DisplayName("El alta online de la agenda solo corre dentro de una transacción abierta")
+    void crearOnlineSinTransaccionFalla() {
+        var solicitud = new SolicitudTurno(1L, 1L, 1L, 1L, Instant.parse("2030-06-10T13:00:00Z"), null);
+
+        assertThatThrownBy(() -> agenda.crearOnline(solicitud))
+                .isInstanceOf(IllegalTransactionStateException.class);
     }
 }

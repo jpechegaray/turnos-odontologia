@@ -4,7 +4,7 @@
 
 ## 1. Alta online en la agenda (`agenda-turnos`)
 
-- [x] 1.1 Agregar `Turno.nuevoOnline(...)` (canal `ONLINE`, `PROGRAMADO`, sin usuario creador), con test unitario de dominio.
+- [x] 1.1 Agregar `Turno.nuevoOnline(...)` (canal `ONLINE`, `PROGRAMADO`, sin usuario creador), con test unitario de dominio. *(Al integrar `master` se usa la versión de C-41.)*
 - [x] 1.2 Extraer de `CrearTurnoService` el paso común "bloquear, validar, guardar y publicar `TurnoCreado`" a un método package-private compartido, sin cambiar el comportamiento del alta del personal. Los IT de C-19 siguen en verde.
 - [x] 1.3 Crear `CrearTurnoOnlineService.crear(pacienteId, profesionalId, prestacionId, inicio, sillonPreferidoId)`:
   - sin `@PreAuthorize`;
@@ -50,7 +50,7 @@
 ## 5. Email de confirmación (`toma-oferta-hueco`, `notificaciones-email`)
 
 - [x] 5.1 Después del commit, `registrarYEnviar(CONFIRMACION_RESERVA, turnoId, null, pacienteId, datos)` con el enlace `APP_PUBLIC_URL/turno/{token}`.
-- [x] 5.2 Crear `DatosConfirmacionReserva implements ReconstructorDatosNotificacion` con `descartarSiFaltanDatos = true` para `CONFIRMACION_RESERVA`. Generalizar el mensaje de descarte de `procesarVencidas`.
+- [x] 5.2 Crear `DatosConfirmacionReserva implements ReconstructorDatosNotificacion` con `descartarSiFaltanDatos = true` para `CONFIRMACION_RESERVA`. Generalizar el mensaje de descarte de `procesarVencidas`. *(Al integrar `master` se usa `ReconstructorConfirmacionReserva` de C-41.)*
 - [x] 5.3 IT: "El paciente recibe el enlace de su nuevo turno" (el enlace sirve en `GET /api/public/turnos/{token}`) y "Una falla de correo no pierde el turno".
 - [x] 5.4 IT del planificador: "El reintento lleva un enlace válido" y "No se reintenta la confirmación de un turno cancelado".
 
@@ -67,5 +67,5 @@
 ## Workflow follow-up
 
 - `openspec-verify` → `verify.md`.
-- PR a `master` (lo revisa Juan Pablo), avisando a Lionel (C-41) que puede reutilizar `CrearTurnoOnlineService` y `DatosConfirmacionReserva`.
+- PR a `master` (lo revisa Juan Pablo), con la integración de `master` (C-41, C-44, C-48) ya resuelta.
 - Archivo del change y actualización de CHANGES.md después del merge.

@@ -17,6 +17,13 @@ public interface PacienteRepositorioJpa extends JpaRepository<PacienteJpa, Long>
 
     @Query("""
         SELECT p FROM PacienteJpa p
+        WHERE p.activo = true AND LOWER(TRIM(p.email)) = :email
+        ORDER BY p.id
+    """)
+    List<PacienteJpa> activosPorEmail(@Param("email") String emailNormalizado);
+
+    @Query("""
+        SELECT p FROM PacienteJpa p
         WHERE p.activo = true
           AND (CAST(:apellido AS String) IS NULL OR LOWER(p.apellido) LIKE CAST(:apellido AS String))
           AND (CAST(:nombre AS String) IS NULL OR LOWER(p.nombre) LIKE CAST(:nombre AS String))

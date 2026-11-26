@@ -1,22 +1,43 @@
 package ar.edu.utn.turnos.agenda.application;
 
+import ar.edu.utn.turnos.agenda.domain.ConsultasAgenda;
 import ar.edu.utn.turnos.agenda.domain.SolicitudTurno;
 import ar.edu.utn.turnos.agenda.domain.Turno;
+import ar.edu.utn.turnos.agenda.domain.ValidadorTurno;
+import ar.edu.utn.turnos.agenda.domain.evento.TurnoCreado;
+import ar.edu.utn.turnos.agenda.infrastructure.TurnosPersistencia;
+import java.time.Clock;
+import ar.edu.utn.turnos.shared.tiempo.Intervalo;
+import java.time.Instant;
+import java.util.function.Function;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Crea un turno dado por el personal (US-010, Flujo 1). El bloqueo, la validación, el guardado y el evento
- * {@code TurnoCreado} los hace {@link AltaTurno}, el mismo paso que usa el alta online. Si otra transacción ocupó
- * el hueco mientras tanto, la persistencia responde el mismo 409 (RN-15).
+ * Crea un turno dado por el personal (US-010, Flujo 1): carga los recursos con los puertos de los otros
+ * módulos, aplica las reglas puras de {@link ValidadorTurno}, guarda y publica {@link TurnoCreado}. Si otra
+ * transacción ocupó el hueco mientras tanto, la persistencia responde el mismo 409 (RN-15).
  */
 @Service
 public class CrearTurnoService {
-    private final AltaTurno alta;
+    private final TurnosPersistencia turnos;
+    private final ConsultaRecursosTurno recursos;
+    private final ConsultasAgenda consultas;
+    private final ApplicationEventPublisher eventos;
+    private final Clock reloj;
+    private final ValidadorTurno validador;
 
-    CrearTurnoService(AltaTurno alta) {
-        this.alta = alta;
+    CrearTurnoService(TurnosPersistencia turnos, ConsultaRecursosTurno recursos, ConsultasAgenda consultas,
+            ApplicationEventPublisher eventos, Clock reloj) {
+        this.turnos = turnos;
+        this.recursos = recursos;
+        this.consultas = consultas;
+        this.eventos = eventos;
+        this.reloj = reloj;
+        this.validador = new ValidadorTurno(reloj);
     }
 
     /**
@@ -25,8 +46,28 @@ public class CrearTurnoService {
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
     @Transactional
     public Turno crear(SolicitudTurno solicitud, String notas, Long creadoPorUsuarioId) {
-        return alta.registrar(solicitud, (intervalo, ahora) -> Turno.nuevo(solicitud.pacienteId(),
-                solicitud.profesionalId(), solicitud.sillonId(), solicitud.prestacionId(), intervalo, notas,
-                creadoPorUsuarioId, ahora));
+        return crearCon(solicitud, intervalo -> Turno.nuevo(solicitud.pacienteId(), solicitud.profesionalId(),
+                solicitud.sillonId(), solicitud.prestacionId(), intervalo, notas, creadoPorUsuarioId, Instant.now(reloj)));
+    }
+
+    /**
+     * Alta de la reserva online (C-41, Flujo 4): las mismas reglas, bloqueos y garantía de la base que el alta del
+     * personal, con canal ONLINE y sin usuario creador. No tiene autorización propia porque la pide un paciente
+     * anónimo; por eso exige una transacción ya abierta ({@code MANDATORY}): solo la usa la reserva pública, que
+     * valida antes el consentimiento y los límites de la reserva online.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Turno crearOnline(SolicitudTurno solicitud) {
+        return crearCon(solicitud, intervalo -> Turno.nuevoOnline(solicitud.pacienteId(), solicitud.profesionalId(),
+                solicitud.sillonId(), solicitud.prestacionId(), intervalo, Instant.now(reloj)));
+    }
+
+    private Turno crearCon(SolicitudTurno solicitud, Function<Intervalo, Turno> construir) {
+        // RN-15: las altas sobre el mismo profesional o sillón se ordenan; la segunda valida contra la primera.
+        turnos.bloquearRecursos(solicitud.profesionalId(), solicitud.sillonId());
+        var intervalo = validador.validar(solicitud, recursos.de(solicitud), consultas, null);
+        var turno = turnos.guardar(construir.apply(intervalo));
+        eventos.publishEvent(TurnoCreado.de(turno));
+        return turno;
     }
 }

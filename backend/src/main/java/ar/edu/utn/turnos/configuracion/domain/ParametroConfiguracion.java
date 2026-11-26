@@ -13,7 +13,13 @@ public enum ParametroConfiguracion {
     ANTICIPACION_RESERVA("reserva_online.anticipacion_minima_horas", 2, "Horas mínimas para reservar en línea"),
     TOPE_TURNOS_EMAIL("reserva_online.max_turnos_activos_por_email", 3, "Tope de turnos activos por email"),
     TOPE_AVISOS("lista_espera.max_avisos_por_hueco", 10, "Tope de avisos por hueco liberado"),
-    NOMBRE_CONSULTORIO("consultorio.nombre", "Consultorio Ficticio", "Nombre público del consultorio");
+    NOMBRE_CONSULTORIO("consultorio.nombre", "Consultorio Ficticio", "Nombre público del consultorio"),
+    DOMICILIO_CONSULTORIO("consultorio.domicilio", "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires",
+            "Domicilio del consultorio, que figura en el aviso de consentimiento (PA-08)"),
+    EMAIL_CONTACTO_CONSULTORIO("consultorio.email_contacto", "contacto@consultorio-ficticio.example",
+            "Email de contacto para ejercer los derechos sobre los datos (PA-08)"),
+    RETENCION_ANIOS("consultorio.retencion_anios", 2, "Años que se conservan los datos después del último turno",
+            new Rango(1, 20));
 
     private final String clave;
     private final String valorInicial;

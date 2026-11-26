@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Repository;
@@ -63,6 +64,25 @@ public class TurnosActivosPersistencia implements TurnosActivosConsulta {
     @Override
     public List<TurnoEnConflicto> futurosDePrestacion(Long prestacionId) {
         return futurosPor("prestacionId", prestacionId);
+    }
+
+    @Override
+    public long contarFuturosActivos(Collection<Long> pacienteIds, Instant ahora) {
+        Objects.requireNonNull(ahora, "ahora");
+        if (pacienteIds.isEmpty()) {
+            return 0;
+        }
+        return em.createQuery("""
+                select count(t)
+                from TurnoJpa t
+                where t.pacienteId in :pacientes
+                  and t.estado in :activos
+                  and t.inicio > :ahora
+                """, Long.class)
+                .setParameter("pacientes", pacienteIds)
+                .setParameter("activos", ESTADOS_ACTIVOS)
+                .setParameter("ahora", ahora)
+                .getSingleResult();
     }
 
     private List<TurnoEnConflicto> futurosPor(String campoRecurso, Long recursoId) {

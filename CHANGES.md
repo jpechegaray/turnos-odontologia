@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 39 de 51 changes hechos (Olas 0 a 3 completas; Ola 4: C-25, C-26, C-27, C-28, C-29, C-31, C-32, C-33 y C-34; Ola 5: C-35, C-36, C-37 y C-40; Ola 6: C-45; Ola 7: C-46). Todos los changes hechos están archivados en OpenSpec. Ya se pueden empezar: C-42 (Valentino, camino crítico), C-39 (Nico) y los "Cualquiera" C-30, C-43 y C-44. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 43 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46 y C-48). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) y C-41 (Lionel) ya están en `master` y tienen pendiente el archivo. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -57,17 +57,17 @@
 | C-35 | ✅ hecho | **Juan Pablo** | 5 | M | reprogramar-turno | C-19, C-27 |  |
 | C-36 | ✅ hecho | **Valentino** | 5 | L | oferta-hueco-aviso-automatico | C-08, C-14, C-15, C-18, C-27, C-31 | camino crítico, HIGH |
 | C-37 | ✅ hecho | Juan Pablo (Cualquiera) | 5 | M | recordatorio-email-planificador | C-08, C-15, C-19, C-32 |  |
-| C-38 | ⬜ pendiente | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
+| C-38 | ✅ hecho | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ⬜ pendiente | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
 | C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
-| C-41 | ⬜ pendiente | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
+| C-41 | 🔄 en revisión | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
 | C-42 | ⬜ pendiente | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
-| C-44 | ⬜ pendiente | Cualquiera | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
+| C-44 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
 | C-47 | ⬜ pendiente | Cualquiera | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
-| C-48 | ⬜ pendiente | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
+| C-48 | ✅ hecho | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
 | C-49 | ⬜ pendiente | **Julián** | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
 | C-50 | ⬜ pendiente | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
 | C-51 | ⬜ pendiente | **Juan Pablo** | 8 | M | verificacion-e2e-y-cierre-mvp | C-33, C-37, C-44, C-46, C-47, C-48, C-49 |  |
@@ -1290,7 +1290,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: PA-05 resuelta: un recordatorio por horario, con 24 hs de anticipación por defecto, configurable. Los pacientes sin email se omiten (PA-16). Cada intento válido emite un enlace nuevo, también para turnos internos, y conserva los enlaces anteriores.
 
 ### [C-38] `C-38-reserva-publica-disponibilidad`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Lionel (PR #130, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Lionel — **Ola**: 5 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `GET /api/public/prestaciones`, `/api/public/profesionales?prestacionId` y `/api/public/disponibilidad`: solo recursos activos y horarios realmente libres según `CalculadorDisponibilidad`, con la duración por defecto
@@ -1352,7 +1352,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 ## FASE 6 — Ola 6: Reserva online, tomar hueco, asignación manual y creación de turnos en el front
 
 ### [C-41] `C-41-reserva-publica-crear-reserva`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[ ]` implementado por Lionel, en revisión (PR por abrir)
 - **Responsable**: Lionel — **Ola**: 6 — **Tamaño**: L (8-10 h)
 - **Scope**:
   - `POST /api/public/reservas`: revalida llamando al servicio de crear turno de `agenda` (no duplica reglas; canal `ONLINE`; duración por defecto; el sistema asigna el sillón), 409 con alternativas si el hueco se ocupó
@@ -1371,7 +1371,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `knowledge-base/09_decisiones_y_supuestos.md` SU-03, SU-04
   - `knowledge-base/10_preguntas_abiertas.md` PA-08, PA-09
 - **Criterio de salida**: Todos los criterios de US-015 cubiertos por tests; la carrera de reservas responde 201 y 409; ninguna ficha existente cambia por una reserva; el consentimiento figura en el registro.
-- **Riesgo o precondición**: Precondición PA-08: el equipo define el texto de consentimiento (Ley 25.326) antes de abrir este change. PA-09 y PA-16 abiertas. RM-05.
+- **Riesgo o precondición**: PA-08 resuelta (2026-11-25, `docs/propuestas/pa-08-consentimiento-datos.md`; versión del texto `2026-11-v1`, SU-16). PA-09 sigue abierta y C-41 mantiene SU-03; PA-16 abierta. RM-05.
 
 ### [C-42] `C-42-tomar-hueco-desde-oferta`
 - **Estado**: `[ ]` pendiente
@@ -1413,8 +1413,8 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-06.
 
 ### [C-44] `C-44-emails-cancelacion-reprogramacion`
-- **Estado**: `[ ]` pendiente
-- **Responsable**: Cualquiera — **Ola**: 6 — **Tamaño**: S (2-3 h)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #132, 2026-11-25; archivado 2026-11-25)
+- **Responsable**: Juan Pablo (tomado como Cualquiera) — **Ola**: 6 — **Tamaño**: S (2-3 h)
 - **Scope**:
   - Escuchas de `TurnoCancelado` y `TurnoReprogramado`: registran `NotificacionEnviada` de tipo `CANCELACION` o `REPROGRAMACION` y envían el email si el paciente tiene email (sin email no hay error)
   - Descarta el recordatorio pendiente del turno
@@ -1428,7 +1428,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `knowledge-base/06_funcionalidades.md` US-011 (criterio de email)
   - `knowledge-base/07_flujos_principales.md` Flujo 2 y Flujo 3
 - **Criterio de salida**: Cancelar y reprogramar generan un email cada uno; un paciente sin email no produce errores; tests en verde.
-- **Riesgo o precondición**: PA-06 abierta (política de reprogramación tardía): el texto del email puede cambiar.
+- **Política de reprogramación tardía**: PA-06 resuelta en C-35. El aviso informa el nuevo horario.
 
 ### [C-45] `C-45-front-crear-turno`
 - **Estado**: `[x]` hecho por Juan Pablo (PR #122, 2026-11-25; archivado 2026-11-25)
@@ -1488,7 +1488,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Criterio de salida**: Recepción anota a un paciente, ve compatibles de un hueco y asigna manualmente desde la UI.
 
 ### [C-48] `C-48-front-reserva-publica-reservar`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Juan Pablo (PR #134, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Julián — **Ola**: 7 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `features/reserva-publica` en `/reservar`: pasos de prestación, profesional, horario y datos con aceptación de datos personales; sin login ni DNI
@@ -1504,7 +1504,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
   - `design-system/README.md` y `components.html` (reserva pública)
   - `knowledge-base/10_preguntas_abiertas.md` PA-08
 - **Criterio de salida**: Un paciente reserva de punta a punta desde el celular (390x844) y ve el enlace; un horario ocupado muestra alternativas.
-- **Riesgo o precondición**: Precondición PA-08 (texto de consentimiento).
+- **Consentimiento**: PA-08 resuelta en C-41. La reserva muestra el aviso y exige su aceptación.
 
 ### [C-49] `C-49-front-turno-por-token-y-oferta`
 - **Estado**: `[ ]` pendiente

@@ -53,7 +53,7 @@ Si ningún sillón está libre, lanza `ValidadorTurno.solapado("SILLON")`. La du
 - *Alternativa descartada*: abrir `CrearTurnoService.crear` a un llamador sin rol. Rompe el requisito "Solo el personal autorizado crea turnos" y mezcla canales.
 - *Alternativa descartada*: bloquear todos los sillones candidatos por adelantado. Toma locks de más y, con el sillón preferido fuera de orden, abre la puerta a deadlocks entre profesionales distintos.
 
-Para no duplicar código se extrae el paso común "bloquear, validar, guardar y publicar" a un método package-private que comparten los dos servicios.
+Para no duplicar código, `CrearTurnoOnlineService` solo elige el sillón y delega el paso común "bloquear, validar, guardar y publicar" en `CrearTurnoService.crearOnline(SolicitudTurno)` (`MANDATORY`, sin rol), que C-41 mergeó antes en `master` junto con `Turno.nuevoOnline`. Al integrar `master` se descartó el `AltaTurno` propio de C-42, que hacía lo mismo.
 
 ### D3. Transacción de la toma y orden de locks
 `TomaDeOferta.tomar(token)` no es transaccional por sí mismo. Primero busca la oferta por hash; si no está o el hash no coincide en tiempo constante, responde `404 OFERTA_NO_ENCONTRADA`. Después ejecuta un `TransactionTemplate` con estos pasos:
@@ -97,13 +97,13 @@ El fin informado es `hueco_inicio + duración por defecto de la prestación de l
 `TurnoTomado` contiene inicio, fin, estado, profesional, prestación y `token`. Su `toString` oculta el token, como `TokenEmitido`. Se devuelve el token una sola vez porque RN-25 indica mostrarlo en la pantalla de confirmación, y C-49 puede llevar al paciente directo a `/turno/{token}`.
 - *Alternativa descartada*: mandarlo solo por email. Es más restrictivo, pero obliga a C-49 a pedirle al paciente que abra el correo para ver su turno, y quien tiene el token de la oferta ya es el paciente identificado.
 
-### D7. Reconstructor de `CONFIRMACION_RESERVA` en `shared.notificacion`
-Se agrega `DatosConfirmacionReserva implements ReconstructorDatosNotificacion`, al lado de `DatosRecordatorios` y con la misma lógica:
+### D7. Reconstructor de `CONFIRMACION_RESERVA`
+Se reutiliza `ReconstructorConfirmacionReserva` (`reservapublica.reserva`), que C-41 mergeó antes en `master`:
 - bloquea el turno;
-- exige estado `PROGRAMADO`/`CONFIRMADO`, el mismo `inicio_referencia` y que no haya empezado;
+- exige estado `PROGRAMADO`/`CONFIRMADO` y que no haya empezado;
 - toma el email actual del paciente y emite un token nuevo con `emitirSiVigente`.
 
-`descartarSiFaltanDatos` devuelve `true` para `CONFIRMACION_RESERVA`. No depende de la oferta, así que sirve también para C-41. El mensaje de descarte de `procesarVencidas` (hoy dice "Recordatorio descartado") se generaliza a "Notificación descartada: turno o destinatario no vigente".
+`descartarSiFaltanDatos` devuelve `true` para `CONFIRMACION_RESERVA` y no depende del origen del turno, así que cubre tanto la reserva online como la toma de una oferta. Al integrar `master` se descartaron `DatosConfirmacionReserva` y la base `DatosTurnoConEnlace` de C-42, que duplicaban esa lógica. El mensaje de descarte de `procesarVencidas` (hoy dice "Recordatorio descartado") se generaliza a "Notificación descartada: turno o destinatario no vigente".
 
 ### D8. Protección de la ruta de ofertas
 `RutaConTokenDeTurno` pasa a reconocer dos prefijos, `/api/public/turnos/` y `/api/public/ofertas/`, y la referencia segura del error se elige según el prefijo (`/api/public/ofertas`). `ProteccionEnlaceTurnoConfig` no cambia: hereda el `no-store` y la limpieza del `path` para la ruta nueva.
@@ -118,8 +118,8 @@ Los logs de `TomaDeOferta` llevan solo ids de oferta, entrada y turno. `OfertaHu
   → Es un caso raro y el paciente puede reintentar. Se acepta en lugar de bloquear todos los sillones (D2).
 - **[El token del turno viaja en la respuesta]** Más exposición que solo por email.
   → Respuesta `no-store`, HTTPS y el token nunca en logs. Se puede revertir sin cambiar las specs del alta, solo el requisito de la respuesta.
-- **[Coordinación con C-41]** Lionel va a usar `CrearTurnoOnlineService` y `DatosConfirmacionReserva`.
-  → Se avisa en el PR. Si C-41 llega antes, se integra su versión en lugar de duplicarla.
+- **[Coordinación con C-41]** C-41 llegó antes a `master` con su propia alta online y su reconstructor de la confirmación.
+  → Se integraron sus versiones (`CrearTurnoService.crearOnline`, `Turno.nuevoOnline`, `ReconstructorConfirmacionReserva`) en lugar de duplicarlas; C-42 solo suma la elección de sillón (`CrearTurnoOnlineService`).
 - **[El correo se arma fuera de la transacción]** Si la aplicación cae entre el commit y el registro de la notificación, el turno existe sin email.
   → Es el mismo riesgo que C-36 ya acepta. El paciente tiene el token en la respuesta `201`.
 

@@ -38,19 +38,6 @@ class TurnoTest {
         assertThat(turno.canceladoEn()).isNull();
     }
 
-    @Test
-    @DisplayName("Un turno online nuevo queda PROGRAMADO, con canal ONLINE y sin usuario creador")
-    void turnoOnlineNuevo() {
-        var turno = Turno.nuevoOnline(1L, 2L, 3L, 4L, Intervalo.desde(INICIO, 45), CREADO);
-        assertThat(turno.id()).isNull();
-        assertThat(turno.estado()).isEqualTo(EstadoTurno.PROGRAMADO);
-        assertThat(turno.canal()).isEqualTo(CanalTurno.ONLINE);
-        assertThat(turno.duracionMin()).isEqualTo(45);
-        assertThat(turno.creadoPorUsuarioId()).isNull();
-        assertThat(turno.notas()).isNull();
-        assertThat(turno.creadoEn()).isEqualTo(CREADO);
-    }
-
     @ParameterizedTest
     @EnumSource(value = EstadoTurno.class, names = {"CONFIRMADO", "CANCELADO", "ATENDIDO", "AUSENTE"})
     @DisplayName("Transiciones permitidas desde un turno programado")
@@ -425,5 +412,18 @@ class TurnoTest {
         assertThat(turno.mismoHorario(2L, 5L, Intervalo.desde(INICIO, 30))).isFalse();
         assertThat(turno.mismoHorario(2L, 3L, Intervalo.desde(INICIO, 45))).isFalse();
         assertThat(turno.mismoHorario(2L, 3L, Intervalo.desde(INICIO.plusSeconds(300), 30))).isFalse();
+    }
+
+    @Test
+    @DisplayName("Un turno de la reserva online nace PROGRAMADO, con canal ONLINE y sin usuario creador")
+    void turnoOnlineNaceProgramadoOnlineYSinCreador() {
+        var turno = Turno.nuevoOnline(1L, 2L, 3L, 4L, Intervalo.desde(INICIO, 30), CREADO);
+
+        assertThat(turno.estado()).isEqualTo(EstadoTurno.PROGRAMADO);
+        assertThat(turno.canal()).isEqualTo(CanalTurno.ONLINE);
+        assertThat(turno.creadoPorUsuarioId()).isNull();
+        assertThat(turno.notas()).isNull();
+        assertThat(turno.duracionMin()).isEqualTo(30);
+        assertThat(turno.creadoEn()).isEqualTo(CREADO);
     }
 }

@@ -52,6 +52,10 @@ public class PacienteJpa {
     @Column(nullable = true)
     private Instant consentimientoDatosEn;
 
+    /** Versión del texto de consentimiento aceptado (PA-08); null si la ficha no lo registró. */
+    @Column(nullable = true, length = 20)
+    private String consentimientoVersion;
+
     @Column(nullable = false, updatable = false)
     private Instant creadoEn;
 
@@ -72,6 +76,7 @@ public class PacienteJpa {
         this.notas = dominio.notas();
         this.activo = dominio.activo();
         this.consentimientoDatosEn = dominio.consentimientoDatosEn();
+        this.consentimientoVersion = dominio.consentimientoVersion();
         this.creadoEn = dominio.creadoEn();
     }
 
@@ -92,6 +97,7 @@ public class PacienteJpa {
                 this.notas,
                 this.activo,
                 this.consentimientoDatosEn,
+                this.consentimientoVersion,
                 this.creadoEn);
     }
 }

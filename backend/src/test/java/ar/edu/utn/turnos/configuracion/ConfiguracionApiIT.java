@@ -32,6 +32,7 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
     private static final String RUTA = "/api/configuracion";
     private static final String FILAS = "select clave, valor, actualizado_en from configuracion order by clave";
     private static final String PLAZO = "\"cancelacion.plazo_horas\": 24";
+    private static final String RETENCION = "\"consultorio.retencion_anios\": 2";
     private static final String DEFAULTS = """
             {
               "cancelacion.plazo_horas": 24,
@@ -40,7 +41,10 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
               "reserva_online.anticipacion_minima_horas": 2,
               "reserva_online.max_turnos_activos_por_email": 3,
               "lista_espera.max_avisos_por_hueco": 10,
-              "consultorio.nombre": "Consultorio Ficticio"
+              "consultorio.nombre": "Consultorio Ficticio",
+              "consultorio.domicilio": "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires",
+              "consultorio.email_contacto": "contacto@consultorio-ficticio.example",
+              "consultorio.retencion_anios": 2
             }
             """;
 
@@ -73,15 +77,16 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
     }
 
     @ParameterizedTest
-    @CsvSource({"0,1", "168,168"})
+    @CsvSource({"0,1,1", "168,168,20"})
     @Transactional
     @DisplayName("Admin reemplaza toda la configuración con límites válidos")
-    void reemplazaTodaLaConfiguracion(int plazo, int anticipacion) throws Exception {
+    void reemplazaTodaLaConfiguracion(int plazo, int anticipacion, int retencion) throws Exception {
         var antes = OffsetDateTime.parse("2020-01-01T00:00:00Z");
         jdbc.update("update configuracion set actualizado_en = ?", antes);
         var nuevo = DEFAULTS.replace(PLAZO, "\"cancelacion.plazo_horas\": " + plazo)
                 .replace("\"recordatorio.anticipacion_horas\": 24", "\"recordatorio.anticipacion_horas\": " + anticipacion)
-                .replace("Consultorio Ficticio", "Consultorio de Prueba");
+                .replace("Consultorio Ficticio", "Consultorio de Prueba")
+                .replace("\"consultorio.retencion_anios\": 2", "\"consultorio.retencion_anios\": " + retencion);
 
         mockMvc.perform(conCsrfValido(escritura("ADMIN", nuevo)))
                 .andExpect(status().isOk())
@@ -90,11 +95,12 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
                 .andExpect(status().isOk())
                 .andExpect(content().json(nuevo, JsonCompareMode.STRICT));
 
-        var cambiadas = Set.of("cancelacion.plazo_horas", "recordatorio.anticipacion_horas", "consultorio.nombre");
+        var cambiadas = Set.of("cancelacion.plazo_horas", "recordatorio.anticipacion_horas", "consultorio.nombre",
+                "consultorio.retencion_anios");
         var fechas = jdbc.query("select clave, actualizado_en from configuracion",
                 (rs, fila) -> Map.entry(rs.getString("clave"), rs.getObject("actualizado_en", OffsetDateTime.class)))
                 .stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        assertThat(fechas).hasSize(7).containsKeys(cambiadas.toArray(String[]::new));
+        assertThat(fechas).hasSize(10).containsKeys(cambiadas.toArray(String[]::new));
         var fechaCambio = fechas.get("cancelacion.plazo_horas");
         assertThat(fechaCambio).isAfter(antes);
         fechas.forEach((clave, fecha) -> assertThat(fecha).as(clave)
@@ -179,7 +185,11 @@ class ConfiguracionApiIT extends PruebaIntegracionBase {
                 modificado.replace(PLAZO, "\"cancelacion.plazo_horas\": 24.00000000000000001"),
                 modificado.replace(PLAZO, "\"cancelacion.plazo_horas\": 2147483648"),
                 modificado.replace("Consultorio Ficticio", "  "),
-                modificado.replace("Consultorio Ficticio", "Consultorio\\u0000Ficticio"));
+                modificado.replace("Consultorio Ficticio", "Consultorio\\u0000Ficticio"),
+                modificado.replace(RETENCION, "\"consultorio.retencion_anios\": 0"),
+                modificado.replace(RETENCION, "\"consultorio.retencion_anios\": 21"),
+                modificado.replace("Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires", " "),
+                modificado.replace("contacto@consultorio-ficticio.example", ""));
     }
 
     private static MockHttpServletRequestBuilder escritura(String rol, String cuerpo) {

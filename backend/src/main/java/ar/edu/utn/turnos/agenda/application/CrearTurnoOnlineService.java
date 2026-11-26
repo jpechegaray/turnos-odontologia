@@ -18,23 +18,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Alta interna de un turno online (C-42; la reutilizará la reserva online de C-41): canal ONLINE, duración por
- * defecto de la prestación y sillón elegido por el sistema (SU-14). No exige rol: solo la invocan flujos públicos
- * que ya identificaron al paciente por su token. Las reglas y la garantía ante concurrencia son las del alta del
- * personal ({@link AltaTurno}).
+ * Alta de un turno online con sillón elegido por el sistema (C-42; SU-14): duración por defecto de la prestación y
+ * el sillón preferido o el primero activo libre. No exige rol: solo la invocan flujos públicos que ya identificaron
+ * al paciente por su token. Las reglas, los bloqueos y la garantía ante concurrencia son las del alta online de la
+ * agenda ({@link CrearTurnoService#crearOnline}, C-41).
  *
- * <p>La elección del sillón se hace leyendo la ocupación sin bloquear; después {@link AltaTurno} bloquea profesional
- * y sillón elegido y revalida, así que una carrera termina en el mismo 409 RN-01 y nunca en un solape.
+ * <p>La elección del sillón se hace leyendo la ocupación sin bloquear; después {@code crearOnline} bloquea
+ * profesional y sillón elegido y revalida, así que una carrera termina en el mismo 409 RN-01 y nunca en un solape.
  */
 @Service
 public class CrearTurnoOnlineService {
-    private final AltaTurno alta;
+    private final CrearTurnoService alta;
     private final SillonConsulta sillones;
     private final ConsultaPrestaciones prestaciones;
     private final ConsultasAgenda consultas;
     private final TurnosPersistencia turnos;
 
-    CrearTurnoOnlineService(AltaTurno alta, SillonConsulta sillones, ConsultaPrestaciones prestaciones,
+    CrearTurnoOnlineService(CrearTurnoService alta, SillonConsulta sillones, ConsultaPrestaciones prestaciones,
             ConsultasAgenda consultas, TurnosPersistencia turnos) {
         this.alta = alta;
         this.sillones = sillones;
@@ -70,8 +70,7 @@ public class CrearTurnoOnlineService {
                 .flatMap(intervalo -> primeroLibre(candidatos, profesionalId, intervalo))
                 .orElse(candidatos.get(0));
         var solicitud = new SolicitudTurno(pacienteId, profesionalId, sillon, prestacionId, inicio, null);
-        return alta.registrar(solicitud, (validado, ahora) -> Turno.nuevoOnline(pacienteId, profesionalId, sillon,
-                prestacionId, validado, ahora));
+        return alta.crearOnline(solicitud);
     }
 
     /** El preferido primero (si está activo) y después los activos por id ascendente. */

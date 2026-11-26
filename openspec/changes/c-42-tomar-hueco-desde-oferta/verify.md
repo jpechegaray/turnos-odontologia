@@ -55,7 +55,7 @@ Fallidos: ninguno.
 
 ## Reglas de negocio y reglas duras
 
-- **RN-01 / RN-02 (sin solapamientos):** el alta online pasa por el mismo `AltaTurno` (locks + `ValidadorTurno`) que el alta interna, y la garantía final sigue siendo `EXCLUDE USING gist`. Hay test de solapamiento real con el profesional y de carrera concurrente con PostgreSQL. El borde `[inicio, fin)` ya lo cubren los tests de C-19; este change no modifica esa lógica.
+- **RN-01 / RN-02 (sin solapamientos):** el alta online pasa por `CrearTurnoService.crearOnline` (de C-41), con los mismos locks y `ValidadorTurno` que el alta interna, y la garantía final sigue siendo `EXCLUDE USING gist`. Hay test de solapamiento real con el profesional y de carrera concurrente con PostgreSQL. El borde `[inicio, fin)` ya lo cubren los tests de C-19; este change no modifica esa lógica.
 - **RN-13 (bloqueos de agenda):** "El profesional bloqueó la agenda en el horario del hueco".
 - **RN-15 / RN-24 (lista de espera y oferta):** escenarios de toma, carrera, vencida y no disponible.
 - **RN-07 / RN-25 / RN-38 (tokens):** el token de la oferta se compara por hash en tiempo constante; 404 uniforme; `no-store`; sin tokens en logs ni en `instance`. El turno nuevo recibe un token propio.
@@ -74,4 +74,4 @@ Ninguna. D1–D8 coinciden con el código. D3 ya registra el orden de locks defi
 
 ## Próximo paso
 
-Commit en `valentino`, push y PR a `master` (revisa Juan Pablo). Después del merge: `/opsx:archive c-42-tomar-hueco-desde-oferta`. Avisar a Lionel (C-41) que puede reutilizar `CrearTurnoOnlineService` y `DatosConfirmacionReserva`.
+Commit en `valentino`, push y PR a `master` (revisa Juan Pablo). Después del merge: `/opsx:archive c-42-tomar-hueco-desde-oferta`. 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import ar.edu.utn.turnos.PruebaIntegracionBase;
 import ar.edu.utn.turnos.configuracion.infrastructure.InicializadorConfiguracion;
+import jakarta.persistence.EntityManager;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +22,9 @@ class ConfiguracionInicialIT extends PruebaIntegracionBase {
     @Autowired
     private InicializadorConfiguracion inicializador;
 
+    @Autowired
+    private EntityManager entidades;
+
     @Test
     @DisplayName("El primer arranque inicializa los siete valores por defecto")
     void inicializaValoresPorDefecto() {
@@ -35,7 +39,38 @@ class ConfiguracionInicialIT extends PruebaIntegracionBase {
                         "reserva_online.anticipacion_minima_horas", "2",
                         "reserva_online.max_turnos_activos_por_email", "3",
                         "lista_espera.max_avisos_por_hueco", "10",
-                        "consultorio.nombre", "Consultorio Ficticio"));
+                        "consultorio.nombre", "Consultorio Ficticio",
+                        "consultorio.domicilio", "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires",
+                        "consultorio.email_contacto", "contacto@consultorio-ficticio.example",
+                        "consultorio.retencion_anios", "2"));
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Los parámetros nuevos del consultorio tienen su valor por defecto")
+    void reponeParametrosNuevosDelConsultorio() {
+        var fecha = OffsetDateTime.parse("2030-06-01T12:00:00Z");
+        jdbc.update("delete from configuracion where clave in (?, ?, ?)", "consultorio.domicilio",
+                "consultorio.email_contacto", "consultorio.retencion_anios");
+        jdbc.update("update configuracion set valor = case when clave = ? then ? else (valor::int + 1)::text end, "
+                + "actualizado_en = ?", "consultorio.nombre", "Consultorio Editado", fecha);
+        var anteriores = jdbc.queryForList("select clave, valor, actualizado_en from configuracion order by clave");
+
+        inicializador.inicializar();
+        entidades.flush();
+
+        assertThat(jdbc.queryForList("select clave, valor, actualizado_en from configuracion where clave not in "
+                + "(?, ?, ?) order by clave", "consultorio.domicilio", "consultorio.email_contacto",
+                "consultorio.retencion_anios")).isEqualTo(anteriores);
+        assertThat(anteriores).hasSize(7);
+        var nuevos = jdbc.query("select clave, valor from configuracion where clave in (?, ?, ?)",
+                (rs, fila) -> Map.entry(rs.getString("clave"), rs.getString("valor")), "consultorio.domicilio",
+                "consultorio.email_contacto", "consultorio.retencion_anios");
+        assertThat(nuevos.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                .containsExactlyInAnyOrderEntriesOf(Map.of(
+                        "consultorio.domicilio", "Av. Ficticia 1234, Ciudad Autónoma de Buenos Aires",
+                        "consultorio.email_contacto", "contacto@consultorio-ficticio.example",
+                        "consultorio.retencion_anios", "2"));
     }
 
     @Test
@@ -51,7 +86,7 @@ class ConfiguracionInicialIT extends PruebaIntegracionBase {
 
         inicializador.inicializar();
 
-        assertThat(jdbc.queryForObject("select count(*) from configuracion", Integer.class)).isEqualTo(7);
+        assertThat(jdbc.queryForObject("select count(*) from configuracion", Integer.class)).isEqualTo(10);
         assertThat(jdbc.queryForObject("select valor from configuracion where clave = ?", String.class, recordatorio))
                 .isEqualTo("24");
         assertThat(jdbc.queryForObject("select valor from configuracion where clave = ?", String.class, cancelacion))
