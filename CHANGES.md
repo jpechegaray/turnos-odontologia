@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 49 de 51 changes hechos (Olas 0 a 7 completas). Todos los changes hechos están archivados en OpenSpec, salvo C-39 (Nico), que ya está en `master` y tiene pendiente el archivo. Quedan C-50 (Julián, camino crítico) y C-51 (Juan Pablo), de la Ola 8, que ya se pueden empezar. Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-26:** 50 de 51 changes hechos (Olas 0 a 7 completas). C-50 quedó integrado en los PR #145 y #146 y su archivo conserva las tareas de revisión y documentación pendientes. C-39 ya está en `master` y tiene pendiente el archivo. Queda C-51 (Juan Pablo), de la Ola 8. El CI de cada PR ejecuta los tests del backend y del frontend y `master` exige ambos checks.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -69,7 +69,7 @@
 | C-47 | ✅ hecho | Cualquiera (Valentino) | 7 | M | front-lista-espera | C-16, C-18, C-31, C-43 |  |
 | C-48 | ✅ hecho | **Julián** | 7 | M | front-reserva-publica-reservar | C-09, C-38, C-41 | HIGH |
 | C-49 | ✅ hecho | **Valentino** (reasignado de Julián) | 7 | M | front-turno-por-token-y-oferta | C-09, C-39, C-42 | camino crítico, HIGH |
-| C-50 | ⬜ pendiente | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
+| C-50 | ✅ hecho | **Julián** | 8 | M | identidad-visual-final | C-20, C-21, C-22, C-23, C-24, C-34, C-45, C-46, C-47, C-48, C-49 | camino crítico |
 | C-51 | ⬜ pendiente | **Juan Pablo** | 8 | M | verificacion-e2e-y-cierre-mvp | C-33, C-37, C-44, C-46, C-47, C-48, C-49 |  |
 
 ---
@@ -1532,7 +1532,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 > C-50 modifica estilos compartidos; C-51 no toca `frontend/src`, por lo que pueden correr en paralelo.
 
 ### [C-50] `C-50-identidad-visual-final`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Julián y Juan Pablo (PR #145 y #146, 2026-11-26). El archivo de OpenSpec documenta las tareas sin confirmar.
 - **Responsable**: Julián — **Ola**: 8 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Cerrar y cargar el nombre del producto, el logo, el color primario y la tipografía finales (hoy `(TBD)` en `design-system/README.md`)
