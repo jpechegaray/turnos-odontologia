@@ -2,7 +2,7 @@ import type { FiltrosNotificaciones } from "./tipos";
 
 export const TAMANIO_PAGINA = 20;
 
-export const FILTROS_VACIOS: FiltrosNotificaciones = { estado: "", turno: "" };
+export const FILTROS_VACIOS: FiltrosNotificaciones = { turno: "" };
 
 const ENTERO_POSITIVO = /^[1-9]\d*$/;
 
@@ -13,13 +13,12 @@ export function turnoValido(texto: string): boolean {
 }
 
 export function hayFiltros(filtros: FiltrosNotificaciones): boolean {
-  return filtros.estado !== "" || filtros.turno.trim() !== "";
+  return filtros.turno.trim() !== "";
 }
 
-/** Ruta de la consulta con los filtros elegidos y la página, en orden fijo: estado, turnoId, pagina, tamanio. */
+/** Ruta de la consulta con el turno opcional y la página del registro. */
 export function consultaDeNotificaciones(filtros: FiltrosNotificaciones, pagina: number): string {
   const parametros = new URLSearchParams();
-  if (filtros.estado !== "") parametros.set("estado", filtros.estado);
   const turno = filtros.turno.trim();
   if (turno !== "") parametros.set("turnoId", turno);
   parametros.set("pagina", String(pagina));

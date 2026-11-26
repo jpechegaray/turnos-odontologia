@@ -80,7 +80,7 @@ public class AsignarHuecoService {
                     "La entrada no es compatible con el hueco indicado");
         }
         Long sillonId = resolverSillon(entrada, solicitud, fin);
-        var turno = crearTurno.crear(new SolicitudTurno(entrada.pacienteId(), solicitud.profesionalId(), sillonId,
+        var turno = crearTurno.crearDesdeLista(new SolicitudTurno(entrada.pacienteId(), solicitud.profesionalId(), sillonId,
                 entrada.prestacionId(), solicitud.inicio(), null), solicitud.notas(), creadoPorUsuarioId);
         entradas.guardar(entrada.asignar(turno.id()));
         ofertas.tomarDelHueco(solicitud.profesionalId(), solicitud.inicio());

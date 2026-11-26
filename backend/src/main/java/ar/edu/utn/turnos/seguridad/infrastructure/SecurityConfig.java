@@ -129,7 +129,8 @@ public class SecurityConfig {
                         // La corrección solo por ADMIN depende del estado del turno: la decide el servicio.
                         .requestMatchers(HttpMethod.POST, "/api/turnos/{id}/asistencia").hasAnyRole("ADMIN", "RECEPCION")
                         // Registro de notificaciones (C-25, US-020): el odontólogo no lo consulta.
-                        .requestMatchers(HttpMethod.GET, "/api/notificaciones").hasAnyRole("ADMIN", "RECEPCION")
+                        .requestMatchers(HttpMethod.GET, "/api/notificaciones", "/api/notificaciones/*/vista-previa")
+                                .hasAnyRole("ADMIN", "RECEPCION")
                         // Regla general de RN-33 (C-28): el odontólogo es solo lectura. Va después de las reglas
                         // específicas (login y públicas ya se resolvieron arriba; logout lo atiende LogoutFilter)
                         // y da 403 antes de que MVC valide el cuerpo. Las restricciones solo-ADMIN siguen aplicando.

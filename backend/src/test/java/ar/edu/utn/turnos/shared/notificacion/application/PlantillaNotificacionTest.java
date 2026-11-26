@@ -27,6 +27,35 @@ class PlantillaNotificacionTest {
     }
 
     @Test
+    @DisplayName("El correo de turno detalla fecha profesional y prestación")
+    void confirmaTurno() {
+        var mensaje = plantilla.armar(TipoNotificacion.CONFIRMACION_RESERVA, ejemploTurno());
+        assertThat(mensaje.cuerpo()).contains("tu turno quedó agendado", "26/11/2026 09:00",
+                "Profesional: Ana Ficticia", "Prestación: Limpieza", "Equipo de Consultorio Ficticio");
+    }
+
+    @Test
+    @DisplayName("El correo de ingreso avisa que la espera sigue vigente")
+    void confirmaIngresoALista() {
+        var datos = new DatosNotificacion("luna.demo-lista@example.test", "Luna", null, "Limpieza", null, null);
+        var mensaje = plantilla.armar(TipoNotificacion.INGRESO_LISTA_ESPERA, datos);
+        assertThat(mensaje.cuerpo()).contains("Registramos tu solicitud para Limpieza en la lista de espera",
+                "te avisaremos por correo electrónico").doesNotContain("Fecha y hora:");
+    }
+
+    @Test
+    @DisplayName("El correo de asignación desde lista informa que terminó la espera")
+    void confirmaFinDeLaEspera() {
+        var mensaje = plantilla.armar(TipoNotificacion.CONFIRMACION_LISTA_ESPERA, ejemploTurno());
+        assertThat(mensaje.cuerpo()).contains("Tu espera terminó", "26/11/2026 09:00", "Ana Ficticia", "Limpieza");
+    }
+
+    private DatosNotificacion ejemploTurno() {
+        return new DatosNotificacion("luna.demo-lista@example.test", "Luna", Instant.parse("2026-11-26T12:00:00Z"),
+                "Limpieza", "Ana Ficticia", null);
+    }
+
+    @Test
     @DisplayName("La notificación usa el nombre del consultorio y no expone otros pacientes")
     void usaElConsultorioYNoExponeOtrosPacientes() {
         DatosNotificacion pacienteA = new DatosNotificacion(

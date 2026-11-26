@@ -91,7 +91,7 @@ public class ServicioNotificaciones {
             Long ofertaHuecoId,
             Long pacienteId,
             DatosNotificacion datos) {
-        if (datos == null || datos.destinatario() == null || datos.destinatario().isBlank()) {
+        if (sinDestinatario(datos)) {
             return;
         }
         // El envío inmediato lo hace este hilo. La fila queda programada una espera más adelante para que el
@@ -99,6 +99,20 @@ public class ServicioNotificaciones {
         Instant reservaHasta = reloj.instant().plus(propiedades.reintento().esperaInicial());
         NotificacionEnviada pendiente = NotificacionEnviada.pendiente(
                 tipo, datos.destinatario(), turnoId, ofertaHuecoId, pacienteId, datos.inicio(), reservaHasta);
+        registrarYEnviar(pendiente, datos);
+    }
+
+    public void registrarIngresoLista(Long entradaId, Long pacienteId, DatosNotificacion datos) {
+        if (sinDestinatario(datos)) return;
+        Instant reservaHasta = reloj.instant().plus(propiedades.reintento().esperaInicial());
+        registrarYEnviar(NotificacionEnviada.pendienteIngresoLista(entradaId, pacienteId, datos.destinatario(), reservaHasta), datos);
+    }
+
+    private static boolean sinDestinatario(DatosNotificacion datos) {
+        return datos == null || datos.destinatario() == null || datos.destinatario().isBlank();
+    }
+
+    private void registrarYEnviar(NotificacionEnviada pendiente, DatosNotificacion datos) {
         NotificacionEnviada registrada;
         try {
             registrada = transaccionRegistro.execute(status -> repositorio.guardar(pendiente));

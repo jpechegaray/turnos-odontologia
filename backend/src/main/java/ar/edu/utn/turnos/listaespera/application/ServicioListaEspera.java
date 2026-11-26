@@ -9,12 +9,14 @@ import ar.edu.utn.turnos.prestaciones.application.ConsultaPrestaciones;
 import ar.edu.utn.turnos.profesionales.profesional.application.ProfesionalConsulta;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
+import ar.edu.utn.turnos.shared.notificacion.application.EventosAvisoAlta;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,16 +36,18 @@ public class ServicioListaEspera {
     private final ProfesionalConsulta profesionales;
     private final BuscadorCompatibles buscador;
     private final Clock reloj;
+    private final ApplicationEventPublisher eventos;
 
     public ServicioListaEspera(ListaEsperaPersistencia entradas, PacienteConsulta pacientes,
             ConsultaPrestaciones prestaciones, ProfesionalConsulta profesionales, BuscadorCompatibles buscador,
-            Clock reloj) {
+            Clock reloj, ApplicationEventPublisher eventos) {
         this.entradas = entradas;
         this.pacientes = pacientes;
         this.prestaciones = prestaciones;
         this.profesionales = profesionales;
         this.buscador = buscador;
         this.reloj = reloj;
+        this.eventos = eventos;
     }
 
     @PreAuthorize(PUEDE_GESTIONAR)
@@ -65,9 +69,11 @@ public class ServicioListaEspera {
             throw ListaEsperaPersistencia.duplicada();
         }
         // Si otra alta concurrente ganó entre la consulta y el guardado, el índice parcial la detecta.
-        return entradas.guardar(EntradaListaEspera.nueva(datos.pacienteId(), datos.prestacionId(),
+        var entrada = entradas.guardar(EntradaListaEspera.nueva(datos.pacienteId(), datos.prestacionId(),
                 datos.profesionalId(), desde, datos.fechaHasta(), datos.franjaDesde(), datos.franjaHasta(),
                 Instant.now(reloj)));
+        eventos.publishEvent(new EventosAvisoAlta.EntradaRegistrada(entrada.id()));
+        return entrada;
     }
 
     @PreAuthorize(PUEDE_CONSULTAR)
