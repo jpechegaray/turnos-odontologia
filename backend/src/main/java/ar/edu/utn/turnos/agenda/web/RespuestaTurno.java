@@ -4,7 +4,7 @@ import ar.edu.utn.turnos.agenda.domain.Turno;
 import java.time.Instant;
 
 /** Representación de un turno en la API: nunca la entidad (regla dura 9). Los instantes van en UTC. */
-record RespuestaTurno(
+public record RespuestaTurno(
         Long id,
         Long pacienteId,
         Long profesionalId,
@@ -23,7 +23,7 @@ record RespuestaTurno(
         String canceladoPor,
         String motivoCancelacion) {
 
-    static RespuestaTurno de(Turno turno) {
+    public static RespuestaTurno de(Turno turno) {
         return new RespuestaTurno(turno.id(), turno.pacienteId(), turno.profesionalId(), turno.sillonId(),
                 turno.prestacionId(), turno.intervalo().inicio(), turno.intervalo().fin(), turno.duracionMin(),
                 turno.estado().name(), turno.canal().name(), turno.notas(), turno.creadoEn(),

@@ -16,6 +16,8 @@ import ar.edu.utn.turnos.agenda.domain.EstadoTurno;
 import ar.edu.utn.turnos.agenda.domain.HorarioDisponible;
 import ar.edu.utn.turnos.agenda.domain.SolicitudTurno;
 import ar.edu.utn.turnos.agenda.domain.Turno;
+import ar.edu.utn.turnos.agenda.domain.TurnoOcupado;
+import ar.edu.utn.turnos.agenda.infrastructure.ConsultaOcupacionDisponibilidad;
 import ar.edu.utn.turnos.listaespera.domain.EntradaListaEspera;
 import ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera;
 import ar.edu.utn.turnos.listaespera.infrastructure.ListaEsperaPersistencia;
@@ -71,6 +73,9 @@ class AsignarHuecoServiceTest {
 
     @Mock
     private SillonConsulta sillones;
+
+    @Mock
+    private ConsultaOcupacionDisponibilidad ocupacion;
 
     @Mock
     private CrearTurnoService crearTurno;
@@ -200,6 +205,47 @@ class AsignarHuecoServiceTest {
         verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
         assertThat(captor.getValue().sillonId()).isEqualTo(8L);
         verifyNoInteractions(sillones);
+    }
+
+    @Test
+    @DisplayName("El sillón sugerido libre se usa aunque no sea el de menor id")
+    void sillonSugeridoLibreAunqueNoSeaElMenor() {
+        when(entradas.bloquear(ENTRADA_ID)).thenReturn(Optional.of(entradaActiva(PROFESIONAL_ID)));
+        when(prestaciones.buscarPorId(PRESTACION_ID)).thenReturn(Optional.of(prestacion(DURACION, true)));
+        when(profesionalPrestaciones.realiza(PROFESIONAL_ID, PRESTACION_ID)).thenReturn(true);
+        when(disponibilidad.consultar(PROFESIONAL_ID, PRESTACION_ID, INICIO, FIN, null))
+                .thenReturn(List.of(new HorarioDisponible(INICIO, FIN, 4L)));
+        when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.of(oferta(8L)));
+        when(sillones.buscarPorId(8L)).thenReturn(Optional.of(new SillonConsulta.Datos(8L, "Sillón 8", null, true)));
+        when(ocupacion.buscar(PROFESIONAL_ID, List.of(8L), new Intervalo(INICIO, FIN))).thenReturn(List.of());
+        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID))).thenReturn(turno(99L, 8L));
+
+        servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
+
+        var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
+        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        assertThat(captor.getValue().sillonId()).isEqualTo(8L);
+    }
+
+    @Test
+    @DisplayName("El sillón sugerido ocupado cede al primero activo libre")
+    void sillonSugeridoOcupadoCede() {
+        when(entradas.bloquear(ENTRADA_ID)).thenReturn(Optional.of(entradaActiva(PROFESIONAL_ID)));
+        when(prestaciones.buscarPorId(PRESTACION_ID)).thenReturn(Optional.of(prestacion(DURACION, true)));
+        when(profesionalPrestaciones.realiza(PROFESIONAL_ID, PRESTACION_ID)).thenReturn(true);
+        when(disponibilidad.consultar(PROFESIONAL_ID, PRESTACION_ID, INICIO, FIN, null))
+                .thenReturn(List.of(new HorarioDisponible(INICIO, FIN, 4L)));
+        when(ofertas.sugeridaPara(ENTRADA_ID, PROFESIONAL_ID, INICIO)).thenReturn(Optional.of(oferta(8L)));
+        when(sillones.buscarPorId(8L)).thenReturn(Optional.of(new SillonConsulta.Datos(8L, "Sillón 8", null, true)));
+        when(ocupacion.buscar(PROFESIONAL_ID, List.of(8L), new Intervalo(INICIO, FIN))).thenReturn(List.of(
+                new TurnoOcupado(50L, 2L, 8L, new Intervalo(INICIO, FIN), EstadoTurno.PROGRAMADO)));
+        when(crearTurno.crear(any(SolicitudTurno.class), any(), eq(USUARIO_ID))).thenReturn(turno(99L, 4L));
+
+        servicio.asignar(ENTRADA_ID, solicitud(null), USUARIO_ID);
+
+        var captor = ArgumentCaptor.forClass(SolicitudTurno.class);
+        verify(crearTurno).crear(captor.capture(), any(), eq(USUARIO_ID));
+        assertThat(captor.getValue().sillonId()).isEqualTo(4L);
     }
 
     @Test

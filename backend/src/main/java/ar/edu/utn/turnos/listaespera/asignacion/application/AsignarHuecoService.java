@@ -5,6 +5,7 @@ import ar.edu.utn.turnos.agenda.application.DisponibilidadService;
 import ar.edu.utn.turnos.agenda.domain.HorarioDisponible;
 import ar.edu.utn.turnos.agenda.domain.SolicitudTurno;
 import ar.edu.utn.turnos.agenda.domain.Turno;
+import ar.edu.utn.turnos.agenda.infrastructure.ConsultaOcupacionDisponibilidad;
 import ar.edu.utn.turnos.listaespera.domain.CompatibilidadListaEspera;
 import ar.edu.utn.turnos.listaespera.domain.EntradaListaEspera;
 import ar.edu.utn.turnos.listaespera.domain.EstadoListaEspera;
@@ -18,6 +19,7 @@ import ar.edu.utn.turnos.profesionales.prestacion.application.ProfesionalRealiza
 import ar.edu.utn.turnos.profesionales.sillon.application.SillonConsulta;
 import ar.edu.utn.turnos.shared.error.EstadoError;
 import ar.edu.utn.turnos.shared.error.ReglaNegocioException;
+import ar.edu.utn.turnos.shared.tiempo.Intervalo;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -40,10 +42,12 @@ public class AsignarHuecoService {
     private final DisponibilidadService disponibilidad;
     private final SillonConsulta sillones;
     private final CrearTurnoService crearTurno;
+    private final ConsultaOcupacionDisponibilidad ocupacion;
 
     AsignarHuecoService(ListaEsperaPersistencia entradas, OfertasHuecoPersistencia ofertas,
             ConsultaPrestaciones prestaciones, ProfesionalRealizaPrestacion profesionalPrestaciones,
-            DisponibilidadService disponibilidad, SillonConsulta sillones, CrearTurnoService crearTurno) {
+            DisponibilidadService disponibilidad, SillonConsulta sillones, CrearTurnoService crearTurno,
+            ConsultaOcupacionDisponibilidad ocupacion) {
         this.entradas = entradas;
         this.ofertas = ofertas;
         this.prestaciones = prestaciones;
@@ -51,6 +55,7 @@ public class AsignarHuecoService {
         this.disponibilidad = disponibilidad;
         this.sillones = sillones;
         this.crearTurno = crearTurno;
+        this.ocupacion = ocupacion;
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'RECEPCION')")
@@ -98,6 +103,10 @@ public class AsignarHuecoService {
             return sugerido;
         }
         if (!libres.isEmpty()) {
+            // La disponibilidad informa un solo sillón por horario (el de menor id): el sugerido se revisa aparte.
+            if (sugerido != null && sillonActivoYLibre(sugerido, solicitud.profesionalId(), solicitud.inicio(), fin)) {
+                return sugerido;
+            }
             return libres.stream().min(Long::compareTo).orElseThrow();
         }
         if (sugerido != null && sillones.buscarPorId(sugerido).map(SillonConsulta.Datos::activo).orElse(false)) {
@@ -107,5 +116,15 @@ public class AsignarHuecoService {
                 .map(SillonConsulta.Datos::id).min(Long::compareTo)
                 .orElseThrow(() -> new ReglaNegocioException("SIN_SILLON_DISPONIBLE", EstadoError.NO_PROCESABLE_422,
                         "No hay sillón disponible"));
+    }
+
+    private boolean sillonActivoYLibre(Long sillonId, Long profesionalId, Instant inicio, Instant fin) {
+        if (!sillones.buscarPorId(sillonId).map(SillonConsulta.Datos::activo).orElse(false)) {
+            return false;
+        }
+        var intervalo = new Intervalo(inicio, fin);
+        return ocupacion.buscar(profesionalId, List.of(sillonId), intervalo).stream()
+                .noneMatch(t -> sillonId.equals(t.sillonId()) && t.estado().ocupaLugar()
+                        && t.intervalo().solapaCon(intervalo));
     }
 }

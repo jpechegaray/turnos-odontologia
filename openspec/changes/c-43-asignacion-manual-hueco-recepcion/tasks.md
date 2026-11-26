@@ -17,24 +17,24 @@
 
 ## 3. Endpoint, transacción y competición
 
-- [ ] 3.1 Crear `listaespera.asignacion.web.AsignarHuecoController` (`POST /api/lista-espera/{id}/asignar`) y `SolicitudAsignarHueco` (`inicio` `OffsetDateTime` obligatorio, `profesionalId` obligatorio, `sillonId` y `notas` opcionales con `@Size(max = 1000)`), respondiendo `201` con `agenda.web.RespuestaTurno` y `Location` al turno; verificar con `@DisplayName("Recepción asigna un hueco a una entrada compatible")` y `@DisplayName("La asignación guarda las notas del turno")`.
-- [ ] 3.2 Cubrir el contrato de entrada con `@DisplayName("El cuerpo exige profesional e inicio con zona")`: sin `profesionalId`, sin `inicio` o `inicio` sin zona dan `400` en Problem Details y no crean turno.
-- [ ] 3.3 Cubrir las validaciones de la entrada con `@DisplayName("Una entrada inexistente responde 404")`, `@DisplayName("Una entrada que ya no está activa responde 409")` (código `ENTRADA_NO_ACTIVA`) y `@DisplayName("Una entrada incompatible con el hueco responde 422")` (código `ENTRADA_INCOMPATIBLE`).
-- [ ] 3.4 Cubrir la duración y el sillón con `@DisplayName("La duración del turno es la de la prestación de la entrada")`, `@DisplayName("Sin sillón se prefiere el sugerido por la oferta si sigue libre")`, `@DisplayName("Sin sillón libre sugerido se usa el primero activo libre")` y `@DisplayName("Un sillón indicado ocupado responde 409")` (código `RN-01`).
-- [ ] 3.5 Cubrir la competición y el cierre de ofertas con `@DisplayName("Una segunda asignación del mismo hueco responde 409")` (código `RN-01`, sin segundo turno y segunda entrada `ACTIVA`), `@DisplayName("Las ofertas del hueco pasan a TOMADA")` y `@DisplayName("Sin ofertas la asignación igual funciona")`.
-- [ ] 3.6 Cubrir la atomicidad con `@DisplayName("Un fallo al crear el turno no deja la entrada cerrada ni las ofertas tomadas")`: forzar el fallo del alta (por ejemplo, hueco fuera de horario o sillón ocupado) y verificar que la entrada sigue `ACTIVA` sin `turnoAsignadoId` y las ofertas siguen `ENVIADA`.
+- [x] 3.1 Crear `listaespera.asignacion.web.AsignarHuecoController` (`POST /api/lista-espera/{id}/asignar`) y `SolicitudAsignarHueco` (`inicio` `OffsetDateTime` obligatorio, `profesionalId` obligatorio, `sillonId` y `notas` opcionales con `@Size(max = 1000)`), respondiendo `201` con `agenda.web.RespuestaTurno` y `Location` al turno; verificar con `@DisplayName("Recepción asigna un hueco a una entrada compatible")` y `@DisplayName("La asignación guarda las notas del turno")`.
+- [x] 3.2 Cubrir el contrato de entrada con `@DisplayName("El cuerpo exige profesional e inicio con zona")`: sin `profesionalId`, sin `inicio` o `inicio` sin zona dan `400` en Problem Details y no crean turno.
+- [x] 3.3 Cubrir las validaciones de la entrada con `@DisplayName("Una entrada inexistente responde 404")`, `@DisplayName("Una entrada que ya no está activa responde 409")` (código `ENTRADA_NO_ACTIVA`) y `@DisplayName("Una entrada incompatible con el hueco responde 422")` (código `ENTRADA_INCOMPATIBLE`).
+- [x] 3.4 Cubrir la duración y el sillón con `@DisplayName("La duración del turno es la de la prestación de la entrada")`, `@DisplayName("Sin sillón se prefiere el sugerido por la oferta si sigue libre")`, `@DisplayName("Sin sillón libre sugerido se usa el primero activo libre")` y `@DisplayName("Un sillón indicado ocupado responde 409")` (código `RN-01`).
+- [x] 3.5 Cubrir la competición y el cierre de ofertas con `@DisplayName("Una segunda asignación del mismo hueco responde 409")` (código `RN-01`, sin segundo turno y segunda entrada `ACTIVA`), `@DisplayName("Las ofertas del hueco pasan a TOMADA")` y `@DisplayName("Sin ofertas la asignación igual funciona")`.
+- [x] 3.6 Cubrir la atomicidad con `@DisplayName("Un fallo al crear el turno no deja la entrada cerrada ni las ofertas tomadas")`: forzar el fallo del alta (por ejemplo, hueco fuera de horario o sillón ocupado) y verificar que la entrada sigue `ACTIVA` sin `turnoAsignadoId` y las ofertas siguen `ENVIADA`.
 
 ## 4. Seguridad
 
-- [ ] 4.1 Agregar en `SecurityConfig` la regla explícita `POST /api/lista-espera/{id}/asignar` con `hasAnyRole("ADMIN", "RECEPCION")`, antes de la regla genérica de `POST /api/**`; verificar con `@DisplayName("El odontólogo no asigna huecos")` (403 con cuerpo malformado) y `@DisplayName("Sin sesión no se asigna un hueco")` (401).
-- [ ] 4.2 Verificar `@DisplayName("Las escrituras requieren CSRF válido")`: `ADMIN`/`RECEPCION` sin CSRF reciben `403` y la entrada y las ofertas no cambian.
+- [x] 4.1 Agregar en `SecurityConfig` la regla explícita `POST /api/lista-espera/{id}/asignar` con `hasAnyRole("ADMIN", "RECEPCION")`, antes de la regla genérica de `POST /api/**`; verificar con `@DisplayName("El odontólogo no asigna huecos")` (403 con cuerpo malformado) y `@DisplayName("Sin sesión no se asigna un hueco")` (401).
+- [x] 4.2 Verificar `@DisplayName("Las escrituras requieren CSRF válido")`: `ADMIN`/`RECEPCION` sin CSRF reciben `403` y la entrada y las ofertas no cambian.
 
 ## 5. Integración y cierre
 
-- [ ] 5.1 `mvn verify` en verde (backend completo, incluido `ArquitecturaTest`) y verificar que no hay cambios de esquema ni de `application.yml`.
-- [ ] 5.2 `openspec validate c-43-asignacion-manual-hueco-recepcion --strict` en verde.
-- [ ] 5.3 Prueba manual en dev con datos ficticios propios: anotar una entrada, liberar un hueco, asignarlo por `POST /api/lista-espera/{id}/asignar` y comprobar `201`, entrada `ASIGNADA` y ofertas `TOMADA`; borrar los datos de prueba al terminar.
-- [ ] 5.4 Ejecutar `openspec-verify` y dejar `verify.md` con el veredicto.
+- [x] 5.1 `mvn verify` en verde (backend completo, incluido `ArquitecturaTest`) y verificar que no hay cambios de esquema ni de `application.yml`.
+- [x] 5.2 `openspec validate c-43-asignacion-manual-hueco-recepcion --strict` en verde.
+- [x] 5.3 Prueba manual en dev con datos ficticios propios: anotar una entrada, liberar un hueco, asignarlo por `POST /api/lista-espera/{id}/asignar` y comprobar `201`, entrada `ASIGNADA` y ofertas `TOMADA`; borrar los datos de prueba al terminar.
+- [x] 5.4 Ejecutar `openspec-verify` y dejar `verify.md` con el veredicto.
 
 ## Workflow follow-up
 

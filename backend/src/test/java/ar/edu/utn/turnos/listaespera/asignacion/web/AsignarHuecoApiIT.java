@@ -441,4 +441,60 @@ class AsignarHuecoApiIT extends PruebaIntegracionBase {
         assertThat(turnoAsignado(entrada)).isNull();
         assertThat(estadoOferta(entrada)).isEqualTo("ENVIADA");
     }
+
+    // --- 4.1 / 4.2 ---
+
+    @Test
+    @DisplayName("El odontólogo no asigna huecos")
+    void odontologoNoAsigna() throws Exception {
+        var entrada = entrada("ACTIVA", null);
+
+        for (var json : List.of(cuerpo(profesional, INICIO, sillon, null), "{")) {
+            asignar(entrada, json, "ODONTOLOGO")
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+        }
+
+        assertThat(cantidadTurnos()).isZero();
+        assertThat(estadoEntrada(entrada)).isEqualTo("ACTIVA");
+    }
+
+    @Test
+    @DisplayName("Sin sesión no se asigna un hueco")
+    void sinSesion() throws Exception {
+        var entrada = entrada("ACTIVA", null);
+
+        mockMvc.perform(post(RUTA, entrada)
+                        .with(csrfValido())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(profesional, INICIO, sillon, null)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+
+        assertThat(cantidadTurnos()).isZero();
+        assertThat(estadoEntrada(entrada)).isEqualTo("ACTIVA");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "RECEPCION"})
+    @DisplayName("Las escrituras requieren CSRF válido")
+    void escriturasRequierenCsrf(String rol) throws Exception {
+        var entrada = entrada("ACTIVA", null);
+        oferta(entrada, profesional, INICIO_INSTANT, FIN_INSTANT, null);
+
+        for (var peticion : List.of(
+                post(RUTA, entrada),
+                post(RUTA, entrada).with(csrfConCabeceraIncorrecta()))) {
+            mockMvc.perform(peticion
+                            .with(user(PERSONAL).roles(rol))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(cuerpo(profesional, INICIO, sillon, null)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+        }
+
+        assertThat(cantidadTurnos()).isZero();
+        assertThat(estadoEntrada(entrada)).isEqualTo("ACTIVA");
+        assertThat(estadoOferta(entrada)).isEqualTo("ENVIADA");
+    }
 }

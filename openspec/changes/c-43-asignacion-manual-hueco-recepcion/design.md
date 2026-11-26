@@ -56,6 +56,7 @@ Antes de crear el turno se valida `CompatibilidadListaEspera.esCompatible(entrad
   Si no hay ningún `HorarioDisponible` en ese inicio, se usa el sillón sugerido por la oferta si está activo o, si no, el primero activo, y se deja que `CrearTurnoService` determine el error exacto: `409 RN-01` si el profesional o el sillón están ocupados, `422 RN-04`/`RN-13` si el hueco está fuera de horario o en el pasado. La creación siempre revalida y la `EXCLUDE` es la garantía final.
 
 - *Alternativa descartada:* resolver el sillón con `SillonConsulta.listarActivos()` + consultar solapamientos a mano. Duplicaría el cálculo de C-26 y podría divergir de las reglas de horario/bloqueo; `DisponibilidadService` ya es el núcleo reutilizable previsto para C-43.
+- *Ajuste en apply:* `DisponibilidadService` informa un solo `HorarioDisponible` por inicio, con el sillón libre de menor id, así que el sugerido casi nunca figura en esa lista. Cuando el hueco tiene horario disponible y el sugerido no es el informado, se verifica aparte que esté activo (`SillonConsulta`) y sin turnos que solapen (`ConsultaOcupacionDisponibilidad.buscar`, la misma consulta de ocupación que usa C-26). Si está libre, se usa; si no, se usa el informado.
 - *Trade-off aceptado:* entre la consulta de disponibilidad y el `INSERT` el sillón puede ocuparse; en ese caso gana la `EXCLUDE` y el pedido recibe `409`, que es exactamente el comportamiento de RN-15.
 
 ### D5. Transacción única y concurrencia de la entrada
@@ -88,6 +89,7 @@ int tomarDelHueco(profesionalId, huecoInicio)
 ```
 
 - **Criterio de matching:** `(profesionalId, huecoInicio)`. Una oferta pudo crearse con un `huecoFin` mayor que la duración de la entrada (el hueco liberado era más largo); igual pertenece al mismo hueco que recepción está tomando, porque su `huecoInicio` es el mismo. Comparar por el fin dejaría ofertas `ENVIADA` de un hueco ya tomado.
+- **Ajuste en apply:** C-42 ya trae `OfertaHuecoJpaRepository.tomarDelHueco(profesionalId, inicio, fin)`, que compara también el fin. Para no cambiar su comportamiento, la consulta de C-43 se llama `tomarDelHuecoPorInicio` en el repositorio y se expone como `OfertasHuecoPersistencia.tomarDelHueco(profesionalId, huecoInicio)`. Para el sillón sugerido (D4) se agrega `sugeridaPara(entradaId, profesionalId, huecoInicio)`: devuelve la oferta de la entrada si existe y, si no, otra del mismo hueco.
 - **Idempotencia:** el `UPDATE` solo toca `ENVIADA`; repetirlo no cambia nada. Las ofertas `VENCIDA` o ya `TOMADA` se conservan.
 - **RN-38:** la oferta pasa a `TOMADA` porque "otro la tomó"; por eso se marcan todas las del hueco, no solo la de la entrada asignada.
 - *Alternativa descartada:* leer cada oferta y guardarla con `save`. Más lenta y sujeta a conflictos de versión; la actualización por JPQL es atómica y no necesita token ni lock por oferta porque la transacción de la asignación ya ordena el hueco.

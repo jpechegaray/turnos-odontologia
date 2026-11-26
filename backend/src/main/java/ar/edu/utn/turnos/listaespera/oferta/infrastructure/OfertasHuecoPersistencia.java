@@ -44,6 +44,23 @@ public class OfertasHuecoPersistencia {
         return ofertas.tomarDelHueco(profesionalId, huecoInicio, huecoFin);
     }
 
+    /**
+     * Pasa a {@code TOMADA} todas las ofertas {@code ENVIADA} del profesional con ese inicio de hueco, sin importar
+     * su fin (asignación manual, C-43 design D6). Idempotente.
+     */
+    public int tomarDelHueco(Long profesionalId, Instant huecoInicio) {
+        return ofertas.tomarDelHuecoPorInicio(profesionalId, huecoInicio);
+    }
+
+    /**
+     * Una oferta del hueco para leer su sillón sugerido (C-43 design D4): la de la entrada si existe, si no la
+     * primera del mismo profesional e inicio.
+     */
+    public Optional<OfertaHueco> sugeridaPara(Long entradaId, Long profesionalId, Instant huecoInicio) {
+        return ofertas.delHuecoPrefiriendo(entradaId, profesionalId, huecoInicio).stream().findFirst()
+                .map(OfertaHuecoJpa::dominio);
+    }
+
     /** Pasa a {@code VENCIDA} una oferta {@code ENVIADA} cuyo hueco ya empezó (C-42). Idempotente. */
     public int vencerOferta(Long id) {
         return ofertas.vencerOferta(id);

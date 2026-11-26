@@ -56,4 +56,25 @@ class OfertaHuecoTest {
 
         assertThat(tomada.vigente(LUNES_10.minusSeconds(30))).isFalse();
     }
+
+    @Test
+    @DisplayName("Tomar una oferta enviada la deja tomada")
+    void tomarUnaOfertaEnviadaLaDejaTomada() {
+        var tomada = nueva().tomar();
+
+        assertThat(tomada.estado()).isEqualTo(EstadoOferta.TOMADA);
+        assertThat(tomada.huecoInicio()).isEqualTo(LUNES_10);
+    }
+
+    @Test
+    @DisplayName("Tomar una oferta vencida o ya tomada no la cambia")
+    void tomarUnaOfertaVencidaOYaTomadaNoLaCambia() {
+        var vencida = new OfertaHueco(9L, 1L, 2L, LUNES_10, LUNES_10.plusSeconds(1800), 3L, HASH, LUNES_10,
+                EstadoOferta.VENCIDA, LUNES_10.minusSeconds(60));
+        var tomada = new OfertaHueco(9L, 1L, 2L, LUNES_10, LUNES_10.plusSeconds(1800), 3L, HASH, LUNES_10,
+                EstadoOferta.TOMADA, LUNES_10.minusSeconds(60));
+
+        assertThat(vencida.tomar()).isEqualTo(vencida);
+        assertThat(tomada.tomar()).isEqualTo(tomada);
+    }
 }
