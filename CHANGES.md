@@ -62,7 +62,7 @@
 | C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
 | C-41 | ✅ hecho | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
 | C-42 | ✅ hecho | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
-| C-43 | 🔄 en revisión | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
+| C-43 | ✅ hecho | Cualquiera (Julián y Lionel) | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
 | C-44 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
 | C-45 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | M | front-crear-turno | C-07, C-19, C-26, C-40 |  |
 | C-46 | ✅ hecho | Juan Pablo (Cualquiera) | 7 | M | front-reprogramar-cancelar-asistencia | C-27, C-29, C-35, C-45 |  |
@@ -1394,7 +1394,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: RM-06 (mismo módulo `listaespera` que C-43, subpaquetes distintos).
 
 ### [C-43] `C-43-asignacion-manual-hueco-recepcion`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` hecho por Julián y Lionel (PR #140, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Cualquiera — **Ola**: 6 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - `POST /api/lista-espera/{id}/asignar` con profesional, inicio y sillón opcional: crea el turno con todas las validaciones, cierra la entrada (`ASIGNADA`) y marca como `TOMADA` las ofertas del hueco
