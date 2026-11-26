@@ -7,6 +7,8 @@ import { mensajeDeErrorSillon } from "./errores";
 import { FormularioSillon } from "./FormularioSillon";
 import type { SillonModificacion, SillonRespuesta, SillonSolicitud } from "./tipos";
 import { useSillones } from "./useSillones";
+import { useAgenda } from "../../agenda/useAgenda";
+import "./sillones.css";
 
 const MARCA_VACIO = "—";
 
@@ -37,6 +39,7 @@ function conEstado(sillon: SillonRespuesta, activo: boolean): SillonModificacion
 export function PaginaSillones() {
   const esAdmin = useEsAdministrador();
   const { sillones, cargando, errorCarga, recargar } = useSillones();
+  const { agenda } = useAgenda({ vista: "dia" });
   const [aviso, actualizarAviso] = useState<string>();
   const [editando, actualizarEditando] = useState<SillonRespuesta>();
   const [confirmandoBaja, actualizarConfirmandoBaja] = useState<number>();
@@ -73,9 +76,18 @@ export function PaginaSillones() {
     }
   }
 
+  const datos: readonly ColumnaTabla<SillonRespuesta>[] = [...COLUMNAS, {
+    clave: "turnos", titulo: "Turnos hoy", celda: (sillon) => (
+      <span className="sillon-cifra"><span aria-hidden="true">Turnos hoy</span><strong className="mono">{
+        agenda && Array.isArray(agenda.turnos) && sillon.activo
+          ? agenda.turnos.filter((turno) => turno.sillonId === sillon.id && turno.estado !== "CANCELADO").length
+          : "Sin datos"
+      }</strong></span>
+    ),
+  }];
   const columnas: readonly ColumnaTabla<SillonRespuesta>[] = esAdmin
     ? [
-        ...COLUMNAS,
+        ...datos,
         {
           clave: "acciones",
           titulo: "Acciones",
@@ -93,7 +105,7 @@ export function PaginaSillones() {
           ),
         },
       ]
-    : COLUMNAS;
+    : datos;
 
   return (
     <section>
@@ -106,7 +118,7 @@ export function PaginaSillones() {
       {aviso && <Toast mensaje={aviso} />}
       {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
       <div className={esAdmin ? "con-formulario" : undefined}>
-      <div className="con-formulario__lista">
+      <div className="con-formulario__lista sillones-tarjetas">
       {cargando ? (
         <p role="status">Cargando…</p>
       ) : errorCarga ? (

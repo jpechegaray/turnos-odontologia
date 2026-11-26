@@ -86,10 +86,9 @@ function secuencia(...listas: readonly (readonly Bloqueo[])[]): () => Response {
   return () => Response.json(listas[Math.min(llamada++, listas.length - 1)]);
 }
 
-/** Usa la acción «Bloqueos» de la fila de Pérez y devuelve el panel abierto. */
+/** Abre la pestaña de bloqueos del profesional seleccionado. */
 async function abrirPanel(): Promise<HTMLElement> {
-  const fila = await screen.findByRole("row", { name: /Pérez/ });
-  await userEvent.click(within(fila).getByRole("button", { name: "Bloqueos" }));
+  await userEvent.click(await screen.findByRole("tab", { name: "Bloqueos" }));
   return screen.findByRole("region", { name: "Bloqueos de Pérez, Ana" });
 }
 

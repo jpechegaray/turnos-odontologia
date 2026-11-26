@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ErrorApi } from "../../shared/api/errorApi";
 import { Alerta, Avatar, Boton, Tabla, type ColumnaTabla } from "../../shared/ui";
-import { CampoSeleccion } from "../../shared/ui/CampoSeleccion";
 import { darDeBaja, listarEntradas } from "./api";
 import { MENSAJE_GENERICO } from "./mensajes";
 import { textoEstado, textoFechas, textoFranja } from "./presentacion";
@@ -36,7 +35,8 @@ function BajaEnFila({ onConfirmar, ocupado }: Readonly<{ onConfirmar: () => Prom
 
 /** Entradas por estado con nombres legibles y la baja de las activas (US-017). */
 export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: CatalogosListaEspera; version: number }>) {
-  const [estado, cambiarEstado] = useState<EstadoEntrada>("ACTIVA");
+  const [estado, cambiarEstado] = useState<EstadoEntrada | "TODAS">("ACTIVA");
+  const [prestacion, cambiarPrestacion] = useState("");
   const [recargas, cambiarRecargas] = useState(0);
   const [consulta, actualizarConsulta] = useState<Consulta>({ tipo: "cargando" });
   const [aviso, cambiarAviso] = useState("");
@@ -46,12 +46,12 @@ export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: Ca
   useEffect(() => {
     let vigente = true;
     actualizarConsulta((previa) => (previa.tipo === "lista" ? previa : { tipo: "cargando" }));
-    listarEntradas(estado).then(
-      (entradas) => { if (vigente) actualizarConsulta({ tipo: "lista", entradas }); },
+    listarEntradas().then(
+      (entradas) => { if (vigente) actualizarConsulta(Array.isArray(entradas) ? { tipo: "lista", entradas } : { tipo: "error" }); },
       () => { if (vigente) actualizarConsulta({ tipo: "error" }); },
     );
     return () => { vigente = false; };
-  }, [estado, version, recargas]);
+  }, [version, recargas]);
 
   async function bajar(entrada: EntradaRespuesta) {
     // Un solo DELETE en curso; sin reintentos automáticos.
@@ -100,21 +100,28 @@ export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: Ca
     },
   ];
 
+  const entradas = consulta.tipo === "lista" ? consulta.entradas : [];
+  const prestaciones = [...new Set(entradas.map(({ prestacionId }) => prestacionId))];
+  const visibles = entradas.filter((entrada) => (estado === entrada.estado || estado === "TODAS")
+    && (!prestacion || String(entrada.prestacionId) === prestacion));
+
   return (
     <Seccion titulo="Entradas" plana extra={
       <div className="lista-espera__filtro">
-        <CampoSeleccion
-          etiqueta="Estado"
-          value={estado}
-          opciones={ESTADOS.map(({ valor, plural }) => ({ valor, etiqueta: plural }))}
-          onChange={(evento) => {
-            const elegido = ESTADOS.find((opcion) => opcion.valor === evento.target.value);
-            if (!elegido) return;
-            cambiarAviso("");
-            // La tabla queda montada mientras llega el estado nuevo, así el foco y la lectura no saltan.
-            cambiarEstado(elegido.valor);
-          }}
-        />
+        <div className="lista-espera__estados" role="group" aria-label="Estado">
+          {ESTADOS.map(({ valor, plural }) => (
+            <Boton key={valor} variante="secundaria" aria-pressed={valor === estado}
+              onClick={() => { cambiarAviso(""); cambiarEstado(valor); }}>
+              {plural} <strong>{entradas.filter((entrada) => entrada.estado === valor).length}</strong>
+            </Boton>
+          ))}
+          <Boton variante="secundaria" aria-pressed={estado === "TODAS"}
+            onClick={() => { cambiarAviso(""); cambiarEstado("TODAS"); }}>Todas</Boton>
+        </div>
+        <select className="input" aria-label="Prestación" value={prestacion} onChange={(evento) => cambiarPrestacion(evento.target.value)}>
+          <option value="">Todas las prestaciones</option>
+          {prestaciones.map((id) => <option key={id} value={id}>{catalogos.nombrePrestacion(id)}</option>)}
+        </select>
       </div>
     }>
       {aviso && <div className="lista-espera__aviso"><Alerta tipo="peligro" titulo={aviso} /></div>}
@@ -135,7 +142,7 @@ export function ListadoEntradas({ catalogos, version }: Readonly<{ catalogos: Ca
           titulo="Entradas de la lista de espera"
           tituloOculto
           columnas={columnas}
-          filas={consulta.entradas}
+          filas={visibles}
           claveFila={(e) => e.id}
           mensajeVacio="No hay entradas en este estado."
         />

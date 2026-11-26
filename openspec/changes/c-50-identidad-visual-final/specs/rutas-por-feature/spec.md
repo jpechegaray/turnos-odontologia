@@ -16,9 +16,9 @@ En escritorio la navegación SHALL ser un menú lateral con el logo y la marca a
 
 ### Requirement: Menú desplegable en celular
 
-En pantallas angostas el layout SHALL ocultar el menú lateral y mostrar una barra superior con la marca y un botón "Menú" que abre el menú completo como panel. El botón MUST indicar con `aria-expanded` si el menú está abierto, y el menú MUST cerrarse con Escape o al elegir una entrada. No hay barra de navegación inferior.
+En pantallas angostas el layout SHALL ocultar el menú lateral y mostrar la barra superior de acciones y la navegación inferior de la propuesta. Los accesos a Inicio, Agenda y Pacientes SHALL respetar las entradas permitidas por rol. Los botones "Abrir menú" y "Más" SHALL abrir el menú completo e indicar su estado con `aria-expanded`. El menú MUST cerrarse con Escape o al elegir una entrada.
 
-#### Scenario: El botón "Menú" abre y cierra el menú completo
+#### Scenario: El botón "Más" abre y cierra el menú completo
 - **GIVEN** el layout renderizado
-- **WHEN** el usuario elige "Menú" y después presiona Escape
-- **THEN** el menú completo se abre con `aria-expanded="true"` y al presionar Escape se cierra con `aria-expanded="false"` 
+- **WHEN** el usuario elige "Más" y después presiona Escape
+- **THEN** el menú completo se abre con `aria-expanded="true"` y al presionar Escape se cierra con `aria-expanded="false"`

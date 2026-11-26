@@ -10,7 +10,7 @@ import { simularSesionActiva } from "./sesion.fixture";
 afterEach(() => { vi.unstubAllGlobals(); });
 
 function renderEn(ruta: string, rol: Rol = "ADMIN") {
-  simularSesionActiva(rol);
+  simularSesionActiva(rol, ({ url }) => Response.json(url.startsWith("/api/pacientes") ? [] : {}));
   return render(
     <MemoryRouter initialEntries={[ruta]}>
       <AppRutas registro={registroDeFeatures} />
@@ -52,13 +52,15 @@ describe("Menú lateral agrupado con íconos", () => {
   });
 });
 
-describe("Menú desplegable en celular", () => {
-  it('El botón "Menú" abre y cierra el menú completo', async () => {
+describe("Navegación de la propuesta", () => {
+  it('El botón "Más" abre y cierra el menú completo', async () => {
     renderEn("/");
 
-    const menu = await screen.findByRole("button", { name: "Menú" });
+    const accesos = await screen.findByRole("navigation", { name: "Accesos rápidos" });
+    const menu = within(accesos).getByRole("button", { name: "Más" });
     expect(menu).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("navigation", { name: "Accesos rápidos" })).not.toBeInTheDocument();
+    expect(within(accesos).getByRole("link", { name: "Agenda" })).toHaveAttribute("href", "/agenda");
+    expect(within(accesos).getByRole("link", { name: "Pacientes" })).toHaveAttribute("href", "/pacientes");
 
     await userEvent.click(menu);
     expect(menu).toHaveAttribute("aria-expanded", "true");

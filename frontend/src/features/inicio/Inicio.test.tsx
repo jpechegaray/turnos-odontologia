@@ -45,6 +45,7 @@ function montar(rol: Rol, responderAgenda: () => AgendaRespuesta | Response) {
     if (url.includes("/api/profesionales")) return Response.json(PROFESIONALES);
     if (url.includes("/api/prestaciones")) return Response.json(PRESTACIONES);
     if (url.includes("/api/sillones")) return Response.json([]);
+    if (url.includes("/api/lista-espera")) return Response.json([{ id: 1 }]);
     return Response.json({});
   });
   render(
@@ -67,13 +68,13 @@ afterEach(() => {
 });
 
 describe("Accesos a las secciones en inicio", () => {
-  it("Inicio muestra un recuadro por sección permitida", async () => {
+  it("Inicio muestra accesos rápidos de las secciones permitidas", async () => {
     montar("RECEPCION", () => agendaDelDia([]));
 
-    const accesos = await screen.findByRole("region", { name: "Secciones" });
-    expect(within(accesos).getByRole("link", { name: /Agenda/ })).toHaveAttribute("href", "/agenda");
-    expect(within(accesos).getByRole("link", { name: /Pacientes/ })).toHaveAttribute("href", "/pacientes");
-    expect(within(accesos).getByRole("link", { name: /Configuración/ })).toHaveAttribute("href", "/configuracion");
+    const accesos = await screen.findByRole("region", { name: "Accesos rápidos" });
+    expect(within(accesos).getByRole("link", { name: "Registrar paciente" })).toHaveAttribute("href", "/pacientes?alta=1");
+    expect(within(accesos).getByRole("link", { name: "Revisar lista de espera" })).toHaveAttribute("href", "/lista-espera");
+    expect(within(accesos).getByRole("link", { name: "Ver bloqueos" })).toHaveAttribute("href", "/profesionales?seccion=bloqueos");
     expect(within(accesos).queryByRole("link", { name: /Usuarios/ })).not.toBeInTheDocument();
     expect(within(accesos).queryByRole("link", { name: /Inicio/ })).not.toBeInTheDocument();
   });
@@ -92,8 +93,8 @@ describe("Resumen del día en inicio", () => {
     const cifras = await screen.findByRole("region", { name: "Cifras del día" });
     expect(within(cifras).getByText("Turnos de hoy").closest("div")).toHaveTextContent("4");
     expect(within(cifras).getByText("Confirmados").closest("div")).toHaveTextContent("2");
-    expect(within(cifras).getByText("Reservados").closest("div")).toHaveTextContent("1");
-    expect(within(cifras).getByText("Atendidos").closest("div")).toHaveTextContent("1");
+    expect(within(cifras).getByText("Sin confirmar").closest("div")).toHaveTextContent("1");
+    expect(within(cifras).getByText("Lista de espera").closest("div")).toHaveTextContent("1");
     const pedido = fetch.mock.calls.map(([entrada]) => String(entrada)).find((url) => url.includes("/api/agenda"));
     expect(pedido).toBe("/api/agenda?vista=dia");
   });

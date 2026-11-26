@@ -33,6 +33,13 @@ La tipografía principal SHALL ser Public Sans, servida desde los archivos del p
 
 El color primario SHALL ser verde bosque `#1B3A2F` y el fondo crema `#F5F1E8`. Cada par de texto y fondo de la paleta, en modo claro y oscuro, MUST tener un contraste de al menos 4.5:1, incluido el texto del menú lateral.
 
+La SPA SHALL fijar el tema claro en todas sus pantallas, incluso si el dispositivo tiene preferencia por el modo oscuro.
+
+#### Scenario: La aplicación usa la paleta clara con el sistema en modo oscuro
+- **GIVEN** el dispositivo prefiere el modo oscuro
+- **WHEN** se abre la aplicación
+- **THEN** el fondo es crema, el primario es verde bosque y los controles del navegador usan el esquema claro
+
 #### Scenario: Los pares de texto principales superan 4.5:1
 - **GIVEN** los valores de `design-system/tokens.css` en modo claro y oscuro
 - **WHEN** se calcula el contraste de texto sobre primario, texto sobre fondo y superficie, texto atenuado, enlaces y texto del menú lateral

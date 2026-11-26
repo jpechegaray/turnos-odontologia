@@ -1,0 +1,15 @@
+.sillones-tarjetas .table-wrap { overflow: visible; }
+.sillones-tarjetas .tabla { display: block; min-width: 0; background: transparent; }
+.sillones-tarjetas .tabla thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.sillones-tarjetas .tabla tbody { display: grid; gap: var(--space-3); }
+.sillones-tarjetas .tabla tr {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3); padding: var(--space-4);
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);
+}
+.sillones-tarjetas .tabla td { padding: 0; border: 0; min-width: 0; overflow-wrap: anywhere; }
+.sillones-tarjetas .tabla td[colspan] { grid-column: 1 / -1; }
+.sillones-tarjetas .tabla td:nth-child(2) { color: var(--color-text-muted); }
+.sillones-tarjetas .tabla td:nth-child(3) { grid-column: 2; grid-row: 1; }
+.sillones-tarjetas .tabla td:nth-child(n+4) { grid-column: 1 / -1; }
+.sillon-cifra { display: flex; justify-content: space-between; gap: var(--space-3); border-block: 1px solid var(--color-border); padding-block: var(--space-2); }

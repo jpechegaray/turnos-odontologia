@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { fechaLocal } from "../../shared/fecha/zonaHoraria";
 import { useSesion } from "../auth/sesion";
 import { Alerta, BadgeEstadoTurno, Boton, Icono, Segmentado, type EstadoVisualTurno, type OpcionSegmentada } from "../../shared/ui";
@@ -43,6 +44,7 @@ function tituloDelPeriodo(agenda: AgendaRespuesta): string {
 
 /** Agenda diaria y semanal del personal (US-013), con alta para ADMIN y RECEPCION (US-010). */
 export function PaginaAgenda() {
+  const [parametros, cambiarParametros] = useSearchParams();
   const [consulta, actualizarConsulta] = useState<ConsultaAgenda>({ vista: "dia" });
   const [agrupacion, actualizarAgrupacion] = useState<Agrupacion>("profesional");
   const [ficha, actualizarFicha] = useState<FichaElegida>();
@@ -53,9 +55,11 @@ export function PaginaAgenda() {
   const idGestionBoton = `${idGestion}-boton`;
   const idAlta = useId();
   const idNuevo = `${idAlta}-boton`;
+  const origenAlta = useRef(idNuevo);
   const { estado } = useSesion();
   const rol = estado.tipo === "activa" ? estado.identidad.rol : undefined;
   const puedeCrear = rol === "ADMIN" || rol === "RECEPCION";
+  const pideNuevo = parametros.get("nuevo") === "1";
   const catalogos = useCatalogosAgenda();
   const nombres = useMemo(() => nombresDe(catalogos), [catalogos]);
   const { agenda, cargando, errorCarga, recargar } = useAgenda(consulta);
@@ -87,9 +91,21 @@ export function PaginaAgenda() {
     if (formularioAbierto && puedeCrear) document.getElementById(idAlta)?.focus();
   }, [formularioAbierto, idAlta, puedeCrear]);
 
+  useEffect(() => {
+    if (!pideNuevo || !puedeCrear) return;
+    origenAlta.current = "nuevo-turno-principal";
+    actualizarGestionAbierta(false);
+    actualizarFormularioAbierto(true);
+    cambiarParametros((actuales) => {
+      const siguientes = new URLSearchParams(actuales);
+      siguientes.delete("nuevo");
+      return siguientes;
+    }, { replace: true });
+  }, [pideNuevo, puedeCrear, cambiarParametros]);
+
   function cerrarFormulario() {
     actualizarFormularioAbierto(false);
-    document.getElementById(idNuevo)?.focus();
+    (document.getElementById(origenAlta.current) ?? document.getElementById(idNuevo))?.focus();
   }
 
   function refrescarParaTurno(inicio: string, profesionalId: number, sillonId: number) {
@@ -131,12 +147,13 @@ export function PaginaAgenda() {
             <Segmentado titulo="Columnas" opciones={AGRUPACIONES} valor={agrupacion} onElegir={actualizarAgrupacion} />
           )}
           {puedeCrear && (
-            <Boton id={idNuevo} disabled={gestionAbierta} aria-expanded={formularioAbierto} aria-controls={formularioAbierto ? `${idAlta}-panel` : undefined}
+            <Boton id={idNuevo} className="agenda-prealta" disabled={gestionAbierta} aria-expanded={formularioAbierto} aria-controls={formularioAbierto ? `${idAlta}-panel` : undefined}
               onClick={() => {
                 if (formularioAbierto) {
                   document.getElementById(idAlta)?.focus();
                   return;
                 }
+                origenAlta.current = idNuevo;
                 actualizarMensaje("");
                 actualizarFormularioAbierto(true);
               }}><Icono nombre="mas" />Nuevo turno</Boton>

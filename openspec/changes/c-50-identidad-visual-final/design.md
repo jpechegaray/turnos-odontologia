@@ -6,9 +6,9 @@ El motivo está en proposal.md. El design system está en la Revisión 1, aproba
 
 ## Goals / Non-Goals
 
-**Goals:** cargar la identidad final en el design system y aplicarla a todas las pantallas, pantalla por pantalla, sin cambiar rutas, permisos ni llamadas a la API (salvo inicio, que pasa a leer la agenda).
+**Goals:** aplicar la identidad, la distribución y los controles de la propuesta a las pantallas, conservando las rutas, los permisos y los contratos de la API.
 
-**Non-Goals:** endpoints nuevos. Ocupación de sillones y contador de la lista de espera en inicio, porque necesitarían cálculo nuevo. Buscador global y botón "Nuevo turno" en la barra superior de los mockups, porque no hay API de búsqueda global. Emails en HTML. Selector de tema claro u oscuro en la SPA, ya que el modo oscuro sigue al sistema.
+**Non-Goals:** endpoints nuevos, emails en HTML y selector de tema en la SPA.
 
 ## Decisions
 
@@ -16,8 +16,8 @@ El motivo está en proposal.md. El design system está en la Revisión 1, aproba
 2. **Fuente autoalojada con Fontsource.** `@fontsource-variable/public-sans` se importa en `main.tsx`. Vite copia los `woff2` al build, así que no hay pedidos a Google Fonts. `--font-sans` queda `"Public Sans Variable", system-ui, …, sans-serif`. `components.html` carga el mismo archivo desde `frontend/node_modules`, con el stack de sistema como respaldo si no está instalado. Alternativa descartada: copiar los `woff2` a `design-system/assets/`, porque sus actualizaciones no quedarían versionadas en `package.json`.
 3. **Logo como SVG con texto vectorizado.** El SVG dibuja el diente y el destello con trazos y el wordmark con `<text>` en Public Sans, con colores de la marca escritos en el propio SVG. Un archivo de imagen no puede leer variables CSS, y la regla 13 aplica al código de la SPA, no a los assets. El layout lo usa con `img` y `alt=""`, porque el nombre ya está escrito al lado.
 4. **Grupo del menú declarado por la feature.** `EntradaMenu` suma `grupo?: "atencion" | "consultorio" | "administracion"` e `icono?: NombreIcono`. Sin grupo, la entrada cae en Atención. Así se sigue sin editar un menú central (requisito de registro automático). Los íconos de navegación se suman al mismo `Icono` del kit UI.
-5. **Menú desplegable en celular y recuadros en Inicio.** A pedido del líder (26/11) no hay barra inferior: en celular, una barra superior con la marca y un botón "Menú" abre el mismo menú lateral como panel (`aria-expanded`, se cierra con Escape y al navegar). Inicio muestra las secciones permitidas como recuadros en el centro, así el menú está a la vista al entrar. El layout le pasa el menú ya filtrado por rol a la pantalla con el contexto del `Outlet`. El corte es a 900 px.
-6. **Inicio reutiliza la consulta de la agenda.** Inicio usa `consultarAgenda({ vista: "dia" })` de la feature agenda. "Ahora" sale de `Date.now()`, comparado con el `inicio` de cada turno, porque los dos son instantes y no depende de la zona del navegador. La hora se muestra en Buenos Aires con `shared/fecha`. Los tests fijan el reloj con `vi.setSystemTime`.
+5. **Navegación de la propuesta.** A 900 px o menos, la barra inferior muestra los accesos permitidos a Inicio, Agenda y Pacientes. "Más" y el botón superior abren el menú completo, que se cierra con Escape o al navegar. La barra superior abre la búsqueda en Pacientes y el formulario de alta en Agenda para los roles habilitados.
+6. **Resumen de Inicio.** Las consultas de agenda, sillones y lista de espera alimentan las tarjetas, los próximos turnos y la ocupación. La ocupación de cada sillón se mide sobre la unión de las franjas de atención. Para los próximos turnos se compara `Date.now()` con el inicio, y la hora se muestra en Buenos Aires con `shared/fecha`. Los tests fijan el reloj con `vi.setSystemTime`.
 7. **Un commit por pantalla.** El orden es: base (tokens, fuente, logo, layout), ingresar, inicio, agenda, pacientes, lista de espera, profesionales, sillones y prestaciones, usuarios, configuración y notificaciones, pantallas públicas y cierre. Cada pantalla se muestra corriendo en la app real a 390x844 y 1440x900 y se aprueba antes del commit.
 8. **Emails sin cambios.** La ficha pedía copiar los hex a las plantillas de email, pero los emails son de texto plano, así que no hay colores que copiar. Se registra en el README del design system.
 

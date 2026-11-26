@@ -1,6 +1,7 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { fechaLocal, formatearHora } from "../../shared/fecha/zonaHoraria";
-import { Avatar, BadgeEstadoTurno, claseDeEstado } from "../../shared/ui";
+import { Avatar, BadgeEstadoTurno, Boton, claseDeEstado } from "../../shared/ui";
+import { useVistaMovil } from "../../shared/ui/useVistaMovil";
 import { ContenidoTurno, type FichaElegida } from "./ContenidoTurno";
 import { cantidadDeFilas, minutosDelDia, filasDe, MINUTOS_FILA, rangoDeGrilla, tramoEnDia, type Tramo } from "./grilla";
 import { horaDeMinutos, rangoLegible, type Nombres } from "./presentacion";
@@ -58,11 +59,55 @@ function textoAtencion(horarios: AgendaRespuesta["horarios"]): string {
   return `Atiende ${horarios.map((h) => `de ${formatearHora(h.inicio)} a ${formatearHora(h.fin)}`).join(" y ")}`;
 }
 
+function AgendaMovil({ columnas, agrupacion, nombres, onVerFicha }: Pick<Props, "agrupacion" | "nombres" | "onVerFicha"> & {
+  columnas: readonly Columna[];
+}) {
+  const [preferida, elegir] = useState<number>();
+  const columna = columnas.find(({ id }) => id === preferida) ?? columnas[0];
+  const eventos = [
+    ...columna.turnos.map(({ dato }) => ({ tipo: "turno", dato } as const)),
+    ...columna.bloqueos.map(({ dato }) => ({ tipo: "bloqueo", dato } as const)),
+  ].sort((a, b) => Date.parse(a.dato.inicio) - Date.parse(b.dato.inicio));
+  return (
+    <div className="agenda-movil">
+      <div className="agenda-movil__recursos" role="group" aria-label={agrupacion === "profesional" ? "Profesional" : "Sillón"}>
+        {columnas.map((opcion) => (
+          <Boton key={opcion.id} variante={opcion.id === columna.id ? "primaria" : "secundaria"}
+            aria-pressed={opcion.id === columna.id} onClick={() => elegir(opcion.id)}>
+            {agrupacion === "profesional" && <Avatar nombre={opcion.titulo} colorId={opcion.id} tamano="sm" />}
+            {opcion.titulo}
+          </Boton>
+        ))}
+      </div>
+      {eventos.length === 0 ? <p className="muted">No hay turnos ni bloqueos.</p> : (
+        <ul className="agenda-movil__lista">
+          {eventos.map(({ tipo, dato }) => (
+            <li key={`${tipo}-${dato.id}`}>
+              <div className="agenda-movil__hora mono">
+                <strong>{formatearHora(dato.inicio)}</strong>
+                <small>{Math.round((Date.parse(dato.fin) - Date.parse(dato.inicio)) / 60_000)} min</small>
+              </div>
+              <div className="agenda-movil__detalle">
+                {tipo === "turno" ? (
+                  <ContenidoTurno turno={dato} prestacion={nombres.prestacion(dato.prestacionId)}
+                    detalle={agrupacion === "profesional" ? nombres.sillon(dato.sillonId) : nombres.profesional(dato.profesionalId)}
+                    onVerFicha={onVerFicha} />
+                ) : <><strong>{dato.motivo || "Bloqueo"}</strong><BadgeEstadoTurno estado="BLOQUEO" /></>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /**
  * Vista diaria en filas de 15 minutos, con una columna por profesional o por sillón. Los horarios y los
  * bloqueos son del profesional (SU-08), así que solo se dibujan en la agrupación por profesional.
  */
 export function GrillaDia({ agenda, agrupacion, filtro, catalogos, nombres, onVerFicha }: Props) {
+  const movil = useVistaMovil();
   const fecha = agenda.desde;
   const porProfesional = agrupacion === "profesional";
   const columnas: Columna[] = idsDeColumnas(agrupacion, agenda, catalogos, filtro)
@@ -84,6 +129,7 @@ export function GrillaDia({ agenda, agrupacion, filtro, catalogos, nombres, onVe
   if (columnas.length === 0) {
     return <p>{porProfesional ? "No hay profesionales para mostrar." : "No hay sillones para mostrar."}</p>;
   }
+  if (movil) return <AgendaMovil columnas={columnas} agrupacion={agrupacion} nombres={nombres} onVerFicha={onVerFicha} />;
 
   const rango = rangoDeGrilla(
     columnas.flatMap((c) => [...c.atencion, ...c.bloqueos.map((b) => b.tramo), ...c.turnos.map((t) => t.tramo)]),

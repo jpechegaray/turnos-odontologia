@@ -1,4 +1,5 @@
 import { useState, type ComponentType } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../../shared/api/clienteApi";
 import { Alerta, Avatar, Boton, Icono, Tabla, Toast, type ColumnaTabla } from "../../../shared/ui";
 import { AccionesFila } from "../AccionesFila";
@@ -63,8 +64,11 @@ function resumen(profesionales: readonly ProfesionalRespuesta[]): string {
 }
 
 export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps = {}) {
+  const [parametros] = useSearchParams();
   const esAdmin = useEsAdministrador();
   const { estado, recargar } = useProfesionales();
+  const explorador = paneles.length > 0;
+  const [alta, actualizarAlta] = useState(false);
   const [seleccion, actualizarSeleccion] = useState<Seleccion>();
   const [aviso, actualizarAviso] = useState<string>();
   const [editando, actualizarEditando] = useState<ProfesionalRespuesta>();
@@ -74,6 +78,7 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
   async function crear(solicitud: ProfesionalSolicitud) {
     await api.post<ProfesionalRespuesta>("/profesionales", solicitud);
     actualizarAviso("Profesional agregado.");
+    actualizarAlta(false);
     await recargar();
   }
 
@@ -104,34 +109,7 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
     }
   }
 
-  const accionesPanel = (p: ProfesionalRespuesta) =>
-    paneles.length > 0 && (
-      <>
-        {paneles.map(({ etiqueta }) => (
-          <Boton
-            key={etiqueta}
-            variante="secundaria"
-            tamano="chico"
-            aria-pressed={seleccion?.etiqueta === etiqueta && seleccion.profesional.id === p.id}
-            onClick={() => {
-              actualizarErrorAccion(undefined);
-              actualizarSeleccion({ etiqueta, profesional: p });
-            }}
-          >
-            {etiqueta}
-          </Boton>
-        ))}
-      </>
-    );
-
-  // Roles de consulta: sin acciones de escritura; si hay `paneles`, solo las acciones que los abren
-  // (visibles para los tres roles) en una columna que no se llama «Acciones».
-  const columnasConsulta: readonly ColumnaTabla<ProfesionalRespuesta>[] = paneles.length === 0 ? COLUMNAS : [
-    ...COLUMNAS,
-    { clave: "detalle", titulo: "Detalle", acciones: true, celda: (p) => <div>{accionesPanel(p)}</div> },
-  ];
-
-  const columnas: readonly ColumnaTabla<ProfesionalRespuesta>[] = !esAdmin ? columnasConsulta : [
+  const columnas: readonly ColumnaTabla<ProfesionalRespuesta>[] = !esAdmin ? COLUMNAS : [
     ...COLUMNAS,
     {
       clave: "acciones",
@@ -146,17 +124,19 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
           onSolicitarBaja={(profesional) => actualizarConfirmandoBaja(profesional.id)}
           onConfirmarBaja={(profesional) => void cambiarEstado(profesional, false)}
           onCancelarBaja={() => actualizarConfirmandoBaja(undefined)}
-          extra={accionesPanel(p)}
         />
       ),
     },
   ];
 
-  // Tras una recarga que ya no trae al elegido, el panel se cierra; mientras carga, sigue montado.
+  const predeterminada = parametros.get("seccion") === "bloqueos" ? "Bloqueos" : "Horarios";
+  const primeraPestana = paneles.find(({ etiqueta }) => etiqueta === predeterminada)?.etiqueta ?? paneles[0]?.etiqueta ?? "Datos";
   const seleccionadoVigente = estado.tipo === "listo"
     ? estado.profesionales.find((p) => p.id === seleccion?.profesional.id)
+      ?? estado.profesionales.find((p) => p.activo) ?? estado.profesionales[0]
     : seleccion?.profesional;
-  const panelAbierto = paneles.find((p) => p.etiqueta === seleccion?.etiqueta);
+  const pestanaActiva = seleccion?.etiqueta ?? primeraPestana;
+  const panelAbierto = paneles.find((p) => p.etiqueta === pestanaActiva);
 
   function contenido(actual: EstadoProfesionales) {
     switch (actual.tipo) {
@@ -176,6 +156,30 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
           />
         );
       case "listo":
+        if (explorador) {
+          return (
+            <section className="panel panel--plano explorador-prof__lista" aria-label="Listado de profesionales">
+              {actual.profesionales.length ? <ul>{actual.profesionales.map((profesional) => (
+                <li key={profesional.id}>
+                  <button type="button" className="explorador-prof__enlace"
+                    aria-current={profesional.id === seleccionadoVigente?.id ? "true" : undefined}
+                    onClick={() => {
+                      actualizarConfirmandoBaja(undefined);
+                      actualizarErrorAccion(undefined);
+                      actualizarSeleccion({ etiqueta: pestanaActiva, profesional });
+                    }}>
+                    <Avatar nombre={`${profesional.nombre} ${profesional.apellido}`} colorId={profesional.id} neutro={!profesional.activo} />
+                    <span><strong>{profesional.nombre} {profesional.apellido}</strong>
+                      <small>{profesional.activo
+                        ? [profesional.especialidad, profesional.matricula].filter(Boolean).join(" · ")
+                        : "Inactivo"}</small>
+                    </span>
+                  </button>
+                </li>
+              ))}</ul> : <p>No hay profesionales cargados.</p>}
+            </section>
+          );
+        }
         return (
           <Tabla
             titulo="Profesionales"
@@ -195,53 +199,71 @@ export function PaginaProfesionales({ paneles = [] }: PaginaProfesionalesProps =
           <h2>Profesionales</h2>
           {estado.tipo === "listo" && <p className="encabezado__bajada">{resumen(estado.profesionales)}</p>}
         </div>
+        {explorador && esAdmin && <Boton variante="secundaria" onClick={() => {
+          actualizarEditando(undefined);
+          actualizarAlta(true);
+        }}><Icono nombre="mas" />Agregar profesional</Boton>}
       </div>
       {aviso && <Toast mensaje={aviso} />}
       {errorAccion && <Alerta tipo="peligro" titulo={errorAccion} />}
+      <div className={explorador ? "explorador-prof" : undefined}>
       {contenido(estado)}
-      {panelAbierto && seleccionadoVigente && (
+      {explorador && seleccionadoVigente && (
         <section className="panel panel--plano detalle-prof" aria-label={`Detalle de ${seleccionadoVigente.apellido}, ${seleccionadoVigente.nombre}`}>
           <div className="detalle-prof__cabeza">
             <Avatar nombre={`${seleccionadoVigente.nombre} ${seleccionadoVigente.apellido}`} colorId={seleccionadoVigente.id} tamano="lg" />
             <div className="detalle-prof__titulo">
-              <strong>{`${seleccionadoVigente.apellido}, ${seleccionadoVigente.nombre}`}</strong>
+              <h3>{seleccionadoVigente.nombre} {seleccionadoVigente.apellido}</h3>
               <span className="muted">
                 {[seleccionadoVigente.especialidad?.trim(), seleccionadoVigente.matricula].filter(Boolean).join(" · ")}
               </span>
             </div>
-            <button type="button" className="boton-icono" aria-label="Cerrar detalle" onClick={() => actualizarSeleccion(undefined)}>
-              <Icono nombre="x" />
-            </button>
+            {esAdmin && <Boton variante="secundaria" tamano="chico" onClick={() => actualizarEditando(seleccionadoVigente)}>
+              <Icono nombre="editar" />Editar datos
+            </Boton>}
           </div>
           <div className="pestanas" role="tablist" aria-label="Secciones del profesional">
-            {paneles.map(({ etiqueta }) => (
+            {["Datos", ...["Horarios", "Bloqueos", "Prestaciones"].filter((etiqueta) => paneles.some((p) => p.etiqueta === etiqueta)),
+              ...paneles.filter(({ etiqueta }) => !["Horarios", "Bloqueos", "Prestaciones"].includes(etiqueta)).map(({ etiqueta }) => etiqueta)]
+              .map((etiqueta) => (
               <button
                 key={etiqueta}
                 type="button"
                 role="tab"
-                aria-selected={etiqueta === panelAbierto.etiqueta}
+                aria-selected={etiqueta === pestanaActiva}
                 onClick={() => actualizarSeleccion({ etiqueta, profesional: seleccionadoVigente })}
               >
                 {etiqueta}
               </button>
             ))}
           </div>
-          <div role="tabpanel" aria-label={panelAbierto.etiqueta}>
-            <panelAbierto.Componente
+          <div role="tabpanel" aria-label={pestanaActiva}>
+            {panelAbierto ? <panelAbierto.Componente
               key={`${panelAbierto.etiqueta}-${seleccionadoVigente.id}`}
               profesional={seleccionadoVigente}
               refrescarLista={recargar}
               informarError={actualizarErrorAccion}
-            />
+            /> : (
+              <div className="explorador-prof__datos">
+                <p>Matrícula: <strong>{seleccionadoVigente.matricula}</strong></p>
+                <p>Especialidad: <strong>{seleccionadoVigente.especialidad || MARCA_VACIO}</strong></p>
+                <p>Estado: <strong>{seleccionadoVigente.activo ? "Activo" : "Inactivo"}</strong></p>
+                {esAdmin && <AccionesFila elemento={seleccionadoVigente} confirmandoBaja={confirmandoBaja === seleccionadoVigente.id}
+                  onEditar={actualizarEditando} onReactivar={(p) => void cambiarEstado(p, true)}
+                  onSolicitarBaja={(p) => actualizarConfirmandoBaja(p.id)} onConfirmarBaja={(p) => void cambiarEstado(p, false)}
+                  onCancelarBaja={() => actualizarConfirmandoBaja(undefined)} />}
+              </div>
+            )}
           </div>
         </section>
       )}
-      {esAdmin && (
+      </div>
+      {esAdmin && (!explorador || alta || editando) && (
         <FormularioProfesional
           key={editando?.id ?? "nuevo"}
           valorInicial={editando}
           onEnviar={(solicitud) => (editando ? modificar(editando, solicitud) : crear(solicitud))}
-          onCancelar={editando ? () => actualizarEditando(undefined) : undefined}
+          onCancelar={editando || explorador ? () => { actualizarEditando(undefined); actualizarAlta(false); } : undefined}
         />
       )}
     </section>

@@ -124,6 +124,8 @@
   --dur-fast: 120ms; --dur-base: 180ms; --dur-slow: 240ms;
 }
 
+:root[data-theme="light"] { color-scheme: light; }
+
 /* Modo oscuro opcional: sigue al sistema; se fuerza con data-theme="light" | "dark".
    Los dos bloques tienen que ser iguales (lo verifica identidadVisual.test.ts). */
 @media (prefers-color-scheme: dark) {

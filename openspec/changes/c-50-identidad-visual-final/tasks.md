@@ -14,7 +14,7 @@ Aplicar TDD estricto por tarea: primero el test de Vitest en rojo, después el c
 ## 2. Pantallas del personal
 
 - [x] 2.1 Ingresar: panel de marca y tarjeta de ingreso según el mockup.
-- [x] 2.2 Inicio: recuadros de las secciones y resumen del día; reemplazar la barra inferior del celular por el botón "Menú"; verificar "Inicio muestra un recuadro por sección permitida", "El botón "Menú" abre y cierra el menú completo", "Inicio muestra las cifras del día", "Inicio lista los próximos turnos", "Inicio sin turnos pendientes" y "Un fallo al cargar el resumen permite reintentar".
+- [x] 2.2 Inicio: tarjetas del resumen, próximos turnos, ocupación de sillones y accesos rápidos según el rol. Verificar las cifras, la lista de próximos turnos, el estado vacío y el reintento ante un error de carga.
 - [ ] 2.3 Agenda, con crear, reprogramar, cancelar y asistencia.
 - [ ] 2.4 Pacientes.
 - [ ] 2.5 Lista de espera.

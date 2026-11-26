@@ -8,11 +8,11 @@
 .lista-espera__cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .lista-espera__plana { min-width: 0; }
 .lista-espera__aviso { margin: 0; padding: var(--space-4) var(--space-5); }
-.lista-espera__filtro { min-width: 200px; }
-.lista-espera__filtro .field { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--space-2); }
-.lista-espera__filtro .input { min-height: 36px; font-size: var(--text-sm); }
-
-.lista-espera__columnas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); align-items: start; }
+.lista-espera__filtro { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); min-width: 0; }
+.lista-espera__filtro .input { width: auto; font-size: var(--text-sm); }
+.lista-espera__estados { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.lista-espera__estados .btn { border-radius: var(--radius-pill); }
+.lista-espera__estados .btn[aria-pressed="true"] { background: var(--color-primary-soft); color: var(--color-primary); }
 
 .lista-espera__formulario { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
 .lista-espera__campos,
@@ -40,7 +40,3 @@
 .es-asignada { background: var(--turno-confirmado-bg); color: var(--turno-confirmado-fg); border-color: var(--turno-confirmado-border); }
 .es-vencida { background: var(--turno-ausente-bg); color: var(--turno-ausente-fg); border-color: var(--turno-ausente-border); }
 .es-cancelada { background: var(--turno-cancelado-bg); color: var(--turno-cancelado-fg); border-color: var(--turno-cancelado-border); }
-
-@media (max-width: 1100px) {
-  .lista-espera__columnas { grid-template-columns: minmax(0, 1fr); }
-}

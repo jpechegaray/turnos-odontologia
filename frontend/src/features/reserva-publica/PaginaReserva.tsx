@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ErrorApi } from "../../shared/api/errorApi";
-import { fechaLocal } from "../../shared/fecha/zonaHoraria";
-import { Alerta, Boton } from "../../shared/ui";
+import { fechaLocal, formatearHora } from "../../shared/fecha/zonaHoraria";
+import { Alerta, Avatar, Boton } from "../../shared/ui";
 import { FormularioReserva, VERSION_AVISO, type ErroresPaciente } from "./FormularioReserva";
 import {
   DATOS_INICIALES, etiquetaHorario, fechaTrasDias, leerAlternativas, pedirReserva, rutaDisponibilidad,
@@ -15,8 +15,11 @@ import "./reserva.css";
 const NOMBRES_PASOS = ["Prestación", "Profesional", "Horario", "Tus datos"] as const;
 
 const PASOS = [
-  "Elegí una prestación", "Elegí un profesional", "Elegí un horario", "Tus datos", "Turno reservado",
+  "Elegí una prestación", "Elegí un profesional", "Elegí día y horario", "Tus datos", "Turno reservado",
 ] as const;
+const DIA_CORTO = new Intl.DateTimeFormat("es-AR", {
+  timeZone: "America/Argentina/Buenos_Aires", weekday: "short", day: "2-digit", month: "short",
+});
 
 function nombreProfesional(profesional: ProfesionalPublico) {
   return `${profesional.nombre} ${profesional.apellido}`;
@@ -40,6 +43,7 @@ export default function PaginaReserva() {
   const [horario, elegirHorario] = useState<Horario>();
   const [hoy] = useState(() => fechaLocal(new Date()));
   const [desde, cambiarDesde] = useState(hoy);
+  const [dia, cambiarDia] = useState<string>();
   const [alternativas, cambiarAlternativas] = useState<Horario[] | null>(null);
   const [datos, cambiarDatos] = useState(DATOS_INICIALES);
   const [aceptado, aceptar] = useState(false);
@@ -72,6 +76,7 @@ export default function PaginaReserva() {
       elegirHorario(undefined);
       cambiarAlternativas(null);
       cambiarDesde(hoy);
+      cambiarDia(undefined);
     }
     elegirPrestacion(nueva);
     irAPaso(1);
@@ -82,6 +87,7 @@ export default function PaginaReserva() {
       elegirHorario(undefined);
       cambiarAlternativas(null);
       cambiarDesde(hoy);
+      cambiarDia(undefined);
     }
     elegirProfesional(nuevo);
     irAPaso(2);
@@ -96,6 +102,7 @@ export default function PaginaReserva() {
     if (error instanceof ErrorApi) {
       if (error.tipo === "conflicto" && error.codigo === "RN-01") {
         elegirHorario(undefined);
+        cambiarDia(undefined);
         cambiarAlternativas(leerAlternativas(error.propiedades.alternativas));
         irAPaso(2);
         return;
@@ -148,11 +155,21 @@ export default function PaginaReserva() {
   }
 
   const opcionesHorario = alternativas ?? (horarios.estado.tipo === "listo" ? horarios.estado.datos : []);
+  const fechas = [...new Set(opcionesHorario.map(({ inicio }) => fechaLocal(inicio)))];
+  const fechaSeleccionada = dia && fechas.includes(dia) ? dia : fechas[0];
+  const disponiblesDelDia = opcionesHorario.filter(({ inicio }) => fechaLocal(inicio) === fechaSeleccionada);
+  const horarioDisponible = disponiblesDelDia.some(({ inicio }) => inicio === horario?.inicio);
+
+  function moverSemana(dias: number) {
+    cambiarDesde(fechaTrasDias(desde, dias));
+    cambiarDia(undefined);
+    elegirHorario(undefined);
+  }
 
   return (
     <main className="reserva-publica">
       <CabeceraPublica />
-      <div className="reserva-panel">
+      <div className={paso === 2 ? "reserva-panel reserva-panel--agenda" : "reserva-panel"}>
         {paso < 4 && <PasosReserva pasos={NOMBRES_PASOS} actual={paso} />}
         <div className="reserva-titulo">
           <h1 ref={titulo} tabIndex={-1}>{PASOS[paso]}</h1>
@@ -194,8 +211,14 @@ export default function PaginaReserva() {
             )}
           </div>
         )}
-        {paso === 2 && (
+        {paso === 2 && prestacion && profesional && (
+          <div className="reserva-distribucion">
           <section className="reserva-bloque" aria-label="Horarios disponibles">
+            <div className="reserva-elegido">
+              <Avatar nombre={nombreProfesional(profesional)} colorId={profesional.id} />
+              <div><strong>{prestacion.nombre}</strong><small>{nombreProfesional(profesional)}</small></div>
+              <Boton variante="secundaria" onClick={() => irAPaso(0)}>Cambiar</Boton>
+            </div>
             {alternativas ? (
               <>
                 <Alerta tipo="peligro" titulo="Ese horario ya se ocupó.">
@@ -211,8 +234,8 @@ export default function PaginaReserva() {
                 <p>Semana desde <time dateTime={desde}>{desde.split("-").reverse().join("/")}</time></p>
                 <div className="reserva-semanas">
                   <Boton variante="secundaria" disabled={desde === hoy}
-                    onClick={() => cambiarDesde(fechaTrasDias(desde, -7))}>Semana anterior</Boton>
-                  <Boton variante="secundaria" onClick={() => cambiarDesde(fechaTrasDias(desde, 7))}>
+                    onClick={() => moverSemana(-7)}>Semana anterior</Boton>
+                  <Boton variante="secundaria" onClick={() => moverSemana(7)}>
                     Semana siguiente
                   </Boton>
                 </div>
@@ -222,16 +245,44 @@ export default function PaginaReserva() {
                 )}
               </>
             )}
-            <div className="reserva-horarios">
-              {opcionesHorario.map((opcion) => (
-                <Boton key={opcion.inicio} variante="secundaria" className="hora" onClick={() => {
-                  elegirHorario(opcion);
-                  cambiarAviso("");
-                  irAPaso(3);
-                }}>{etiquetaHorario(opcion.inicio)}</Boton>
-              ))}
-            </div>
+            {fechas.length > 0 && <div className="reserva-dias" role="group" aria-label="Día">
+              {fechas.map((fecha) => {
+                const ejemplo = opcionesHorario.find(({ inicio }) => fechaLocal(inicio) === fecha);
+                return ejemplo && <Boton key={fecha} variante="secundaria" aria-pressed={fecha === fechaSeleccionada}
+                  onClick={() => { cambiarDia(fecha); elegirHorario(undefined); }}>
+                  {DIA_CORTO.format(Date.parse(ejemplo.inicio))}
+                </Boton>;
+              })}
+            </div>}
+            {["Mañana", "Tarde"].map((franja, i) => {
+              const opciones = disponiblesDelDia.filter(({ inicio }) => (formatearHora(inicio) < "13:00" ? 0 : 1) === i);
+              if (opciones.length === 0) return null;
+              return <section key={franja} className="reserva-franja" aria-label={`Horarios de la ${franja.toLowerCase()}`}>
+                <h2>{franja}</h2>
+                <div className="reserva-horarios">
+                  {opciones.map((opcion) => (
+                    <Boton key={opcion.inicio} variante="secundaria" className="hora"
+                      aria-pressed={horario?.inicio === opcion.inicio} onClick={() => elegirHorario(opcion)}>
+                      {formatearHora(opcion.inicio)}
+                    </Boton>
+                  ))}
+                </div>
+              </section>;
+            })}
           </section>
+          <aside className="panel reserva-eleccion" aria-label="Resumen del turno">
+            <h2>Tu turno</h2>
+            <dl>
+              <div><dt>Prestación</dt><dd>{prestacion.nombre}</dd></div>
+              <div><dt>Profesional</dt><dd>{nombreProfesional(profesional)}</dd></div>
+              <div><dt>Día y hora</dt><dd>{horario && horarioDisponible ? etiquetaHorario(horario.inicio) : "Elegí un horario"}</dd></div>
+            </dl>
+            <Boton anchoCompleto disabled={!horarioDisponible} onClick={() => {
+              cambiarAviso("");
+              irAPaso(3);
+            }}>Continuar</Boton>
+          </aside>
+          </div>
         )}
         {paso === 3 && prestacion && profesional && horario && (
           <>

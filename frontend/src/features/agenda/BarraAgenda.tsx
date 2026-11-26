@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { Boton, Icono } from "../../shared/ui";
+import { useVistaMovil } from "../../shared/ui/useVistaMovil";
 import type { CatalogosAgenda } from "./useCatalogosAgenda";
 
 function Filtro(props: Readonly<{
@@ -48,18 +49,9 @@ export type BarraAgendaProps = Readonly<{
 export function BarraAgenda(props: BarraAgendaProps) {
   const idFecha = useId();
   const profesionales = props.catalogos.profesionales.map((p) => ({ id: p.id, nombre: `${p.nombre} ${p.apellido}` }));
-  return (
-    <section className="panel panel--plano agenda-barra" aria-label="Navegación de la agenda">
-      <div className="agenda-barra__navegar" role="group" aria-label="Período">
-        <button type="button" className="boton-icono" aria-label="Anterior" disabled={!props.navegable} onClick={() => props.onDesplazar(-1)}>
-          <Icono nombre="izq" />
-        </button>
-        <h3 className="agenda-periodo" aria-busy={props.actualizando}>{props.titulo ?? "Cargando…"}</h3>
-        <button type="button" className="boton-icono" aria-label="Siguiente" disabled={!props.navegable} onClick={() => props.onDesplazar(1)}>
-          <Icono nombre="der" />
-        </button>
-        <Boton variante="secundaria" tamano="chico" onClick={props.onHoy}>Hoy</Boton>
-      </div>
+  const movil = useVistaMovil();
+  const filtros = (
+    <div className="agenda-barra__filtros">
       <div className="agenda-barra__fecha">
         <label htmlFor={idFecha} className="sr-only">Fecha</label>
         <input
@@ -74,6 +66,26 @@ export function BarraAgenda(props: BarraAgendaProps) {
       </div>
       <Filtro etiqueta="Profesional" todos="Todos los profesionales" valor={props.profesionalId} opciones={profesionales} onCambiar={props.onProfesional} />
       <Filtro etiqueta="Sillón" todos="Todos los sillones" valor={props.sillonId} opciones={props.catalogos.sillones} onCambiar={props.onSillon} />
+    </div>
+  );
+  return (
+    <section className="panel panel--plano agenda-barra" aria-label="Navegación de la agenda">
+      <div className="agenda-barra__navegar" role="group" aria-label="Período">
+        <button type="button" className="boton-icono" aria-label="Anterior" disabled={!props.navegable} onClick={() => props.onDesplazar(-1)}>
+          <Icono nombre="izq" />
+        </button>
+        <h3 className="agenda-periodo" aria-busy={props.actualizando}>{props.titulo ?? "Cargando…"}</h3>
+        <button type="button" className="boton-icono" aria-label="Siguiente" disabled={!props.navegable} onClick={() => props.onDesplazar(1)}>
+          <Icono nombre="der" />
+        </button>
+        <Boton variante="secundaria" tamano="chico" onClick={props.onHoy}>Hoy</Boton>
+      </div>
+      {movil ? (
+        <details className="agenda-barra__opciones">
+          <summary>Fecha y filtros</summary>
+          {filtros}
+        </details>
+      ) : filtros}
     </section>
   );
 }

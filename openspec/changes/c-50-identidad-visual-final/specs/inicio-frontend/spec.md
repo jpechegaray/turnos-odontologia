@@ -1,26 +1,26 @@
 ## Purpose
 
-Da al personal un resumen del día al entrar a la SPA: cuántos turnos hay en cada estado y cuáles son los próximos. Los datos salen de la agenda que ya expone la API.
+Da al personal un resumen del día con turnos, ocupación de sillones y accesos a las tareas frecuentes. Usa las consultas existentes de agenda, sillones y lista de espera.
 
 ## ADDED Requirements
 
 ### Requirement: Accesos a las secciones en inicio
 
-Inicio SHALL mostrar, en el centro de la pantalla, un recuadro por cada entrada del menú que el rol puede ver, salvo Inicio, con su ícono y su nombre, agrupados como en el menú. Cada recuadro MUST ser un enlace a su sección.
+Inicio SHALL mostrar junto al listado de turnos un panel de accesos a registrar pacientes, revisar la lista de espera y consultar bloqueos. Cada acceso MUST respetar la visibilidad de la sección para el rol.
 
-#### Scenario: Inicio muestra un recuadro por sección permitida
+#### Scenario: Inicio muestra accesos rápidos de las secciones permitidas
 - **GIVEN** una sesión de `RECEPCION`
 - **WHEN** el usuario abre inicio
-- **THEN** ve recuadros que enlazan a Agenda, Pacientes y Configuración, y no ve el de Usuarios
+- **THEN** ve accesos a registrar pacientes, revisar la lista de espera y consultar bloqueos
 
 ### Requirement: Resumen del día en inicio
 
-La pantalla de inicio SHALL pedir `GET /api/agenda?vista=dia` sin `fecha` y mostrar el día que responde el servidor con la cantidad de turnos del día, sin contar los cancelados, y la cantidad por estado (reservados, confirmados, atendidos y ausentes). Mientras carga MUST mostrar un estado de carga.
+La pantalla de inicio SHALL pedir `GET /api/agenda?vista=dia` sin `fecha` y mostrar la cantidad de turnos del día sin cancelados, confirmados y sin confirmar, con los atendidos en el detalle del total. Para los roles habilitados SHALL mostrar el total de entradas activas de lista de espera. La ocupación de cada sillón se calcula sobre la unión de las franjas de atención del consultorio. Mientras carga MUST mostrar un estado de carga.
 
 #### Scenario: Inicio muestra las cifras del día
-- **GIVEN** una agenda del día con dos turnos confirmados, uno reservado, uno atendido y uno cancelado
+- **GIVEN** una agenda del día con dos turnos confirmados, uno reservado, uno atendido, uno cancelado y una entrada activa de lista de espera
 - **WHEN** el usuario abre inicio
-- **THEN** se ven 4 turnos del día, 2 confirmados, 1 reservado y 1 atendido
+- **THEN** se ven 4 turnos del día, 2 confirmados, 1 sin confirmar y 1 entrada de lista de espera
 
 ### Requirement: Próximos turnos en inicio
 

@@ -9,6 +9,10 @@
 /* Barra de navegación */
 .agenda-barra { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
 .agenda-barra__navegar { display: inline-flex; align-items: center; gap: var(--space-1); }
+.agenda-barra__filtros { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.agenda-barra__opciones { width: 100%; font-size: var(--text-sm); }
+.agenda-barra__opciones summary { cursor: pointer; color: var(--color-text-muted); }
+.agenda-barra__opciones .agenda-barra__filtros { margin-top: var(--space-3); }
 .agenda-periodo {
   min-width: 170px;
   margin: 0;
@@ -213,3 +217,20 @@
 @media (prefers-reduced-motion: reduce) {
   .slot { transition: none; }
 }
+.agenda-movil { min-width: 0; }
+.agenda-movil__recursos {
+  display: flex; gap: var(--space-2); overflow-x: auto;
+  padding: var(--space-3); border-bottom: 1px solid var(--color-border);
+}
+.agenda-movil__recursos .btn { flex: none; border-radius: var(--radius-pill); }
+.agenda-movil__lista { list-style: none; padding: 0; margin: 0; }
+.agenda-movil__lista li {
+  display: grid; grid-template-columns: calc(var(--space-7) + var(--space-2)) minmax(0, 1fr);
+  gap: var(--space-3); padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+.agenda-movil__hora { display: grid; align-content: start; }
+.agenda-movil__hora small { color: var(--color-text-muted); font-size: var(--text-xs); }
+.agenda-movil__detalle { display: grid; justify-items: start; gap: var(--space-1); overflow-wrap: anywhere; }
+.agenda-movil > p { padding-inline: var(--space-4); }
+.layout:has(#nuevo-turno-principal) .agenda-prealta { display: none; }
