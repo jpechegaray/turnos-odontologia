@@ -43,6 +43,11 @@ public class ListaEsperaPersistencia {
         return entradas.findById(id).map(ListaEsperaJpa::dominio);
     }
 
+    /** Lee la entrada con lock de fila hasta el fin de la transacción (C-42: una entrada toma un solo hueco). */
+    public Optional<EntradaListaEspera> bloquear(Long id) {
+        return entradas.bloquear(id).map(ListaEsperaJpa::dominio);
+    }
+
     public List<EntradaListaEspera> filtrar(EstadoListaEspera estado, Long pacienteId, Long prestacionId) {
         return entradas.filtrar(estado, pacienteId, prestacionId).stream().map(ListaEsperaJpa::dominio).toList();
     }

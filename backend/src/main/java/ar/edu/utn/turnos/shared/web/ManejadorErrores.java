@@ -38,7 +38,7 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
         problema.setProperty(PROPIEDAD_CODIGO, ex.codigo());
         ex.propiedades().forEach(problema::setProperty);
         if (RutaConTokenDeTurno.coincide(request)) {
-            problema.setInstance(RutaConTokenDeTurno.REFERENCIA);
+            problema.setInstance(RutaConTokenDeTurno.referencia(request));
         }
         return problema;
     }
@@ -61,7 +61,7 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
         if (request instanceof ServletWebRequest servlet && RutaConTokenDeTurno.coincide(servlet.getRequest())) {
             // Los mensajes MVC por defecto pueden repetir la ruta solicitada (por ejemplo, si no hay un recurso).
             var seguro = ProblemDetail.forStatus(status);
-            seguro.setInstance(RutaConTokenDeTurno.REFERENCIA);
+            seguro.setInstance(RutaConTokenDeTurno.referencia(servlet.getRequest()));
             body = seguro;
         }
         return super.handleExceptionInternal(ex, body, headers, status, request);
@@ -79,8 +79,8 @@ public class ManejadorErrores extends ResponseEntityExceptionHandler {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, DETALLE_GENERICO);
         problema.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         if (RutaConTokenDeTurno.coincide(request)) {
-            LOG.error("Error inesperado en un enlace de turno ({})", ex.getClass().getSimpleName());
-            problema.setInstance(RutaConTokenDeTurno.REFERENCIA);
+            LOG.error("Error inesperado en un enlace con token ({})", ex.getClass().getSimpleName());
+            problema.setInstance(RutaConTokenDeTurno.referencia(request));
         } else {
             LOG.error("Error inesperado", ex);
         }

@@ -36,6 +36,19 @@ public class OfertasHuecoPersistencia {
         return ofertas.vencer(ahora);
     }
 
+    /**
+     * Pasa a {@code TOMADA} todas las ofertas {@code ENVIADA} del hueco (mismo profesional e intervalo), incluida la
+     * que se tomó (RN-24, C-42). Las demás quedan informativas: "hueco ya tomado".
+     */
+    public int tomarOfertasDelHueco(Long profesionalId, Instant huecoInicio, Instant huecoFin) {
+        return ofertas.tomarDelHueco(profesionalId, huecoInicio, huecoFin);
+    }
+
+    /** Pasa a {@code VENCIDA} una oferta {@code ENVIADA} cuyo hueco ya empezó (C-42). Idempotente. */
+    public int vencerOferta(Long id) {
+        return ofertas.vencerOferta(id);
+    }
+
     /** La entrada ya tiene oferta para ese hueco: una sola tanda (SU-14 b). */
     public static boolean esOfertaRepetida(DataIntegrityViolationException ex) {
         for (Throwable causa = ex; causa != null; causa = causa.getCause()) {
