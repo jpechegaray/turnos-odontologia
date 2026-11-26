@@ -1553,7 +1553,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 - **Riesgo o precondición**: Precondición: el equipo decide nombre, logo, color y tipografía antes de abrir el change. Cambia estilos compartidos: ningún otro change de front debe estar en vuelo (por eso es la última ola). Está en una ola tardía para no bloquear el front.
 
 ### [C-51] `C-51-verificacion-e2e-y-cierre-mvp`
-- **Estado**: `[x]` hecho por Juan Pablo (2026-11-26)
+- **Estado**: `[x]` hecho por Juan Pablo (PR #150, 2026-11-26)
 - **Responsable**: Juan Pablo — **Ola**: 8 — **Tamaño**: M (4-6 h)
 - **Scope**:
   - Pruebas de flujo con Testcontainers: crear turno, reservar online, cancelar, aviso de oferta, tomar el hueco, cancelación y reprogramación con emails, recordatorio idempotente; flujo por reprogramación hacia la lista de espera
