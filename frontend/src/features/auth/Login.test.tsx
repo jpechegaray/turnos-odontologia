@@ -80,3 +80,8 @@ it("La pantalla de ingreso muestra la marca y el aviso para pacientes", async ()
   expect(screen.getAllByText((_, nodo) => nodo?.textContent === window.BRAND.name).length).toBeGreaterThan(0);
   expect(screen.getByText(/Para gestionar tu turno usá el enlace que te llegó por email/)).toBeInTheDocument();
 });
+
+it("El paciente puede abrir la reserva pública desde el ingreso", async () => {
+  await montar(async () => Response.json(identidad));
+  expect(screen.getByRole("link", { name: "Sacar turno" })).toHaveAttribute("href", "/reservar");
+});

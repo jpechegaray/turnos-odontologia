@@ -1,6 +1,13 @@
 /* Usuarios (C-50, según exploracion-diseno/propuesta/usuarios.html). Solo variables de tokens.css (regla 13). */
-.usuarios .tabla th, .usuarios .tabla td { padding-left: var(--space-4); padding-right: var(--space-4); }
-.usuarios__email { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.usuarios .con-formulario__lista { container-type: inline-size; }
+.usuarios .tabla { min-width: 0; table-layout: fixed; }
+.usuarios .tabla th, .usuarios .tabla td { padding-inline: var(--space-3); overflow-wrap: anywhere; }
+.usuarios .tabla th:first-child { width: 27%; }
+.usuarios .tabla th:last-child { width: 24%; }
+.usuarios .celda-persona .usuarios__email { min-width: 0; white-space: normal; }
+.usuarios .tabla td.tabla__acciones { white-space: normal; }
+.usuarios .tabla td.tabla__acciones > div { display: flex; flex-wrap: wrap; }
+.usuarios .tabla__acciones .btn { max-width: 100%; white-space: normal; }
 .rol {
   display: inline-flex;
   align-items: center;
@@ -13,7 +20,7 @@
 .rol--admin { background: var(--prof-2-bg); color: var(--prof-2-fg); }
 .rol--recepcion { background: var(--prof-4-bg); color: var(--prof-4-fg); }
 .rol--odontologo { background: var(--prof-1-bg); color: var(--prof-1-fg); }
-@media (max-width: 900px) {
+@container (max-width: 660px) {
   .usuarios .tabla, .usuarios .tabla tbody { display: block; min-width: 0; }
   .usuarios .tabla thead { display: none; }
   .usuarios .tabla tbody tr {

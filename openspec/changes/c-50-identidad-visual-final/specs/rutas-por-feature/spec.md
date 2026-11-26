@@ -22,3 +22,17 @@ En pantallas angostas el layout SHALL ocultar el menú lateral y mostrar la barr
 - **GIVEN** el layout renderizado
 - **WHEN** el usuario elige "Más" y después presiona Escape
 - **THEN** el menú completo se abre con `aria-expanded="true"` y al presionar Escape se cierra con `aria-expanded="false"`
+
+### Requirement: Accesos a la búsqueda de pacientes y a la reserva pública
+
+El buscador de fichas de pacientes SHALL estar disponible en el módulo de Pacientes. La página de ingreso SHALL ofrecer un enlace «Sacar turno» que abra la reserva pública sin iniciar sesión.
+
+#### Scenario: El buscador de pacientes solo aparece en Pacientes
+- **GIVEN** una sesión de `ADMIN`
+- **WHEN** se abre Inicio y después se navega a Pacientes
+- **THEN** el buscador aparece una sola vez y dentro del módulo de Pacientes
+
+#### Scenario: El paciente puede abrir la reserva pública desde el ingreso
+- **GIVEN** una visita sin sesión
+- **WHEN** se muestra la pantalla de ingreso
+- **THEN** el enlace «Sacar turno» dirige a `/reservar`

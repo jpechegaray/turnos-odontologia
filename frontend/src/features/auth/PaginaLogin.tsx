@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { ErrorApi } from "../../shared/api/errorApi";
 import { Alerta } from "../../shared/ui/Alerta";
 import { Boton } from "../../shared/ui/Boton";
@@ -84,6 +84,7 @@ export function PaginaLogin() {
           </form>
           <Alerta tipo="info" titulo="¿Sos paciente?">
             <p>Para gestionar tu turno usá el enlace que te llegó por email.</p>
+            <Link className="btn btn--secondary btn--sm login__reserva" to="/reservar">Sacar turno</Link>
           </Alerta>
           <p className="login__pie"><Icono nombre="candado" />Sesión segura: se cierra sola tras un rato sin uso.</p>
         </div>
