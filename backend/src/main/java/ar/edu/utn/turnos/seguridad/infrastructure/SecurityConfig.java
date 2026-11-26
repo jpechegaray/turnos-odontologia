@@ -113,6 +113,9 @@ public class SecurityConfig {
                         // Lista de espera (C-18): el odontólogo solo lee; 403 antes de validar el cuerpo.
                         .requestMatchers(HttpMethod.POST, "/api/lista-espera").hasAnyRole("ADMIN", "RECEPCION")
                         .requestMatchers(HttpMethod.DELETE, "/api/lista-espera/{id}").hasAnyRole("ADMIN", "RECEPCION")
+                        // Asignación manual de un hueco (C-43): 403 al odontólogo antes de validar el cuerpo.
+                        .requestMatchers(HttpMethod.POST, "/api/lista-espera/{id}/asignar")
+                            .hasAnyRole("ADMIN", "RECEPCION")
                         // Sugerencias de un hueco (C-31): sirven para asignarlo, así que el odontólogo no las ve.
                         .requestMatchers(HttpMethod.GET, "/api/lista-espera/compatibles")
                             .hasAnyRole("ADMIN", "RECEPCION")

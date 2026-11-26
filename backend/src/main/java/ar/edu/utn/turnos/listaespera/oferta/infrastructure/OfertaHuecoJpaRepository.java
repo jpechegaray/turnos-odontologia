@@ -2,6 +2,7 @@ package ar.edu.utn.turnos.listaespera.oferta.infrastructure;
 
 import jakarta.persistence.LockModeType;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -32,6 +33,22 @@ interface OfertaHuecoJpaRepository extends JpaRepository<OfertaHuecoJpa, Long> {
             """)
     int tomarDelHueco(@Param("profesionalId") Long profesionalId, @Param("inicio") Instant inicio,
             @Param("fin") Instant fin);
+
+    @Modifying
+    @Query("""
+            update OfertaHuecoJpa o set o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.TOMADA
+            where o.estado = ar.edu.utn.turnos.listaespera.oferta.domain.EstadoOferta.ENVIADA
+              and o.profesionalId = :profesionalId and o.huecoInicio = :inicio
+            """)
+    int tomarDelHuecoPorInicio(@Param("profesionalId") Long profesionalId, @Param("inicio") Instant inicio);
+
+    @Query("""
+            select o from OfertaHuecoJpa o
+            where o.profesionalId = :profesionalId and o.huecoInicio = :inicio
+            order by case when o.listaEsperaId = :entradaId then 0 else 1 end, o.id
+            """)
+    List<OfertaHuecoJpa> delHuecoPrefiriendo(@Param("entradaId") Long entradaId,
+            @Param("profesionalId") Long profesionalId, @Param("inicio") Instant inicio);
 
     @Modifying
     @Query("""

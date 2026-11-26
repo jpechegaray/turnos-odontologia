@@ -51,6 +51,18 @@ public record OfertaHueco(
                 expiraEn, estado, creadoEn);
     }
 
+    /**
+     * La oferta tomada: otro paciente o recepción ocupó el hueco (RN-38, C-43). Solo cambia una oferta
+     * {@code ENVIADA}; una vencida o ya tomada se devuelve igual.
+     */
+    public OfertaHueco tomar() {
+        if (estado != EstadoOferta.ENVIADA) {
+            return this;
+        }
+        return new OfertaHueco(id, listaEsperaId, profesionalId, huecoInicio, huecoFin, sillonSugeridoId, tokenHash,
+                expiraEn, EstadoOferta.TOMADA, creadoEn);
+    }
+
     @Override
     public String toString() {
         return "OfertaHueco[id=" + id + ", listaEsperaId=" + listaEsperaId + ", estado=" + estado + "]";
