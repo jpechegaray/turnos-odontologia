@@ -108,6 +108,21 @@ Notas:
 - El `.env` de la raíz es **opcional** para el frontend: `VITE_API_BASE_URL` vale `/api` por defecto.
 - Para que `/api` responda desde el navegador, el backend tiene que estar corriendo en `:8080` (ver "Levantar el backend").
 
+### Recorrido de demostración (C-51)
+
+Con la base cargada por el seed, el backend en `:8080` y el frontend en `:5173`, este recorrido muestra el MVP completo. Todos los datos son ficticios, y las claves son las que pusiste en tu `.env`; no se escriben en ningún archivo del repo.
+
+1. **Agenda.** Entrá como `recepcion@consultorio.test`. Abrí la Agenda en el día de los turnos de ejemplo y alterná entre "Por profesional" y "Por sillón". Al hacer clic en un paciente se abre su ficha.
+2. **Turno interno.** Con "Nuevo turno", da un turno libre. Después intentá dar otro que se superponga con el mismo profesional o el mismo sillón: el sistema lo rechaza. Un turno que empieza justo cuando termina otro sí se acepta.
+3. **Reserva online.** En otra ventana privada, abrí `http://localhost:5173/reservar` y reservá sin iniciar sesión. La pantalla final muestra el enlace del turno (`/turno/...`), que permite verlo, confirmarlo o cancelarlo. El turno aparece en la Agenda de recepción.
+4. **Lista de espera.** En "Lista de espera", anotá a un paciente con email para la misma prestación y el mismo profesional del turno del paso 2.
+5. **Cancelar o reprogramar.** Desde "Gestionar turnos", cancelá o reprogramá el turno del paso 2. El hueco que se libera genera una oferta para la entrada del paso 4:
+   - con SMTP configurado, al paciente le llega el email con el enlace `/oferta/...`, y al tomarla queda con un turno nuevo y recibe la confirmación;
+   - con `NOTIFICACIONES_CANAL=memoria` no se envían emails, así que el hueco se asigna a mano desde "Lista de espera" con "Asignar hueco".
+6. **Roles.** Entrá como `odonto1@consultorio.test`: ve la agenda, pero no puede dar, cancelar ni reprogramar turnos. Como `admin@consultorio.test`, entrá a Usuarios y a Configuración (plazo de cancelación, anticipación del recordatorio y tope de avisos).
+
+La verificación del cierre del MVP está en [docs/cierre-mvp.md](docs/cierre-mvp.md), y la matriz de reglas a tests, en [docs/matriz-rn-tests.md](docs/matriz-rn-tests.md). Para comprobar que la matriz sigue al día, corré `node scripts/verificar-matriz-rn.mjs`.
+
 ### Clonar y pasarte a tu rama
 
 ```bash
