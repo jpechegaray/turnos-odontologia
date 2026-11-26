@@ -7,12 +7,12 @@ Define cómo el personal consulta y reemplaza los parámetros operativos del con
 ## Requirements
 
 ### Requirement: Carga de la configuración vigente
-La pantalla `/configuracion` SHALL consultar `GET /api/configuracion` y precargar exactamente las siete claves vigentes con sus valores y tipos. MUST mostrar un error recuperable con reintento si la consulta falla. MUST NOT enviar escrituras al montar.
+La pantalla `/configuracion` SHALL consultar `GET /api/configuracion` y precargar exactamente las diez claves vigentes con sus valores y tipos. MUST mostrar un error recuperable con reintento si la consulta falla. MUST NOT enviar escrituras al montar.
 
 #### Scenario: La configuración se precarga con las siete claves vigentes
 - **GIVEN** una sesión activa con rol `ADMIN` o `RECEPCION`
 - **WHEN** la persona abre `/configuracion`
-- **THEN** la SPA consulta `GET /api/configuracion` y muestra los siete campos con sus valores vigentes: `cancelacion.plazo_horas`, `recordatorio.anticipacion_horas`, `reserva_online.horizonte_dias`, `reserva_online.anticipacion_minima_horas`, `reserva_online.max_turnos_activos_por_email`, `lista_espera.max_avisos_por_hueco` y `consultorio.nombre`
+- **THEN** la SPA consulta `GET /api/configuracion` y muestra los diez campos con sus valores vigentes: `cancelacion.plazo_horas`, `recordatorio.anticipacion_horas`, `reserva_online.horizonte_dias`, `reserva_online.anticipacion_minima_horas`, `reserva_online.max_turnos_activos_por_email`, `lista_espera.max_avisos_por_hueco`, `consultorio.nombre`, `consultorio.domicilio`, `consultorio.email_contacto` y `consultorio.retencion_anios`
 
 #### Scenario: Un fallo al consultar la configuración permite reintentar
 - **GIVEN** una API que falla al devolver la configuración
@@ -24,7 +24,7 @@ La pantalla `/configuracion` SHALL consultar `GET /api/configuracion` y precarga
 - **THEN** la SPA solo emite la consulta `GET` y ninguna escritura
 
 ### Requirement: Validación RN-36 por campo
-El formulario SHALL validar antes de enviar que los seis valores numéricos sean enteros dentro de su rango y que `consultorio.nombre` no esté en blanco. Un valor inválido MUST impedir el envío, mostrar el mensaje de RN-36 en el campo y MUST NOT llamar a la API.
+El formulario SHALL validar antes de enviar que los siete valores numéricos sean enteros dentro de su rango y que `consultorio.nombre`, `consultorio.domicilio` y `consultorio.email_contacto` no estén en blanco. Un valor inválido MUST impedir el envío, mostrar el mensaje de RN-36 en el campo y MUST NOT llamar a la API.
 
 #### Scenario: Un plazo de cancelación fuera de rango bloquea el guardado sin llamar a la API
 - **WHEN** el administrador ingresa `169` en `cancelacion.plazo_horas` y envía el formulario
@@ -46,16 +46,24 @@ El formulario SHALL validar antes de enviar que los seis valores numéricos sean
 - **WHEN** el administrador deja `consultorio.nombre` en blanco y envía el formulario
 - **THEN** el formulario muestra el mensaje de RN-36 en ese campo y no se emite ninguna escritura a la API
 
+#### Scenario: Un domicilio o un email de contacto en blanco bloquea el guardado sin llamar a la API
+- **WHEN** el administrador deja `consultorio.domicilio` o `consultorio.email_contacto` en blanco y envía el formulario
+- **THEN** el formulario muestra el mensaje de RN-36 en ese campo y no se emite ninguna escritura a la API
+
+#### Scenario: Una retención fuera de rango bloquea el guardado sin llamar a la API
+- **WHEN** el administrador ingresa `0` o `21` en `consultorio.retencion_anios` y envía el formulario
+- **THEN** el formulario muestra el mensaje de RN-36 en ese campo y no se emite ninguna escritura a la API
+
 #### Scenario: Los valores límite permitidos se aceptan
-- **WHEN** el administrador guarda `cancelacion.plazo_horas` en `0`, `recordatorio.anticipacion_horas` en `168` y el resto dentro de rango
+- **WHEN** el administrador guarda `cancelacion.plazo_horas` en `0`, `recordatorio.anticipacion_horas` en `168`, `consultorio.retencion_anios` en `20` y el resto dentro de rango
 - **THEN** la SPA envía el `PUT` completo con esos valores límite y muestra la confirmación del backend
 
 ### Requirement: Guardado completo de la configuración
-El rol `ADMIN` SHALL enviar `PUT /api/configuracion` con exactamente las siete claves. Con un `200` MUST mostrar confirmación y conservar los valores devueltos. Un `422` con código `RN-36` SHALL mostrarse como alerta sin perder lo ingresado. Un `400` SHALL mostrarse como error de operación.
+El rol `ADMIN` SHALL enviar `PUT /api/configuracion` con exactamente las diez claves. Con un `200` MUST mostrar confirmación y conservar los valores devueltos. Un `422` con código `RN-36` SHALL mostrarse como alerta sin perder lo ingresado. Un `400` SHALL mostrarse como error de operación.
 
 #### Scenario: El administrador guarda las siete claves y ve la confirmación
-- **WHEN** el administrador cambia `cancelacion.plazo_horas` y envía el formulario con las siete claves válidas
-- **THEN** la SPA emite el `PUT` con exactamente las siete claves y muestra la confirmación del backend
+- **WHEN** el administrador cambia `cancelacion.plazo_horas` y envía el formulario con las diez claves válidas
+- **THEN** la SPA emite el `PUT` con exactamente las diez claves y muestra la confirmación del backend
 
 #### Scenario: Un 422 RN-36 del backend se muestra como alerta sin perder los valores ingresados
 - **WHEN** la API responde `422` con código `RN-36`
@@ -66,7 +74,7 @@ El rol `ADMIN` SHALL enviar `PUT /api/configuracion` con exactamente las siete c
 - **THEN** la pantalla muestra una alerta de operación no completada, distinta del mensaje de valor inválido
 
 ### Requirement: Permisos de consulta y edición
-El rol `ADMIN` SHALL editar y guardar la configuración. `RECEPCION` SHALL consultar los siete valores en solo lectura, sin botón de guardado ni campos editables. `ODONTOLOGO` MUST NOT acceder a `/configuracion` y SHALL ver el aviso de permiso al intentarlo directamente. La API conserva la autorización efectiva.
+El rol `ADMIN` SHALL editar y guardar la configuración. `RECEPCION` SHALL consultar los diez valores en solo lectura, sin botón de guardado ni campos editables. `ODONTOLOGO` MUST NOT acceder a `/configuracion` y SHALL ver el aviso de permiso al intentarlo directamente. La API conserva la autorización efectiva.
 
 #### Scenario: El administrador puede editar y guardar
 - **GIVEN** una sesión activa con rol `ADMIN`
@@ -76,7 +84,7 @@ El rol `ADMIN` SHALL editar y guardar la configuración. `RECEPCION` SHALL consu
 #### Scenario: Recepción consulta la configuración en solo lectura y no envía PUT
 - **GIVEN** una sesión activa con rol `RECEPCION`
 - **WHEN** abre `/configuracion`
-- **THEN** los siete campos están en solo lectura, no hay botón de guardado y no se emite ninguna escritura a la API
+- **THEN** los diez campos están en solo lectura, no hay botón de guardado y no se emite ninguna escritura a la API
 
 #### Scenario: El odontólogo no puede abrir la configuración
 - **GIVEN** una sesión activa con rol `ODONTOLOGO`
@@ -87,3 +95,4 @@ El rol `ADMIN` SHALL editar y guardar la configuración. `RECEPCION` SHALL consu
 - **GIVEN** una sesión activa con rol `ADMIN`, `RECEPCION` u `ODONTOLOGO`
 - **WHEN** se muestra el menú principal
 - **THEN** la entrada de configuración aparece para `ADMIN` y `RECEPCION`, y no aparece para `ODONTOLOGO`
+

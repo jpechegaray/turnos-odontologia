@@ -12,7 +12,7 @@
 
 ## Asignación rápida
 
-> **Avance al 2026-11-25:** 43 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46 y C-48). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) y C-41 (Lionel) ya están en `master` y tienen pendiente el archivo. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
+> **Avance al 2026-11-25:** 43 de 51 changes hechos (Olas 0 a 4 completas; Ola 5: C-35, C-36, C-37, C-38 y C-40; Ola 6: C-44 y C-45; Ola 7: C-46 y C-48). Todos los changes hechos están archivados en OpenSpec. C-39 (Nico) ya está en `master` y tiene pendiente el archivo; C-41 (Lionel) quedó archivado. Ya se pueden empezar C-42 (Valentino, camino crítico) y C-43 (Cualquiera). Desde el PR #84 hay CI: cada PR corre los tests del backend y del frontend, y `master` exige que pasen.
 
 > **Con dueño** = changes críticos (camino crítico o gobernanza HIGH/CRITICAL), asignados a una persona fija. **Cualquiera** = changes no críticos: los toma quien esté libre, siguiendo las [reglas de "Cualquiera"](#reglas-para-tomar-un-change-cualquiera). Santino tiene solo 3 changes fijos (el esqueleto C-01 y C-02, y el servicio de tokens C-14); después se suma a los "Cualquiera".
 
@@ -60,7 +60,7 @@
 | C-38 | ✅ hecho | **Lionel** | 5 | M | reserva-publica-disponibilidad | C-08, C-10, C-17, C-26 | HIGH |
 | C-39 | ✅ hecho | **Nico** | 5 | M | gestion-turno-por-token | C-17, C-27, C-32 | CRITICAL |
 | C-40 | ✅ hecho | **Julián** | 5 | M | front-agenda-vistas | C-09, C-16, C-28 |  |
-| C-41 | 🔄 en revisión | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
+| C-41 | ✅ hecho | **Lionel** | 6 | L | reserva-publica-crear-reserva | C-07, C-08, C-15, C-17, C-19, C-32, C-38 | HIGH |
 | C-42 | ✅ hecho | **Valentino** | 6 | M | tomar-hueco-desde-oferta | C-17, C-19, C-32, C-36 | camino crítico, HIGH |
 | C-43 | ⬜ pendiente | Cualquiera | 6 | M | asignacion-manual-hueco-recepcion | C-19, C-26, C-31, C-36 |  |
 | C-44 | ✅ hecho | Juan Pablo (Cualquiera) | 6 | S | emails-cancelacion-reprogramacion | C-15, C-27, C-35 |  |
@@ -1352,7 +1352,7 @@ Total: 89 puntos. Si el pool "Cualquiera" se reparte parejo entre los seis, cada
 ## FASE 6 — Ola 6: Reserva online, tomar hueco, asignación manual y creación de turnos en el front
 
 ### [C-41] `C-41-reserva-publica-crear-reserva`
-- **Estado**: `[ ]` implementado por Lionel, en revisión (PR por abrir)
+- **Estado**: `[x]` hecho por Lionel (PR #131, 2026-11-25; archivado 2026-11-25)
 - **Responsable**: Lionel — **Ola**: 6 — **Tamaño**: L (8-10 h)
 - **Scope**:
   - `POST /api/public/reservas`: revalida llamando al servicio de crear turno de `agenda` (no duplica reglas; canal `ONLINE`; duración por defecto; el sistema asigna el sillón), 409 con alternativas si el hueco se ocupó
