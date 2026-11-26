@@ -33,7 +33,8 @@ import java.time.Instant;
                         columnNames = {"turno_id", "tipo", "inicio_referencia"}),
                 @UniqueConstraint(
                         name = "uk_notificacion_oferta_tipo",
-                        columnNames = {"oferta_hueco_id", "tipo"})
+                        columnNames = {"oferta_hueco_id", "tipo"}),
+                @UniqueConstraint(name = "uk_notificacion_entrada_tipo", columnNames = {"entrada_lista_espera_id", "tipo"})
         },
         indexes = @Index(name = "ix_notificacion_estado_programada", columnList = "estado, programada_para"))
 public class NotificacionEnviadaJpa {
@@ -80,6 +81,9 @@ public class NotificacionEnviadaJpa {
     @Column(name = "enviada_en")
     private Instant enviadaEn;
 
+    @Column(name = "entrada_lista_espera_id")
+    private Long entradaListaEsperaId;
+
     protected NotificacionEnviadaJpa() {
         // Constructor por defecto de JPA.
     }
@@ -98,6 +102,7 @@ public class NotificacionEnviadaJpa {
         this.ultimoError = dominio.ultimoError();
         this.programadaPara = dominio.programadaPara();
         this.enviadaEn = dominio.enviadaEn();
+        this.entradaListaEsperaId = dominio.entradaListaEsperaId();
     }
 
     public static NotificacionEnviadaJpa desdeDominio(NotificacionEnviada dominio) {
@@ -118,6 +123,7 @@ public class NotificacionEnviadaJpa {
                 this.intentos,
                 this.ultimoError,
                 this.programadaPara,
-                this.enviadaEn);
+                this.enviadaEn,
+                this.entradaListaEsperaId);
     }
 }

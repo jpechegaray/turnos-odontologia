@@ -38,7 +38,9 @@ public class PlantillaNotificacion {
     private static String asunto(TipoNotificacion tipo, String consultorio) {
         String base = switch (tipo) {
             case RECORDATORIO -> "Recordatorio de turno";
-            case CONFIRMACION_RESERVA -> "Confirmación de reserva";
+            case CONFIRMACION_RESERVA -> "Confirmación de turno odontológico";
+            case INGRESO_LISTA_ESPERA -> "Confirmación de ingreso a la lista de espera";
+            case CONFIRMACION_LISTA_ESPERA -> "Turno confirmado desde la lista de espera";
             case CANCELACION -> "Cancelación de turno";
             case REPROGRAMACION -> "Reprogramación de turno";
             case OFERTA_HUECO -> "Hueco disponible en la lista de espera";
@@ -51,25 +53,31 @@ public class PlantillaNotificacion {
         String nombre = (datos.nombrePaciente() == null || datos.nombrePaciente().isBlank())
                 ? "Hola"
                 : "Hola " + datos.nombrePaciente().trim();
-        cuerpo.append(nombre).append(":\n\n");
-        cuerpo.append(descripcion(tipo)).append(" en ").append(consultorio).append(".");
+        cuerpo.append(nombre).append(".\n\n");
+        cuerpo.append(descripcion(tipo, datos));
         if (datos.inicio() != null) {
             cuerpo.append("\nFecha y hora: ").append(FORMATO_FECHA.format(datos.inicio()));
         }
-        agregarSiPresente(cuerpo, "Prestación", datos.prestacion());
+        if (tipo != TipoNotificacion.INGRESO_LISTA_ESPERA) {
+            agregarSiPresente(cuerpo, "Prestación", datos.prestacion());
+        }
         agregarSiPresente(cuerpo, "Profesional", datos.profesional());
         agregarSiPresente(cuerpo, "Enlace", datos.enlace());
-        cuerpo.append("\n\n").append(consultorio);
+        cuerpo.append("\n\nSaludos,\nEquipo de ").append(consultorio);
         return cuerpo.toString();
     }
 
-    private static String descripcion(TipoNotificacion tipo) {
+    private static String descripcion(TipoNotificacion tipo, DatosNotificacion datos) {
         return switch (tipo) {
-            case RECORDATORIO -> "Le recordamos su turno";
-            case CONFIRMACION_RESERVA -> "Su reserva fue confirmada";
-            case CANCELACION -> "Su turno fue cancelado";
-            case REPROGRAMACION -> "Su turno fue reprogramado";
-            case OFERTA_HUECO -> "Se liberó un hueco en la lista de espera";
+            case RECORDATORIO -> "Te recordamos que tenés un turno agendado con los siguientes datos.";
+            case CONFIRMACION_RESERVA -> "Confirmamos que tu turno quedó agendado.";
+            case CONFIRMACION_LISTA_ESPERA -> "Tu espera terminó. Ya agendamos tu turno.";
+            case INGRESO_LISTA_ESPERA -> "Registramos tu solicitud"
+                    + (datos.prestacion() == null || datos.prestacion().isBlank() ? "" : " para " + datos.prestacion().trim())
+                    + " en la lista de espera. Cuando haya un horario compatible, te avisaremos por correo electrónico.";
+            case CANCELACION -> "Tu turno fue cancelado.";
+            case REPROGRAMACION -> "Tu turno fue reprogramado. Estos son los datos actualizados.";
+            case OFERTA_HUECO -> "Hay un horario disponible para tu solicitud. Usá el enlace para consultar la oferta y confirmar el turno.";
         };
     }
 

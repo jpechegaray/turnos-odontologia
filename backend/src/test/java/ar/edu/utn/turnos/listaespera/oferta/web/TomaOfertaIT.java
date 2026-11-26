@@ -218,7 +218,7 @@ class TomaOfertaIT extends EscenarioTomaOfertaIT {
                 select n.estado, n.tipo, n.turno_id from notificacion_enviada n where n.paciente_id = ?
                 """, paciente);
         assertThat(registro.get("estado")).isEqualTo("ENVIADA");
-        assertThat(registro.get("tipo")).isEqualTo("CONFIRMACION_RESERVA");
+        assertThat(registro.get("tipo")).isEqualTo("CONFIRMACION_LISTA_ESPERA");
         assertThat(registro.get("turno_id")).isNotNull();
     }
 
@@ -236,7 +236,7 @@ class TomaOfertaIT extends EscenarioTomaOfertaIT {
                 select estado, tipo, ultimo_error from notificacion_enviada where paciente_id = ?
                 """, paciente);
         assertThat(registro.get("estado")).isEqualTo("FALLIDA");
-        assertThat(registro.get("tipo")).isEqualTo("CONFIRMACION_RESERVA");
+        assertThat(registro.get("tipo")).isEqualTo("CONFIRMACION_LISTA_ESPERA");
         assertThat(registro.get("ultimo_error")).isNotNull();
     }
 }

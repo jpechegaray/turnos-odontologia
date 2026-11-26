@@ -21,14 +21,16 @@ class EnumsNotificacionTest {
     }
 
     @Test
-    @DisplayName("El tipo de notificación tiene exactamente los cinco valores del modelo")
-    void tipoTieneLosCincoValoresDelModelo() {
+    @DisplayName("El tipo de notificación incluye el ingreso a la lista de espera y su confirmación")
+    void tipoTieneLosValoresDelModelo() {
         assertThat(TipoNotificacion.values())
                 .containsExactly(
                         TipoNotificacion.RECORDATORIO,
                         TipoNotificacion.CONFIRMACION_RESERVA,
                         TipoNotificacion.CANCELACION,
                         TipoNotificacion.REPROGRAMACION,
-                        TipoNotificacion.OFERTA_HUECO);
+                        TipoNotificacion.OFERTA_HUECO,
+                        TipoNotificacion.INGRESO_LISTA_ESPERA,
+                        TipoNotificacion.CONFIRMACION_LISTA_ESPERA);
     }
 }

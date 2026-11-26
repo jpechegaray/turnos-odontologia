@@ -7,15 +7,15 @@ describe("consultaDeNotificaciones", () => {
     expect(consultaDeNotificaciones(FILTROS_VACIOS, 0)).toBe("/notificaciones?pagina=0&tamanio=20");
   });
 
-  it("arma los filtros en orden fijo y recorta el turno", () => {
-    expect(consultaDeNotificaciones({ estado: "ENVIADA", turno: " 42 " }, 3)).toBe(
-      "/notificaciones?estado=ENVIADA&turnoId=42&pagina=3&tamanio=20",
+  it("arma la consulta y recorta el turno", () => {
+    expect(consultaDeNotificaciones({ turno: " 42 " }, 3)).toBe(
+      "/notificaciones?turnoId=42&pagina=3&tamanio=20",
     );
   });
 
   it("omite el turno vacío", () => {
-    expect(consultaDeNotificaciones({ estado: "FALLIDA", turno: "   " }, 0)).toBe(
-      "/notificaciones?estado=FALLIDA&pagina=0&tamanio=20",
+    expect(consultaDeNotificaciones({ turno: "   " }, 0)).toBe(
+      "/notificaciones?pagina=0&tamanio=20",
     );
   });
 });

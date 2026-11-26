@@ -171,6 +171,27 @@ BEGIN
 END
 $$
 ^^^
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'notificacion_enviada_tipo_check' AND conrelid = 'notificacion_enviada'::regclass
+          AND pg_get_constraintdef(oid) LIKE '%INGRESO_LISTA_ESPERA%'
+          AND pg_get_constraintdef(oid) LIKE '%CONFIRMACION_LISTA_ESPERA%'
+    ) THEN
+        ALTER TABLE notificacion_enviada DROP CONSTRAINT IF EXISTS notificacion_enviada_tipo_check;
+        ALTER TABLE notificacion_enviada ADD CONSTRAINT notificacion_enviada_tipo_check
+            CHECK (tipo IN ('RECORDATORIO', 'CONFIRMACION_RESERVA', 'CANCELACION', 'REPROGRAMACION', 'OFERTA_HUECO',
+                            'INGRESO_LISTA_ESPERA', 'CONFIRMACION_LISTA_ESPERA'));
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'uk_notificacion_entrada_tipo' AND conrelid = 'notificacion_enviada'::regclass
+    ) THEN
+        ALTER TABLE notificacion_enviada ADD CONSTRAINT uk_notificacion_entrada_tipo UNIQUE (entrada_lista_espera_id, tipo);
+    END IF;
+END $$;
+^^^
 CREATE INDEX IF NOT EXISTS ix_notificacion_estado_programada ON notificacion_enviada (estado, programada_para)
 ^^^
 -- C-27 (RN-19): el usuario del personal que canceló el turno. Nulo cuando cancela el paciente por token.

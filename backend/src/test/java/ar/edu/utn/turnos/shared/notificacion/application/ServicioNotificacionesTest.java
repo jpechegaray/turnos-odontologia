@@ -90,6 +90,20 @@ class ServicioNotificacionesTest {
     }
 
     @Test
+    @DisplayName("El primer registro de una entrada envía su confirmación una sola vez")
+    void confirmaIngresoUnaSolaVez() {
+        var ingreso = new DatosNotificacion("luna.demo-lista@example.test", "Luna", null, "Limpieza", null, null);
+        servicio.registrarIngresoLista(8L, 5L, ingreso);
+        servicio.registrarIngresoLista(8L, 5L, ingreso);
+
+        assertThat(repositorio.todos()).singleElement().satisfies(aviso -> {
+            assertThat(aviso.tipo()).isEqualTo(TipoNotificacion.INGRESO_LISTA_ESPERA);
+            assertThat(aviso.entradaListaEsperaId()).isEqualTo(8L);
+        });
+        assertThat(adaptador.enviados()).hasSize(1);
+    }
+
+    @Test
     @DisplayName("Un paciente sin email no genera notificación ni error")
     void unPacienteSinEmailNoGeneraNotificacionNiError() {
         DatosNotificacion sinEmail = new DatosNotificacion("   ", "Ana Ficticia", AHORA, null, null, null);
@@ -341,7 +355,11 @@ class ServicioNotificacionesTest {
                     !Objects.equals(fila.id(), notificacion.id())
                             && Objects.equals(fila.ofertaHuecoId(), notificacion.ofertaHuecoId())
                             && fila.tipo() == notificacion.tipo());
-            if (duplicadoTurno || duplicadoOferta) {
+            boolean duplicadaEntrada = notificacion.entradaListaEsperaId() != null && filas.values().stream().anyMatch(fila ->
+                    !Objects.equals(fila.id(), notificacion.id())
+                            && Objects.equals(fila.entradaListaEsperaId(), notificacion.entradaListaEsperaId())
+                            && fila.tipo() == notificacion.tipo());
+            if (duplicadoTurno || duplicadoOferta || duplicadaEntrada) {
                 throw new DataIntegrityViolationException("Registro de notificación duplicado");
             }
             Long id = notificacion.id() != null ? notificacion.id() : ++secuencia;
@@ -358,7 +376,8 @@ class ServicioNotificacionesTest {
                     notificacion.intentos(),
                     notificacion.ultimoError(),
                     notificacion.programadaPara(),
-                    notificacion.enviadaEn());
+                    notificacion.enviadaEn(),
+                    notificacion.entradaListaEsperaId());
             filas.put(id, conId);
             return conId;
         }
